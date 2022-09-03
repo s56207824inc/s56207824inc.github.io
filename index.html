@@ -2,13 +2,105 @@
     <head>
         <title>My Winning Wheel</title>
         <script src='Winwheel.js'></script>
+        <script src="http://cdnjs.cloudflare.com/ajax/libs/gsap/latest/TweenMax.min.js"></script>
+        <link type="text/css" rel="stylesheet" href="http://dougtesting.net/elements/javascript/syntax/styles/shCoreDefault.css">
     </head>
     <body>
-        <canvas id='canvas' width='880' height='300'>
-            Canvas not supported, use another browser.
-        </canvas>
-        <script>
-            let theWheel = new Winwheel();
-        </script>
+      <div>
+      <canvas id="canvas" width="880" height="440"  style="z-index: 3;"
+        data-responsiveMinWidth="180"
+        data-responsiveScaleHeight="true"   
+        data-responsiveMargin="50"
+        onClick="startSpin();">
+        
+      </canvas>
+      
+      
+      </div>
+      <script>
+          // The responisve parameter is the only difference needed to make a wheel responsive.
+          let theWheel = new Winwheel({
+              'numSegments'  : 8,
+              'textFontSize' : 28,
+              'responsive'   : true,  // This wheel is responsive!
+              'pointerAngle' : 90,    // Ensure this is set correctly
+              'segments'     :
+              [
+                  {'fillStyle' : '#eae56f', 'text' : 'Prize 1'},
+                  {'fillStyle' : '#89f26e', 'text' : 'Prize 2'},
+                  {'fillStyle' : '#7de6ef', 'text' : 'Prize 3'},
+                  {'fillStyle' : '#e7706f', 'text' : 'Prize 4'},
+                  {'fillStyle' : '#eae56f', 'text' : 'Prize 5'},
+                  {'fillStyle' : '#89f26e', 'text' : 'Prize 6'},
+                  {'fillStyle' : '#7de6ef', 'text' : 'Prize 7'},
+                  {'fillStyle' : '#e7706f', 'text' : 'Prize 8'}
+              ],
+              'pins' :
+              {
+                  'outerRadius': 6,
+                  'responsive' : true, // This must be set to true if pin size is to be responsive.
+              },
+              'animation' :
+              {
+                  'type'     : 'spinToStop',
+                  'duration' : 5,
+                  'spins'    : 8,
+                  'callbackSound' : playSound, 
+                  'callbackFinished' : 'alertPrize()',
+                  'callbackAfter' : 'drawTriangle()'
+              }
+          });
+
+          // Called by the onClick of the canvas, starts the spinning.
+          function startSpin()
+          {
+              // Stop any current animation.
+              theWheel.stopAnimation(false);
+      
+              // Reset the rotation angle to less than or equal to 360 so spinning again works as expected.
+              // Setting to modulus (%) 360 keeps the current position.
+              theWheel.rotationAngle = theWheel.rotationAngle % 360;
+      
+              // Start animation.
+              theWheel.startAnimation();
+          }
+          drawTriangle();
+          function drawTriangle()
+          {
+              // Get the canvas context the wheel uses.
+              let ctx = theWheel.ctx;
+
+              ctx.strokeStyle = 'navy';     // Set line colour.
+              ctx.fillStyle   = 'aqua';     // Set fill colour.
+              ctx.lineWidth   = 2;
+              ctx.beginPath();              // Begin path
+ 
+              // degree 45
+              ctx.moveTo(670, 194);      // Move to initial position.
+              ctx.lineTo(670, 246);      // Draw lines to make the shape.
+              ctx.lineTo(630, 220);
+              ctx.lineTo(670, 195);
+              ctx.stroke();                 // Complete the path by stroking (draw lines).
+              ctx.fill();                   // Then fill.
+          }
+          function alertPrize()
+          {
+              // Call getIndicatedSegment() function to return pointer to the segment pointed to on wheel.
+              let winningSegment = theWheel.getIndicatedSegment();
+      
+              // Basic alert of the segment text which is the prize name.
+              alert("You have won " + winningSegment.text + "!");
+          }
+          let audio = new Audio('tick.mp3');
+          function playSound()
+          {
+              // Stop and rewind the sound (stops it if already playing).
+              audio.pause();
+              audio.currentTime = 0;
+      
+              // Play the sound.
+              audio.play();
+          }
+      </script>
     </body>
 </html>
