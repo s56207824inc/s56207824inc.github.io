@@ -25,7 +25,6 @@
         data-responsiveMargin="50"
         onClick="startSpin();">
       </canvas>
-
       <script>
         
         
@@ -36,8 +35,9 @@
           zoom: 16,
           });
           infoWindow = new google.maps.InfoWindow();
-          const locationButton = document.createElement("button");
+          // const locationButton = document.createElement("button");
 
+          const locationButton = document.getElementById("button");
           locationButton.textContent = "Pan to Current Location";
           locationButton.classList.add("custom-map-control-button");
           map.controls[google.maps.ControlPosition.TOP_CENTER].push(locationButton);
