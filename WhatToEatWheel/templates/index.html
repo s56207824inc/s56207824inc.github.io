@@ -1,33 +1,46 @@
 <html>
     <head>
-        <title>My Winning Wheel</title>
-        
-        <script src='https://cdn.jsdelivr.net/npm/winwheel@1.0.1/dist/Winwheel.min.js'></script>
+        <title>吃什麼好呢</title>
+              
+        <script src='https://cdn.jsdelivr.net/npm/winwheeljs@2.7.0/dist/Winwheel.min.js'></script>
         <script src="http://cdnjs.cloudflare.com/ajax/libs/gsap/latest/TweenMax.min.js"></script>
-        <link type="text/css" rel="stylesheet" href="http://dougtesting.net/elements/javascript/syntax/styles/shCoreDefault.css">
         <style>
-          html, body{
-              width: 100%;
-              height: 100%;
+          .container{
+            width: 100%;
+            height: 100vh;
+            display: flex;
           }
           #map{
               width: 50%;
+              height: 100vh;
+          }
+          #canvas{
+              width: 50%;
               height: 50%;
           }
+        
       </style>
     </head>
     <body>
       {% load static %}
-      <h1>My Google Map</h1>
-      <div id="map"></div>
-      <canvas id="canvas" width="880" height="440"  style="z-index: 3;"
-        data-responsiveMinWidth="180"
-        data-responsiveScaleHeight="true"   
-        data-responsiveMargin="50"
-        onClick="startSpin();">
-      </canvas>
+      <div class="container">
+        <div id="map" ></div>
+        <canvas id="canvas" 
+        width="880" height="440"  style="z-index: 3;"
+          data-responsiveMinWidth="180"
+          data-responsiveScaleHeight="true"   
+          data-responsiveMargin="50"
+          onclick="startSpin()">
+        </canvas>
+      </div>
+      
+      <audio id="myAudio">
+        <source src="{% static '/media/tick.mp3' %}" type="audio/mpeg">
+        Your browser does not support the audio element.
+      </audio>
+      <button onclick="startSpin()" type="button">Play Audio</button>
+    </audio>
       <script>
-        
         
         function initMap() {
           var map, infoWindow;
@@ -101,6 +114,8 @@
       </script>
       <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAt4ZfNINLe9AQgtPoUYkRv_P_tvifCCHM&callback=initMap&libraries=places" async defer></script>
       <script>
+        
+          let audio = document.getElementById("myAudio");
           // The responisve parameter is the only difference needed to make a wheel responsive.
           let theWheel = new Winwheel({
               'numSegments'  : 8,
@@ -118,19 +133,21 @@
                   {'fillStyle' : '#7de6ef', 'text' : 'Prize 7'},
                   {'fillStyle' : '#e7706f', 'text' : 'Prize 8'}
               ],
-              'pins' :
-              {
-                  'outerRadius': 6,
-                  'responsive' : true, // This must be set to true if pin size is to be responsive.
-              },
               'animation' :
               {
                   'type'     : 'spinToStop',
                   'duration' : 5,
                   'spins'    : 8,
-                  'callbackSound' : 'playSound()', 
+                  'callbackSound' : 'playSound()' , 
+                  'soundTrigger'  : 'pin',
                   'callbackFinished' : 'alertPrize()',
-                  'callbackAfter' : 'drawTriangle()'
+                  'callbackAfter' : 'drawTriangle()',
+              },
+              'pins' :
+              {
+                  'number' : 16,
+                  'outerRadius': 6,
+                  'responsive' : true, // This must be set to true if pin size is to be responsive.
               }
           });
 
@@ -174,7 +191,10 @@
               // Basic alert of the segment text which is the prize name.
               alert("You have won " + winningSegment.text + "!");
           }
-          let audio = new Audio(required('C:\Users\PCUSER\Github\s56207824inc.github.io\static\tick.mp3'));
+          function play123(){
+            console.log('123');
+          }
+          // var audio = document.getElementById("myAudio"); 
           function playSound()
           {
               // Stop and rewind the sound (stops it if already playing).
