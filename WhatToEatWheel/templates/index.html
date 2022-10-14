@@ -43,40 +43,114 @@
         <div class="search">
         <input class="search-bar" type="text" name="search" id="distance" placeholder="多少距離之內">
         </div>
-    </div>
+      </div>
 
-    <div class="wrap">
-        <div class="search">
-        <input class="search-bar" type="text" name="search" id="mylocation" placeholder="目前位置">
-        <button class="search-btn" id="btn" onclick="cal()"></button>
-        </div>
-    </div>
+      <div class="wrap">
+          <div class="search">
+          <input class="search-bar" type="text" name="search" id="mylocation" placeholder="目前位置">
+          <button class="search-btn" id="btn" onclick="cal()"></button>
+          </div>
+      </div>
 
-    <script>
-        function cal() {
-            dis = document.getElementById("distance").value;
-            myloc = document.getElementById("mylocation").value;
-            var geocoder = new google.maps.Geocoder();
-            geocoder.geocode({
-                'address': myloc
-            }, function(results, status) {
-                console.log(results)
-                if (status == 'OK') {
-                    map.setCenter(results[0].geometry.location);
-                    var marker = new google.maps.Marker({
-                        map: map,
-                        position: results[0].geometry.location
-                });
-                } else {
-                console.log(status);
-                }
-            });
-        }
-    </script>
 
+      <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAlNRaHqtGB3sTDKymkHmJtYRfPFpfFVsU&libraries=places&callback=initMap"></script>
+      <!-- <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAt4ZfNINLe9AQgtPoUYkRv_P_tvifCCHM&callback=initMap&libraries=places" async defer></script> -->
       <script>
+        
+          let audio = document.getElementById("myAudio");
+          // The responisve parameter is the only difference needed to make a wheel responsive.
+          let numSegments = 8;
+
+          let theWheel = new Winwheel({
+              'numSegments'  : numSegments,
+              'textFontSize' : 28,
+              'responsive'   : true,  // This wheel is responsive!
+              'pointerAngle' : 90,    // Ensure this is set correctly
+              'segments'     :
+              [
+                  {'fillStyle' : '#eae56f', 'text' : 'Prize 1'},
+                  {'fillStyle' : '#89f26e', 'text' : 'Prize 2'},
+                  {'fillStyle' : '#7de6ef', 'text' : 'Prize 3'},
+                  {'fillStyle' : '#e7706f', 'text' : 'Prize 4'},
+                  {'fillStyle' : '#eae56f', 'text' : 'Prize 5'},
+                  {'fillStyle' : '#89f26e', 'text' : 'Prize 6'},
+                  {'fillStyle' : '#7de6ef', 'text' : 'Prize 7'},
+                  {'fillStyle' : '#e7706f', 'text' : 'Prize 8'}
+              ],
+              'animation' :
+              {
+                  'type'     : 'spinToStop',
+                  'duration' : 5,
+                  'spins'    : 8,
+                  'callbackSound' : 'playSound()' , 
+                  'soundTrigger'  : 'pin',
+                  'callbackFinished' : 'alertPrize()',
+                  'callbackAfter' : 'drawTriangle()',
+              },
+              'pins' :
+              {
+                  'number' : 16,
+                  'outerRadius': 6,
+                  'responsive' : true, // This must be set to true if pin size is to be responsive.
+              }
+          });
+
+          // Called by the onClick of the canvas, starts the spinning.
+          function startSpin()
+          {
+              // Stop any current animation.
+              theWheel.stopAnimation(false);
+      
+              // Reset the rotation angle to less than or equal to 360 so spinning again works as expected.
+              // Setting to modulus (%) 360 keeps the current position.
+              theWheel.rotationAngle = theWheel.rotationAngle % 360;
+      
+              // Start animation.
+              theWheel.startAnimation();
+          }
+          drawTriangle();
+          function drawTriangle()
+          {
+              // Get the canvas context the wheel uses.
+              let ctx = theWheel.ctx;
+
+              ctx.strokeStyle = 'navy';     // Set line colour.
+              ctx.fillStyle   = 'aqua';     // Set fill colour.
+              ctx.lineWidth   = 2;
+              ctx.beginPath();              // Begin path
+
+              // degree 45
+              ctx.moveTo(670, 194);      // Move to initial position.
+              ctx.lineTo(670, 246);      // Draw lines to make the shape.
+              ctx.lineTo(630, 220);
+              ctx.lineTo(670, 195);
+              ctx.stroke();                 // Complete the path by stroking (draw lines).
+              ctx.fill();                   // Then fill.
+          }
+          function alertPrize()
+          {
+              // Call getIndicatedSegment() function to return pointer to the segment pointed to on wheel.
+              let winningSegment = theWheel.getIndicatedSegment();
+              playSound();
+              // Basic alert of the segment text which is the prize name.
+              alert("You have won " + winningSegment.text + "!");
+          }
+
+          // var audio = document.getElementById("myAudio"); 
+          function playSound()
+          {
+              // Stop and rewind the sound (stops it if already playing).
+              audio.pause();
+              audio.currentTime = 0;
+      
+              // Play the sound.
+              audio.play();
+          }
+      </script>
+      <script>
+        var map, infoWindow;
         function initMap() {
-          var map, infoWindow;
+          
           map = new google.maps.Map(document.getElementById("map"), {
           center: { lat: -34.397, lng: 150.644 },
           zoom: 16,
@@ -144,103 +218,7 @@
         }
         
         window.initMap = initMap;
-      </script>
-      
-      <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAlNRaHqtGB3sTDKymkHmJtYRfPFpfFVsU&libraries=places&callback=initMap"></script>
-      <!-- <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAt4ZfNINLe9AQgtPoUYkRv_P_tvifCCHM&callback=initMap&libraries=places" async defer></script> -->
-      <script>
-        
-          let audio = document.getElementById("myAudio");
-          // The responisve parameter is the only difference needed to make a wheel responsive.
-          let theWheel = new Winwheel({
-              'numSegments'  : 8,
-              'textFontSize' : 28,
-              'responsive'   : true,  // This wheel is responsive!
-              'pointerAngle' : 90,    // Ensure this is set correctly
-              'segments'     :
-              [
-                  {'fillStyle' : '#eae56f', 'text' : 'Prize 1'},
-                  {'fillStyle' : '#89f26e', 'text' : 'Prize 2'},
-                  {'fillStyle' : '#7de6ef', 'text' : 'Prize 3'},
-                  {'fillStyle' : '#e7706f', 'text' : 'Prize 4'},
-                  {'fillStyle' : '#eae56f', 'text' : 'Prize 5'},
-                  {'fillStyle' : '#89f26e', 'text' : 'Prize 6'},
-                  {'fillStyle' : '#7de6ef', 'text' : 'Prize 7'},
-                  {'fillStyle' : '#e7706f', 'text' : 'Prize 8'}
-              ],
-              'animation' :
-              {
-                  'type'     : 'spinToStop',
-                  'duration' : 5,
-                  'spins'    : 8,
-                  'callbackSound' : 'playSound()' , 
-                  'soundTrigger'  : 'pin',
-                  'callbackFinished' : 'alertPrize()',
-                  'callbackAfter' : 'drawTriangle()',
-              },
-              'pins' :
-              {
-                  'number' : 16,
-                  'outerRadius': 6,
-                  'responsive' : true, // This must be set to true if pin size is to be responsive.
-              }
-          });
-
-          // Called by the onClick of the canvas, starts the spinning.
-          function startSpin()
-          {
-              // Stop any current animation.
-              theWheel.stopAnimation(false);
-      
-              // Reset the rotation angle to less than or equal to 360 so spinning again works as expected.
-              // Setting to modulus (%) 360 keeps the current position.
-              theWheel.rotationAngle = theWheel.rotationAngle % 360;
-      
-              // Start animation.
-              theWheel.startAnimation();
-          }
-          drawTriangle();
-          function drawTriangle()
-          {
-              // Get the canvas context the wheel uses.
-              let ctx = theWheel.ctx;
-
-              ctx.strokeStyle = 'navy';     // Set line colour.
-              ctx.fillStyle   = 'aqua';     // Set fill colour.
-              ctx.lineWidth   = 2;
-              ctx.beginPath();              // Begin path
- 
-              // degree 45
-              ctx.moveTo(670, 194);      // Move to initial position.
-              ctx.lineTo(670, 246);      // Draw lines to make the shape.
-              ctx.lineTo(630, 220);
-              ctx.lineTo(670, 195);
-              ctx.stroke();                 // Complete the path by stroking (draw lines).
-              ctx.fill();                   // Then fill.
-          }
-          function alertPrize()
-          {
-              // Call getIndicatedSegment() function to return pointer to the segment pointed to on wheel.
-              let winningSegment = theWheel.getIndicatedSegment();
-              playSound();
-              // Basic alert of the segment text which is the prize name.
-              alert("You have won " + winningSegment.text + "!");
-          }
-
-          // var audio = document.getElementById("myAudio"); 
-          function playSound()
-          {
-              // Stop and rewind the sound (stops it if already playing).
-              audio.pause();
-              audio.currentTime = 0;
-      
-              // Play the sound.
-              audio.play();
-          }
-      </script>
-      <script>
         let pos;
-        let map;
         let service;
 
         let Info = [];
@@ -250,32 +228,7 @@
                 this.distanceFrom = 0;
             }
         }
-
-
-        function initMap() {
-            bounds = new google.maps.LatLngBounds();
         
-            infoWindow = new google.maps.InfoWindow;
-            currentInfoWindow = infoWindow;
-            if (navigator.geolocation) {
-          
-                navigator.geolocation.getCurrentPosition(position => {
-                    pos = {
-                        lat: position.coords.latitude,
-                        lng: position.coords.longitude
-                    };
-                    map = new google.maps.Map(document.getElementById('map'), {
-                        center: pos,
-                        zoom: 15
-                    });
-          
-                    getNearbyPlaces(pos);
-                });
-                        //browser supports geolocation but user has denied permission
-            } else {
-                // browser doesn't suppport geolocation
-            }
-        }
         function getNearbyPlaces(position) {
             let request = {
                 location: position,
@@ -311,19 +264,49 @@
                     avoidTolls: true,
                 }, testCallBack);
         }
-
         function testCallBack(results, status) {
-            console.log(results);
-            for (let i = 0; i < results.rows[0].elements.length; i++) {
-                Info[i].distanceFrom = results.rows[0].elements[i].distance.value;
-            }
-            Info.sort(function(a, b) {
-                return a.distanceFrom > b.distanceFrom ? 1 : -1; ///????
+          console.log(results);
+          for (let i = 0; i < results.rows[0].elements.length; i++) {
+              Info[i].distanceFrom = results.rows[0].elements[i].distance.value;
+          }
+          Info.sort(function(a, b) {
+              return a.distanceFrom > b.distanceFrom ? 1 : -1; ///????
+          });
+          for (let i = 0; i < Info.length; i++) {
+              if (Info[i].distanceFrom < dis) {
+                  console.log(Info[i].name);
+                  console.log(Info[i].distanceFrom);
+              } else {
+                  console.log("these locations too far")
+                  console.log(Info[i].name);
+                  console.log(Info[i].distanceFrom);
+              }
+          }
+        }
+        var dis, myloc, geocoder
+        function cal() {
+            dis = document.getElementById("distance").value;
+            myloc = document.getElementById("mylocation").value;
+            geocoder = new google.maps.Geocoder();
+            geocoder.geocode({
+                'address': myloc
+            }, function(results, status) {
+                // console.log(results[0].geometry.location.lng())
+                if (status == 'OK') {
+                    map.setCenter(results[0].geometry.location);
+                    var marker = new google.maps.Marker({
+                        map: map,
+                        position: results[0].geometry.location
+                    });
+                    pos = {
+                        lat: results[0].geometry.location.lat(),
+                        lng: results[0].geometry.location.lng()
+                    };
+                    getNearbyPlaces(pos);
+                } else {
+                    console.log(status);
+                }
             });
-            for (let i = 0; i < Info.length; i++) {
-                console.log(Info[i].name);
-                console.log(Info[i].distanceFrom);
-            }
         }
       </script>
 
