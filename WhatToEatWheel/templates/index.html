@@ -39,6 +39,41 @@
       </audio>
       <button onclick="startSpin()" type="button">Play Audio</button>
 
+      <div class="wrap">
+        <div class="search">
+        <input class="search-bar" type="text" name="search" id="distance" placeholder="多少距離之內">
+        </div>
+    </div>
+
+    <div class="wrap">
+        <div class="search">
+        <input class="search-bar" type="text" name="search" id="mylocation" placeholder="目前位置">
+        <button class="search-btn" id="btn" onclick="cal()"></button>
+        </div>
+    </div>
+
+    <script>
+        function cal() {
+            dis = document.getElementById("distance").value;
+            myloc = document.getElementById("mylocation").value;
+            var geocoder = new google.maps.Geocoder();
+            geocoder.geocode({
+                'address': myloc
+            }, function(results, status) {
+                console.log(results)
+                if (status == 'OK') {
+                    map.setCenter(results[0].geometry.location);
+                    var marker = new google.maps.Marker({
+                        map: map,
+                        position: results[0].geometry.location
+                });
+                } else {
+                console.log(status);
+                }
+            });
+        }
+    </script>
+
       <script>
         function initMap() {
           var map, infoWindow;
@@ -191,9 +226,7 @@
               // Basic alert of the segment text which is the prize name.
               alert("You have won " + winningSegment.text + "!");
           }
-          function play123(){
-            console.log('123');
-          }
+
           // var audio = document.getElementById("myAudio"); 
           function playSound()
           {
@@ -220,7 +253,6 @@
 
 
         function initMap() {
-            
             bounds = new google.maps.LatLngBounds();
         
             infoWindow = new google.maps.InfoWindow;
@@ -239,7 +271,6 @@
           
                     getNearbyPlaces(pos);
                 });
-            
                         //browser supports geolocation but user has denied permission
             } else {
                 // browser doesn't suppport geolocation
@@ -251,8 +282,6 @@
                 rankBy: google.maps.places.RankBy.DISTANCE, //依照距離排列
                 keyword: 'restaurant'
             };
-            
-
             service = new google.maps.places.PlacesService(map);
             service.nearbySearch(request, nearbyCallback);
         }
