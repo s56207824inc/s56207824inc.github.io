@@ -2,7 +2,8 @@
     <head>
         <title>My Winning Wheel</title>
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous"> 
-        
+        <link rel="stylesheet" href="css/style.css">
+
         <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
         <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
@@ -13,10 +14,47 @@
     </head>
 
     <body>
+        <!-- <label for="how far">within distance?</label>
+        <input type="text" id="how far" name="name" required 
+               minlength="4" maxlength="8" size="10"> -->
+
+        <div class="wrap">
+            <div class="search">
+            <input class="search-bar" type="text" name="search" id="distance" placeholder="多少距離之內">
+            </div>
+        </div>
+    
+        <div class="wrap">
+            <div class="search">
+            <input class="search-bar" type="text" name="search" id="mylocation" placeholder="目前位置">
+            <button class="search-btn" id="btn" onclick="cal()"></button>
+            </div>
+        </div>
+
+        <script>
+            function cal() {
+                dis = document.getElementById("distance").value;
+                myloc = document.getElementById("mylocation").value;
+                var geocoder = new google.maps.Geocoder();
+                geocoder.geocode({
+                    'address': myloc
+                }, function(results, status) {
+                    console.log(results)
+                    if (status == 'OK') {
+                        map.setCenter(results[0].geometry.location);
+                        var marker = new google.maps.Marker({
+                            map: map,
+                            position: results[0].geometry.location
+                    });
+                    } else {
+                    console.log(status);
+                    }
+                });
+            }
+        </script>
+
 
         <div id="map"></div>
-
-
         <script>
             let pos;
             let map;
@@ -32,7 +70,6 @@
 
 
             function initMap() {
-                
                 bounds = new google.maps.LatLngBounds();
            
                 infoWindow = new google.maps.InfoWindow;
@@ -57,6 +94,8 @@
                     // browser doesn't suppport geolocation
                 }
             }
+
+
             function getNearbyPlaces(position) {
                 let request = {
                     location: position,
@@ -68,6 +107,8 @@
                 service = new google.maps.places.PlacesService(map);
                 service.nearbySearch(request, nearbyCallback);
             }
+
+
             function nearbyCallback(places, status) {
                 let destination = [];
                 if (status == google.maps.places.PlacesServiceStatus.OK) {
@@ -82,6 +123,8 @@
                     calculateDistance(destination);
                 }
             }
+
+
             function calculateDistance(destination) {
                 const serviceForDistance = new google.maps.DistanceMatrixService();
                 serviceForDistance.getDistanceMatrix(
@@ -95,6 +138,7 @@
                     }, testCallBack);
             }
 
+
             function testCallBack(results, status) {
                 console.log(results);
                 for (let i = 0; i < results.rows[0].elements.length; i++) {
@@ -104,12 +148,11 @@
                     return a.distanceFrom > b.distanceFrom ? 1 : -1; ///????
                 });
                 for (let i = 0; i < Info.length; i++) {
-                    console.log(Info[i].name);
-                    console.log(Info[i].distanceFrom);
+                    // console.log(Info[i].name);
+                    // console.log(Info[i].distanceFrom);
                 }
             }
         </script>
-
 
 
         <canvas id='myCanvas' 
@@ -118,6 +161,7 @@
                 onClick="startSpin();">
             Canvas not supported, use another browser.
         </canvas>
+
 
         <script>
             let theWheel = new Winwheel({
@@ -157,6 +201,7 @@
             }
         </script>
       
+
         <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAlNRaHqtGB3sTDKymkHmJtYRfPFpfFVsU&libraries=places&callback=initMap"></script>
     </body>
 </html>
