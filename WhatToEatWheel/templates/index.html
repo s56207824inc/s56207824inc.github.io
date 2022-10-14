@@ -4,6 +4,7 @@
         <script src='https://cdn.jsdelivr.net/npm/winwheeljs@2.7.0/dist/Winwheel.min.js'></script>
         <script src="http://cdnjs.cloudflare.com/ajax/libs/gsap/latest/TweenMax.min.js"></script>
         <style>
+           
           .container{
             width: 100%;
             height: 100vh;
@@ -21,7 +22,8 @@
       </style>
     </head>
     <body>
-      <!-- {% load static %} -->
+      {% load static %}
+      <!-- TODO:前端切版、排版CSS -->
       <div class="container">
         <div id="map" ></div>
         <canvas id="canvas" 
@@ -37,9 +39,6 @@
         <source src="{% static '/media/tick.mp3' %}" type="audio/mpeg">
         Your browser does not support the audio element.
       </audio>
-      <button onclick="startSpin()" type="button">Play Audio</button>
-
-
 
 
       <!-- TODO: 如果其中有一個格子沒有值的話, 需要提示-->
@@ -48,7 +47,7 @@
         <input class="search-bar" type="text" name="search" id="distance" placeholder="多少距離之內">
         </div>
       </div>
-
+      <!-- TODO: 按鈕、搜尋樣式改好看-->
       <div class="wrap">
           <div class="search">
           <input class="search-bar" type="text" name="search" id="mylocation" placeholder="目前位置">
@@ -61,12 +60,15 @@
       <!-- <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAt4ZfNINLe9AQgtPoUYkRv_P_tvifCCHM&callback=initMap&libraries=places" async defer></script> -->
 
       <!-- draw the whole wheels -->
+      <!-- TODO:JS 包起來 -->
       <script>
           let theWheel;
+
           function drawTheWheel(numberValid) {
+              delete theWheel;
               const numSegments = numberValid;
               let segments = [];
-              
+              // TODO:輪盤樣式、顏色改好看一點
               function getRandomColor() {
                   let color = [];
                   for (let i = 0; i < 3; i++) {
@@ -79,7 +81,7 @@
                   }
                   return color.join('');
               }
-
+              
               for (let i = 0; i < numSegments; i++) {
                     console.log(getRandomColor())
                     let segmentInfo = {'fillStyle': '#' + getRandomColor(), 'text': Info[i].placeName};
@@ -109,6 +111,7 @@
                       'responsive' : true, // This must be set to true if pin size is to be responsive.
                   }
               });
+              
               drawTriangle();
             }
 
@@ -161,75 +164,42 @@
           var map, infoWindow;
           function initMap() {
               map = new google.maps.Map(document.getElementById("map"), {
-                  center: { lat: -34.397, lng: 150.644 },
-                  zoom: 16,
+                  center: { lat: 23.5, lng: 121 },
+                  zoom: 8,
               });
 
               infoWindow = new google.maps.InfoWindow();
-              const locationButton = document.createElement("button");
-
-              locationButton.textContent = "Pan to Current Location";
-              locationButton.classList.add("custom-map-control-button");
-              map.controls[google.maps.ControlPosition.TOP_CENTER].push(locationButton);
-              locationButton.addEventListener("click", () => {
-              if (navigator.geolocation) {
-                  navigator.geolocation.getCurrentPosition(
-                    (position) => {
-                      const pos = {
-                        lat: position.coords.latitude,
-                        lng: position.coords.longitude,
-                      };
-                      infoWindow.setPosition(pos);
-                      infoWindow.setContent("Location found.");
-                      infoWindow.open(map); 
-                      map.setCenter(pos);
-                    },
-                    () => {
-                        handleLocationError(true, infoWindow, map.getCenter());
-                    }
-                ); 
-              } else {
-                  // Browser doesn't support Geolocation
-                  handleLocationError(false, infoWindow, map.getCenter());
-              }
-
-
-          function handleLocationError(browserHasGeolocation, infoWindow, pos) {
-              infoWindow.setPosition(pos);
-              infoWindow.setContent(
-                  browserHasGeolocation
-                  ? "Error: The Geolocation service failed."
-                  : "Error: Your browser doesn't support geolocation."
-              );
-              infoWindow.open(map);
-          }
-
-          var service = new google.maps.places.PlacesService(map);
-          service.findPlaceFromQuery(request, function(results, status) {
-              if (status === google.maps.places.PlacesServiceStatus.OK) {
-                  console.log(results[0].geometry);
-                  map.setCenter(results[0].geometry.location);
-              }
-          });
-          });
         }
 
                 
         window.initMap = initMap;
         let dis, myloc, geocoder;
         let pos, service;
-       
+        let Info = [];
+        const DEFAULT_NUM = 5;
+         
         class placeInfo {
             constructor() {
                 this.placeName = "None";
                 this.distanceFrom = 0;
             }
         }
-        
-        let finish = false;
+
+
+        for(let i=0; i<DEFAULT_NUM; i++) {
+            Info.push(new placeInfo());
+        }
+        drawTheWheel(DEFAULT_NUM);
+
+
         function cal() {
+            // TODO:若dis或myloc為空，跳錯誤通知
+            // TODO:若dis不是數字或非有效值，報錯
+            // TODO:若myloc結果非有效值，報錯
+            // TODO:距離算法(DRIVING/WALKING/...)讓使用者選擇
             dis = document.getElementById("distance").value;
             myloc = document.getElementById("mylocation").value;
+            
             geocoder = new google.maps.Geocoder();
             geocoder.geocode({
                 'address': myloc
@@ -238,6 +208,7 @@
                     // console.log(results[0].geometry.location.lng())
                     if (status == 'OK') {
                         map.setCenter(results[0].geometry.location);
+                        map.setZoom(16);
                         var marker = new google.maps.Marker({
                             map: map,
                             position: results[0].geometry.location
@@ -247,13 +218,14 @@
                             lng: results[0].geometry.location.lng()
                         };
                         getNearbyPlaces(pos);
+                        console.log(Info);
                     } else {
                         console.log(status);
                     }
                 });
         }
 
-        let Info = [];
+        
         function getNearbyPlaces(position) {
             console.log('call getNearbyPlaces')
             let request = {
@@ -269,6 +241,7 @@
         function nearbyCallback(places, status) {
             console.log('call nearbyCallback')
             let destination = [];
+            Info = [];
             if (status == google.maps.places.PlacesServiceStatus.OK) {
                 places.forEach(place => {
                     let currLocation = new google.maps.LatLng(place.geometry.location.lat(), 
