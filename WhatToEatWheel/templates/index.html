@@ -21,7 +21,7 @@
       </style>
     </head>
     <body>
-      {% load static %}
+      <!-- {% load static %} -->
       <div class="container">
         <div id="map" ></div>
         <canvas id="canvas" 
@@ -39,6 +39,10 @@
       </audio>
       <button onclick="startSpin()" type="button">Play Audio</button>
 
+
+
+
+      <!-- TODO: 如果其中有一個格子沒有值的話, 需要提示-->
       <div class="wrap">
         <div class="search">
         <input class="search-bar" type="text" name="search" id="distance" placeholder="多少距離之內">
@@ -55,62 +59,61 @@
 
       <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAlNRaHqtGB3sTDKymkHmJtYRfPFpfFVsU&libraries=places&callback=initMap"></script>
       <!-- <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAt4ZfNINLe9AQgtPoUYkRv_P_tvifCCHM&callback=initMap&libraries=places" async defer></script> -->
+
+      <!-- draw the whole wheels -->
       <script>
-        
-          let audio = document.getElementById("myAudio");
-          // The responisve parameter is the only difference needed to make a wheel responsive.
-          let numSegments = 8;
-
-          let theWheel = new Winwheel({
-              'numSegments'  : numSegments,
-              'textFontSize' : 28,
-              'responsive'   : true,  // This wheel is responsive!
-              'pointerAngle' : 90,    // Ensure this is set correctly
-              'segments'     :
-              [
-                  {'fillStyle' : '#eae56f', 'text' : 'Prize 1'},
-                  {'fillStyle' : '#89f26e', 'text' : 'Prize 2'},
-                  {'fillStyle' : '#7de6ef', 'text' : 'Prize 3'},
-                  {'fillStyle' : '#e7706f', 'text' : 'Prize 4'},
-                  {'fillStyle' : '#eae56f', 'text' : 'Prize 5'},
-                  {'fillStyle' : '#89f26e', 'text' : 'Prize 6'},
-                  {'fillStyle' : '#7de6ef', 'text' : 'Prize 7'},
-                  {'fillStyle' : '#e7706f', 'text' : 'Prize 8'}
-              ],
-              'animation' :
-              {
-                  'type'     : 'spinToStop',
-                  'duration' : 5,
-                  'spins'    : 8,
-                  'callbackSound' : 'playSound()' , 
-                  'soundTrigger'  : 'pin',
-                  'callbackFinished' : 'alertPrize()',
-                  'callbackAfter' : 'drawTriangle()',
-              },
-              'pins' :
-              {
-                  'number' : 16,
-                  'outerRadius': 6,
-                  'responsive' : true, // This must be set to true if pin size is to be responsive.
+          let theWheel;
+          function drawTheWheel(numberValid) {
+              const numSegments = numberValid;
+              let segments = [];
+              
+              function getRandomColor() {
+                  let color = [];
+                  for (let i = 0; i < 3; i++) {
+                      let asciiNum = Math.ceil(Math.random() * 5);
+                      color.push(String.fromCharCode(97 + asciiNum));
+                  }
+                  for (let i = 0; i < 3; i++) {
+                      let radNum = Math.ceil(Math.random() * 9);
+                      color.push(String.fromCharCode(48 + radNum));
+                  }
+                  return color.join('');
               }
-          });
 
-          // Called by the onClick of the canvas, starts the spinning.
-          function startSpin()
-          {
-              // Stop any current animation.
-              theWheel.stopAnimation(false);
-      
-              // Reset the rotation angle to less than or equal to 360 so spinning again works as expected.
-              // Setting to modulus (%) 360 keeps the current position.
-              theWheel.rotationAngle = theWheel.rotationAngle % 360;
-      
-              // Start animation.
-              theWheel.startAnimation();
-          }
-          drawTriangle();
-          function drawTriangle()
-          {
+              for (let i = 0; i < numSegments; i++) {
+                    console.log(getRandomColor())
+                    let segmentInfo = {'fillStyle': '#' + getRandomColor(), 'text': Info[i].placeName};
+                    segments.push(segmentInfo)
+              }
+
+              theWheel = new Winwheel({
+                  'numSegments'  : numSegments,
+                  'textFontSize' : 14,
+                  'responsive'   : true,  // This wheel is responsive!
+                  'pointerAngle' : 90,    // Ensure this is set correctly
+                  'segments'     : segments,
+                  'animation' :
+                  {
+                      'type'     : 'spinToStop',
+                      'duration' : 5,
+                      'spins'    : 8,
+                      'callbackSound' : 'playSound()' , 
+                      'soundTrigger'  : 'pin',
+                      'callbackFinished' : 'alertPrize()',
+                      'callbackAfter' : 'drawTriangle()',
+                  },
+                  'pins' :
+                  {
+                      'number' : 16,
+                      'outerRadius': 6,
+                      'responsive' : true, // This must be set to true if pin size is to be responsive.
+                  }
+              });
+              drawTriangle();
+            }
+
+
+          function drawTriangle() {
               // Get the canvas context the wheel uses.
               let ctx = theWheel.ctx;
 
@@ -127,101 +130,95 @@
               ctx.stroke();                 // Complete the path by stroking (draw lines).
               ctx.fill();                   // Then fill.
           }
-          function alertPrize()
-          {
-              // Call getIndicatedSegment() function to return pointer to the segment pointed to on wheel.
+      </script>
+
+
+      <!-- wheels utilis -->
+      <script>
+          function startSpin() {
+              theWheel.stopAnimation(false);
+              theWheel.rotationAngle = theWheel.rotationAngle % 360;
+              theWheel.startAnimation();
+          }
+
+
+          function alertPrize() {
               let winningSegment = theWheel.getIndicatedSegment();
               playSound();
-              // Basic alert of the segment text which is the prize name.
               alert("You have won " + winningSegment.text + "!");
           }
 
-          // var audio = document.getElementById("myAudio"); 
-          function playSound()
-          {
-              // Stop and rewind the sound (stops it if already playing).
+          let audio = document.getElementById("myAudio");
+          function playSound() {
               audio.pause();
               audio.currentTime = 0;
-      
-              // Play the sound.
               audio.play();
           }
       </script>
-      <script>
-        var map, infoWindow;
-        function initMap() {
-          
-          map = new google.maps.Map(document.getElementById("map"), {
-          center: { lat: -34.397, lng: 150.644 },
-          zoom: 16,
-          });
-          infoWindow = new google.maps.InfoWindow();
-          const locationButton = document.createElement("button");
 
-          locationButton.textContent = "Pan to Current Location";
-          locationButton.classList.add("custom-map-control-button");
-          map.controls[google.maps.ControlPosition.TOP_CENTER].push(locationButton);
-          locationButton.addEventListener("click", () => {
-            if (navigator.geolocation) {
-              navigator.geolocation.getCurrentPosition(
-                (position) => {
-                  const pos = {
-                    lat: position.coords.latitude,
-                    lng: position.coords.longitude,
-                  };
-                  infoWindow.setPosition(pos);
-                  infoWindow.setContent("Location found.");
-                  infoWindow.open(map); 
-                  map.setCenter(pos);
-                },
-                () => {
-                  handleLocationError(true, infoWindow, map.getCenter());
-                }
-              ); 
+
+      <script>
+          var map, infoWindow;
+          function initMap() {
+              map = new google.maps.Map(document.getElementById("map"), {
+                  center: { lat: -34.397, lng: 150.644 },
+                  zoom: 16,
+              });
+
+              infoWindow = new google.maps.InfoWindow();
+              const locationButton = document.createElement("button");
+
+              locationButton.textContent = "Pan to Current Location";
+              locationButton.classList.add("custom-map-control-button");
+              map.controls[google.maps.ControlPosition.TOP_CENTER].push(locationButton);
+              locationButton.addEventListener("click", () => {
+              if (navigator.geolocation) {
+                  navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                      const pos = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude,
+                      };
+                      infoWindow.setPosition(pos);
+                      infoWindow.setContent("Location found.");
+                      infoWindow.open(map); 
+                      map.setCenter(pos);
+                    },
+                    () => {
+                        handleLocationError(true, infoWindow, map.getCenter());
+                    }
+                ); 
               } else {
-                // Browser doesn't support Geolocation
-                handleLocationError(false, infoWindow, map.getCenter());
+                  // Browser doesn't support Geolocation
+                  handleLocationError(false, infoWindow, map.getCenter());
               }
-            function handleLocationError(browserHasGeolocation, infoWindow, pos) {
+
+
+          function handleLocationError(browserHasGeolocation, infoWindow, pos) {
               infoWindow.setPosition(pos);
               infoWindow.setContent(
-                browserHasGeolocation
+                  browserHasGeolocation
                   ? "Error: The Geolocation service failed."
                   : "Error: Your browser doesn't support geolocation."
               );
               infoWindow.open(map);
-            }
-            var service = new google.maps.places.PlacesService(map);
+          }
 
-            service.findPlaceFromQuery(request, function(results, status) {
+          var service = new google.maps.places.PlacesService(map);
+          service.findPlaceFromQuery(request, function(results, status) {
               if (status === google.maps.places.PlacesServiceStatus.OK) {
-                console.log(results[0].geometry);
-              //   for (var i = 0; i < results.length; i++) {
-              //     createMarker(results[i]);
-                  
-              //   }
-              //   new google.maps.Marker({
-              //   position: {laresults[0].geometry.location.lat , results[0].geometry.location.lng },
-              //   map,
-              //   title: "Hello World!",
-              // });
-                map.setCenter(results[0].geometry.location);
+                  console.log(results[0].geometry);
+                  map.setCenter(results[0].geometry.location);
               }
-            });
           });
-          var request = {
-            query: '美食',
-            fields: ['name', 'geometry'],
-          };
-
-          
+          });
         }
-        
-        window.initMap = initMap;
-        let pos;
-        let service;
 
-        let Info = [];
+                
+        window.initMap = initMap;
+        let dis, myloc, geocoder;
+        let pos, service;
+       
         class placeInfo {
             constructor() {
                 this.placeName = "None";
@@ -229,7 +226,36 @@
             }
         }
         
+        let finish = false;
+        function cal() {
+            dis = document.getElementById("distance").value;
+            myloc = document.getElementById("mylocation").value;
+            geocoder = new google.maps.Geocoder();
+            geocoder.geocode({
+                'address': myloc
+                }, 
+                function(results, status) {
+                    // console.log(results[0].geometry.location.lng())
+                    if (status == 'OK') {
+                        map.setCenter(results[0].geometry.location);
+                        var marker = new google.maps.Marker({
+                            map: map,
+                            position: results[0].geometry.location
+                        });
+                        pos = {
+                            lat: results[0].geometry.location.lat(),
+                            lng: results[0].geometry.location.lng()
+                        };
+                        getNearbyPlaces(pos);
+                    } else {
+                        console.log(status);
+                    }
+                });
+        }
+
+        let Info = [];
         function getNearbyPlaces(position) {
+            console.log('call getNearbyPlaces')
             let request = {
                 location: position,
                 rankBy: google.maps.places.RankBy.DISTANCE, //依照距離排列
@@ -238,21 +264,27 @@
             service = new google.maps.places.PlacesService(map);
             service.nearbySearch(request, nearbyCallback);
         }
+
+
         function nearbyCallback(places, status) {
+            console.log('call nearbyCallback')
             let destination = [];
             if (status == google.maps.places.PlacesServiceStatus.OK) {
                 places.forEach(place => {
                     let currLocation = new google.maps.LatLng(place.geometry.location.lat(), 
                                                               place.geometry.location.lng());
                     let instance = new placeInfo()
-                    instance.name = place.name;
+                    instance.placeName = place.name;
                     Info.push(instance);
                     destination.push(currLocation);
                 });
                 calculateDistance(destination);
             }
         }
+
+
         function calculateDistance(destination) {
+            console.log('call calculateDistance')
             const serviceForDistance = new google.maps.DistanceMatrixService();
             serviceForDistance.getDistanceMatrix(
                 {
@@ -264,49 +296,29 @@
                     avoidTolls: true,
                 }, testCallBack);
         }
+
+
         function testCallBack(results, status) {
-          console.log(results);
-          for (let i = 0; i < results.rows[0].elements.length; i++) {
-              Info[i].distanceFrom = results.rows[0].elements[i].distance.value;
-          }
-          Info.sort(function(a, b) {
-              return a.distanceFrom > b.distanceFrom ? 1 : -1; ///????
-          });
-          for (let i = 0; i < Info.length; i++) {
-              if (Info[i].distanceFrom < dis) {
-                  console.log(Info[i].name);
-                  console.log(Info[i].distanceFrom);
-              } else {
-                  console.log("these locations too far")
-                  console.log(Info[i].name);
-                  console.log(Info[i].distanceFrom);
-              }
-          }
-        }
-        var dis, myloc, geocoder
-        function cal() {
-            dis = document.getElementById("distance").value;
-            myloc = document.getElementById("mylocation").value;
-            geocoder = new google.maps.Geocoder();
-            geocoder.geocode({
-                'address': myloc
-            }, function(results, status) {
-                // console.log(results[0].geometry.location.lng())
-                if (status == 'OK') {
-                    map.setCenter(results[0].geometry.location);
-                    var marker = new google.maps.Marker({
-                        map: map,
-                        position: results[0].geometry.location
-                    });
-                    pos = {
-                        lat: results[0].geometry.location.lat(),
-                        lng: results[0].geometry.location.lng()
-                    };
-                    getNearbyPlaces(pos);
-                } else {
-                    console.log(status);
-                }
+          console.log('call testCallBack')
+            for (let i = 0; i < results.rows[0].elements.length; i++) {
+                Info[i].distanceFrom = results.rows[0].elements[i].distance.value;
+            }
+            Info.sort(function(a, b) {
+                return a.distanceFrom > b.distanceFrom ? 1 : -1; ///????
             });
+
+
+            let numberValid = 0
+            for (let i = 0; i < Info.length; i++) {
+                if (Info[i].distanceFrom < dis) {
+                  Info[numberValid] = Info[i];
+                  numberValid += 1
+                } 
+            }
+
+            console.log(numberValid)
+            drawTheWheel(numberValid)
+            
         }
       </script>
 
