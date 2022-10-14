@@ -1,5 +1,4 @@
 # s56207824inc.github.io
 
-###### test
+#### This branch "handsomeJack" is for combining programs.
 
-###### test from ubuntu
