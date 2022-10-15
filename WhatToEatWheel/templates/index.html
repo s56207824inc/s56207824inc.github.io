@@ -63,28 +63,20 @@
       <!-- TODO:JS 包起來 -->
       <script>
           let theWheel;
+          let colorMap = [
+            '#eae56f',
+            '#e7706f',
+            '#7de6ef',
+          ]
 
           function drawTheWheel(numberValid) {
               delete theWheel;
               const numSegments = numberValid;
               let segments = [];
               // TODO:輪盤樣式、顏色改好看一點
-              function getRandomColor() {
-                  let color = [];
-                  for (let i = 0; i < 3; i++) {
-                      let asciiNum = Math.ceil(Math.random() * 5);
-                      color.push(String.fromCharCode(97 + asciiNum));
-                  }
-                  for (let i = 0; i < 3; i++) {
-                      let radNum = Math.ceil(Math.random() * 9);
-                      color.push(String.fromCharCode(48 + radNum));
-                  }
-                  return color.join('');
-              }
-              
               for (let i = 0; i < numSegments; i++) {
-                    console.log(getRandomColor())
-                    let segmentInfo = {'fillStyle': '#' + getRandomColor(), 'text': Info[i].placeName};
+                    let colorIndex = (i % colorMap.length);
+                    let segmentInfo = {'fillStyle': colorMap[colorIndex], 'text': Info[i].placeName};
                     segments.push(segmentInfo)
               }
 
