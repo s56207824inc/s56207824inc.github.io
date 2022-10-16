@@ -117,7 +117,7 @@ function alertPrize() {
   let winningSegment = theWheel.getIndicatedSegment();
   playSound();
 
-  
+
   result.innerHTML = winningSegment.text;
   const targetLocation = winningSegment.location;
   map.panTo(targetLocation);
@@ -229,12 +229,6 @@ function markerRemove() {
   }
 }
 
-function show
-
-
-
-
-
 
 //callback functions
 function initMap() {
@@ -245,7 +239,6 @@ function initMap() {
   infowindow = new google.maps.InfoWindow();
   drawTheWheel(DEFAULT_NUM);
 }
-
 
 
 function cal() {
