@@ -1,10 +1,13 @@
 <html>
+
+
     <head>
         <title>Branch Test</title>
         <script src='https://cdn.jsdelivr.net/npm/winwheeljs@2.7.0/dist/Winwheel.min.js'></script>
         <script src="http://cdnjs.cloudflare.com/ajax/libs/gsap/latest/TweenMax.min.js"></script>
-        <style>
-           
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous"></script>
+     
+      <style>
           .container{
             width: 100%;
             height: 100vh;
@@ -21,6 +24,8 @@
 
       </style>
     </head>
+
+
     <body>
       {% load static %}
       <!-- TODO:前端切版、排版CSS -->
@@ -44,20 +49,68 @@
       <!-- TODO: 如果其中有一個格子沒有值的話, 需要提示-->
       <div class="wrap">
         <div class="search">
-        <input class="search-bar" type="text" name="search" id="distance" placeholder="多少距離之內">
+            <input class="search-bar" type="text" name="search" id="distance" placeholder="多少距離之內">
         </div>
       </div>
+
+
       <!-- TODO: 按鈕、搜尋樣式改好看-->
       <div class="wrap">
           <div class="search">
-          <input class="search-bar" type="text" name="search" id="mylocation" placeholder="目前位置">
-          <button class="search-btn" id="btn" onclick="cal()"></button>
+              <input class="search-bar" type="text" name="search" id="mylocation" placeholder="目前位置">
+              <button class="btn btn-success" type="button" id="btn" onclick="cal()">點擊決定您的命運</button>
           </div>
       </div>
 
+      <form>
+        請選擇交通方式<br>
+        <div class="transportation">
+          <input type="radio" class="btn-check" name="method" id="option1" value="DRIVING" checked="checked" autocomplete="off">
+          <label class="btn btn-outline-danger" for="option1">開車</label>
+
+          <input type="radio" class="btn-check" name="method" id="option2" value="WALKING" autocomplete="off">
+          <label class="btn btn-outline-danger" for="option2">走路</label>
+
+          <input type="radio" class="btn-check" name="method" id="option3" value="BICYCLING" autocomplete="off">
+          <label class="btn btn-outline-danger" for="option3">腳踏車</label>
+        </div>
+
+        <br>價錢範圍
+        <div class="prices">
+          <input type="radio" class="btn-check" name="price" id="level1" value="1" checked="checked" autocomplete="off">
+          <label class="btn btn-outline-danger" for="level1">$$</label>
+
+          <input type="radio" class="btn-check" name="price" id="level2" value="2" autocomplete="off">
+          <label class="btn btn-outline-danger" for="level2">$$$</label>
+
+          <input type="radio" class="btn-check" name="price" id="level3" value="3" autocomplete="off">
+          <label class="btn btn-outline-danger" for="level3">$$$$</label>
+
+          <input type="radio" class="btn-check" name="price" id="level4" value="4" autocomplete="off">
+          <label class="btn btn-outline-danger" for="level4">no limit</label>
+        </div>
+
+        <br>評價
+        <div class="reivew rate">
+          <input type="radio" class="btn-check" name="rate" id="one" value="1" checked="checked" autocomplete="off">
+          <label class="btn btn-outline-danger" for="two">1星</label>
+
+          <input type="radio" class="btn-check" name="rate" id="two" value="2" autocomplete="off">
+          <label class="btn btn-outline-danger" for="two">2星</label>
+
+          <input type="radio" class="btn-check" name="rate" id="three" value="3" autocomplete="off">
+          <label class="btn btn-outline-danger" for="three">3星</label>
+
+          <input type="radio" class="btn-check" name="rate" id="four" value="4" autocomplete="off">
+          <label class="btn btn-outline-danger" for="four">4星</label>
+
+          <input type="radio" class="btn-check" name="rate" id="five" value="5" autocomplete="off">
+          <label class="btn btn-outline-danger" for="five">5星</label>
+        </div>
+      </form>
+
 
       <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAlNRaHqtGB3sTDKymkHmJtYRfPFpfFVsU&libraries=places&callback=initMap"></script>
-      <!-- <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAt4ZfNINLe9AQgtPoUYkRv_P_tvifCCHM&callback=initMap&libraries=places" async defer></script> -->
 
       <!-- draw the whole wheels -->
       <!-- TODO:JS 包起來 -->
@@ -136,7 +189,7 @@
               theWheel.startAnimation();
           }
 
-
+          //TODO:看要不要給提示說目的地距離多少, 到那邊要多久
           function alertPrize() {
               let winningSegment = theWheel.getIndicatedSegment();
               playSound();
@@ -151,6 +204,21 @@
           }
       </script>
 
+      <!--check utilis-->
+      <script>
+          function isVaildNumEnough(validNumber) {
+            if (validNumber < 2) {
+              return false
+            } 
+            return true
+          }
+          function isOpeningNow(open) {
+            if (open) {
+              return true
+            } 
+            return false
+          }
+      </script>
 
       <script>
           var map, infoWindow;
@@ -172,8 +240,13 @@
          
         class placeInfo {
             constructor() {
-                this.placeName = "None";
+                this.rating = 0;
+                this.durationTxt = "None";
+                this.durationVal = 0;
                 this.distanceFrom = 0;
+                this.placeName = "None";
+                this.priceLevel = 0;
+                this.isOpening = false;
             }
         }
 
@@ -185,19 +258,14 @@
 
 
         function cal() {
-            // TODO:若dis或myloc為空，跳錯誤通知
-            // TODO:若dis不是數字或非有效值，報錯
-            // TODO:若myloc結果非有效值，報錯
-            // TODO:距離算法(DRIVING/WALKING/...)讓使用者選擇
             dis = document.getElementById("distance").value;
             myloc = document.getElementById("mylocation").value;
-            
+    
             geocoder = new google.maps.Geocoder();
             geocoder.geocode({
                 'address': myloc
                 }, 
                 function(results, status) {
-                    // console.log(results[0].geometry.location.lng())
                     if (status == 'OK') {
                         map.setCenter(results[0].geometry.location);
                         map.setZoom(16);
@@ -210,11 +278,10 @@
                             lng: results[0].geometry.location.lng()
                         };
                         getNearbyPlaces(pos);
-                        console.log(Info);
                     } else {
                         console.log(status);
                     }
-                });
+            });
         }
 
         
@@ -223,7 +290,8 @@
             let request = {
                 location: position,
                 rankBy: google.maps.places.RankBy.DISTANCE, //依照距離排列
-                keyword: 'restaurant'
+                keyword: 'restaurant',
+                Field: ["price_level, rating", "open_now"]
             };
             service = new google.maps.places.PlacesService(map);
             service.nearbySearch(request, nearbyCallback);
@@ -234,12 +302,19 @@
             console.log('call nearbyCallback')
             let destination = [];
             Info = [];
+        
             if (status == google.maps.places.PlacesServiceStatus.OK) {
                 places.forEach(place => {
                     let currLocation = new google.maps.LatLng(place.geometry.location.lat(), 
                                                               place.geometry.location.lng());
                     let instance = new placeInfo()
+                    //TODO:check opening_hours.open_now <- "google may be discard this feature" 
+          
+                    instance.rating = place.rating
                     instance.placeName = place.name;
+                    instance.priceLevel = place.priceLevel
+                    // instance.isOpening = place.opening_hours.open_now
+
                     Info.push(instance);
                     destination.push(currLocation);
                 });
@@ -251,11 +326,12 @@
         function calculateDistance(destination) {
             console.log('call calculateDistance')
             const serviceForDistance = new google.maps.DistanceMatrixService();
+            const methodType = document.querySelectorAll('input[type="radio"][name="method"]:checked')[0].value;
             serviceForDistance.getDistanceMatrix(
                 {
                     origins: [pos],
                     destinations: destination,
-                    travelMode: 'DRIVING',
+                    travelMode: methodType,
                     unitSystem: google.maps.UnitSystem.METRIC,
                     avoidHighways: true,
                     avoidTolls: true,
@@ -264,26 +340,35 @@
 
 
         function testCallBack(results, status) {
-          console.log('call testCallBack')
+            console.log('call testCallBack');
+            const rate = document.querySelectorAll('input[type="radio"][name="rate"]:checked')[0].value;
+            const price = document.querySelectorAll('input[type="radio"][name="price"]:checked')[0].value;
+
+
             for (let i = 0; i < results.rows[0].elements.length; i++) {
                 Info[i].distanceFrom = results.rows[0].elements[i].distance.value;
+                Info[i].durationVal = results.rows[0].elements[i].duration.value;
+                Info[i].durationTxt = results.rows[0].elements[i].duration.text;
             }
+
             Info.sort(function(a, b) {
                 return a.distanceFrom > b.distanceFrom ? 1 : -1; ///????
             });
 
-
             let numberValid = 0
             for (let i = 0; i < Info.length; i++) {
-                if (Info[i].distanceFrom < dis) {
+                if (Info[i].distanceFrom < dis & isOpeningNow(Info[i].isOpening)) {
                   Info[numberValid] = Info[i];
                   numberValid += 1
                 } 
             }
+          
+            if (isVaildNumEnough(numberValid)) {
+                drawTheWheel(numberValid);
+            } else {
+                console.log("To reset your within distance for more choices")
+            }
 
-            console.log(numberValid)
-            drawTheWheel(numberValid)
-            
         }
       </script>
 
