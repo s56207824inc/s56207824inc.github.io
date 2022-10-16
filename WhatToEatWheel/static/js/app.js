@@ -129,13 +129,14 @@ function alertPrize() {
     position: targetLocation
   });
 
-
+  infowindowContent.style.display = "block";
   infowindowContent.children.namedItem("place-name").innerHTML = winningSegment.placeName;
   infowindowContent.children.namedItem("place-rate").innerHTML = winningSegment.rate;
   infowindowContent.children.namedItem("place-duration").innerHTML = winningSegment.durationTxt;
   infowindowContent.children.namedItem("place-price").innerHTML = winningSegment.price;
   infowindow.setContent(infowindowContent);
   infowindow.open(map, marker);
+  
 
 
   markerList.push(marker);
