@@ -1,447 +1,458 @@
 <html>
+  <head>
+    <title>Branch Test</title>
+    <script src='https://cdn.jsdelivr.net/npm/winwheeljs@2.7.0/dist/Winwheel.min.js'></script>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/gsap/latest/TweenMax.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
+    <style>
+      .container{
+        width: 100%;
+        height: 100vh;
+        display: flex;
+      }
+      .left{
+        width: 50%;
+        height: 100vh;
+      }
+      #map{
+        width: 50%;
+        height: 100vh;
+      }
+      .rigth{
+        width: 50%;
+        height: 100vh;
+        display: flex;
+        /* 水平置中 */
+        justify-content: center;    
+        /* 垂直置中 */
+        align-items: center;   
+      }
+
+      #canvas{
+        width: 100%;
+        height: width;
+      }
+      .wrap{
+        width: 100%;
+        height: 50%;
+        padding: 20px 10px 20px 10px;
+        text-align: center;
+      }
+      .search{
+        padding: 10px 50px 10px 0px;
+        width: 100%;
+        display: block ;
+      }
+      .search-label{
+        padding-right: 10px;
+      }
+      .search-bar{
+        height: 30px;
+      }
+    </style>
+  </head>
 
 
-    <head>
-        <title>Branch Test</title>
-        <script src='https://cdn.jsdelivr.net/npm/winwheeljs@2.7.0/dist/Winwheel.min.js'></script>
-        <script src="http://cdnjs.cloudflare.com/ajax/libs/gsap/latest/TweenMax.min.js"></script>
-        <style>
-            .container{
-                width: 100%;
-                height: 100vh;
-                display: flex;
-            }
-            .left{
-                width: 50%;
-                height: 100vh;
-            }
-            #map{
-                width: 50%;
-                height: 100vh;
-            }
-            .rigth{
-                width: 50%;
-                height: 100vh;
-                display: flex;
-                /* 水平置中 */
-                justify-content: center;    
-                /* 垂直置中 */
-                align-items: center;   
-            }
+  <body>
+    {% load static %}
+    <!-- TODO:前端切版、排版CSS -->
+    <div class="container">
+      <div id="map" class="left">
 
-            #canvas{
-                width: 100%;
-                height: 50%;
-            }
-            .wrap{
-                width: 100%;
-                height: 50%;
-                padding: 20px 10px 20px 10px;
-                text-align: center;
-            }
-            .search{
-                padding: 10px 50px 10px 0px;
-                width: 100%;
-                display: block ;
-            }
-            .search-bar{
-                height: 30px;
-            }
-      </style>
-    </head>
-
-
-    <body>
-      {% load static %}
-      <!-- TODO:前端切版、排版CSS -->
-      <div class="container">
-        <div id="map" class="left"></div>
-        <div class="right">
-            <canvas id="canvas" 
-            width="880" height="440"  style="z-index: 3;"
-              data-responsiveMinWidth="180"
-              data-responsiveScaleHeight="true"   
-              data-responsiveMargin="50"
-              onclick="startSpin()">
-            </canvas>
-            <!-- TODO: 如果其中有一個格子沒有值的話, 需要提示-->
-            <div class="wrap">
-                <div class="search">
-                    <label for="distance" style="padding-right: 10px;">距離</label>
-                    <input class="search-bar" type="text" name="search" id="distance" placeholder="多少距離之內">
-                <!-- TODO: 按鈕、搜尋樣式改好看-->
-                </div>
-                <div class="search">
-                    <label for="mylocation" style="padding-right: 10px;">地址</label>
-                    <input class="search-bar" type="text" name="search" id="mylocation" placeholder="目前位置">
-                </div>
-                
-                <button class="search-btn" id="btn" onclick="cal()"></button>
-            </div>
-        </div>
       </div>
-      
-      <audio id="myAudio"> 
-        <source src="{% static '/media/tick.mp3' %}" type="audio/mpeg">
-        Your browser does not support the audio element.
-      </audio>
-
+      <div class="right">
+        <canvas id="canvas" 
+          width="880" height="440"  style="z-index: 3;"
+          data-responsiveMinWidth="180"
+          data-responsiveScaleHeight="true"   
+          data-responsiveMargin="50"
+          onclick="startSpin()">
+        </canvas>
 
       <!-- TODO: 如果其中有一個格子沒有值的話, 需要提示-->
       <div class="wrap">
+        <!-- TODO: 按鈕、搜尋樣式改好看-->
         <div class="search">
-            <input class="search-bar" type="text" name="search" id="distance" placeholder="多少距離之內">
+          <label class="search-label" for="mylocation">地址</label>
+          <input class="search-bar" type="text" name="search" id="mylocation" placeholder="目前位置">
         </div>
-      </div>
+        
+        <form>
+          <br>
+          <div class="transportation">
+            請選擇交通方式
+            <input type="radio" class="btn-check" name="method" id="option1" value="DRIVING" checked="checked" autocomplete="off">
+            <label class="btn btn-outline-danger" for="option1">開車</label>
 
+            <input type="radio" class="btn-check" name="method" id="option2" value="WALKING" autocomplete="off">
+            <label class="btn btn-outline-danger" for="option2">走路</label>
 
-      <!-- TODO: 按鈕、搜尋樣式改好看-->
-      <div class="wrap">
-          <div class="search">
-              <input class="search-bar" type="text" name="search" id="mylocation" placeholder="目前位置">
-              <button class="btn btn-success" type="button" id="btn" onclick="cal()">點擊決定您的命運</button>
+            <input type="radio" class="btn-check" name="method" id="option3" value="BICYCLING" autocomplete="off">
+            <label class="btn btn-outline-danger" for="option3">腳踏車</label>
           </div>
+          <br>
+          <div class="distance">
+            距離(公尺)
+            <input type="radio" class="btn-check" name="distance" id="option1-dis" value="500" checked="checked" autocomplete="off">
+            <label class="btn btn-outline-danger" for="option1-dis">500</label>
+
+            <input type="radio" class="btn-check" name="distance" id="option2-dis" value="1000" autocomplete="off">
+            <label class="btn btn-outline-danger" for="option2-dis">1000</label>
+
+            <input type="radio" class="btn-check" name="distance" id="option3-dis" value="3000" autocomplete="off">
+            <label class="btn btn-outline-danger" for="option3-dis">3000</label>
+
+            <input type="radio" class="btn-check" name="distance" id="option4-dis" value="100000" autocomplete="off">
+            <label class="btn btn-outline-danger" for="option4-dis">不限</label>
+          </div>
+
+          <br>
+          <div class="prices">
+            價錢範圍
+            <input type="radio" class="btn-check" name="price" id="level1" value="1" checked="checked" autocomplete="off">
+            <label class="btn btn-outline-danger" for="level1">$$</label>
+
+            <input type="radio" class="btn-check" name="price" id="level2" value="2" autocomplete="off">
+            <label class="btn btn-outline-danger" for="level2">$$$</label>
+
+            <input type="radio" class="btn-check" name="price" id="level3" value="3" autocomplete="off">
+            <label class="btn btn-outline-danger" for="level3">$$$$</label>
+
+            <input type="radio" class="btn-check" name="price" id="level4" value="4" autocomplete="off">
+            <label class="btn btn-outline-danger" for="level4">不限</label>
+          </div>
+
+          <br>
+          <div class="reivew rate">
+            評價
+            <input type="radio" class="btn-check" name="rate" id="one" value="1" checked="checked" autocomplete="off">
+            <label class="btn btn-outline-danger" for="one">1星</label>
+
+            <input type="radio" class="btn-check" name="rate" id="two" value="2" autocomplete="off">
+            <label class="btn btn-outline-danger" for="two">2星</label>
+
+            <input type="radio" class="btn-check" name="rate" id="three" value="3" autocomplete="off">
+            <label class="btn btn-outline-danger" for="three">3星</label>
+
+            <input type="radio" class="btn-check" name="rate" id="four" value="4" autocomplete="off">
+            <label class="btn btn-outline-danger" for="four">4星</label>
+
+            <input type="radio" class="btn-check" name="rate" id="five" value="5" autocomplete="off">
+            <label class="btn btn-outline-danger" for="five">5星</label>
+          </div>
+        </form>
+        
+        <button class="btn btn-success" type="button" id="btn" onclick="cal()">點擊決定您的命運</button>
       </div>
 
-      <form>
-        請選擇交通方式<br>
-        <div class="transportation">
-          <input type="radio" class="btn-check" name="method" id="option1" value="DRIVING" checked="checked" autocomplete="off">
-          <label class="btn btn-outline-danger" for="option1">開車</label>
 
-          <input type="radio" class="btn-check" name="method" id="option2" value="WALKING" autocomplete="off">
-          <label class="btn btn-outline-danger" for="option2">走路</label>
+      </div>
+    </div>
 
-          <input type="radio" class="btn-check" name="method" id="option3" value="BICYCLING" autocomplete="off">
-          <label class="btn btn-outline-danger" for="option3">腳踏車</label>
-        </div>
+    <audio id="myAudio"> 
+    <source src="{% static '/media/tick.mp3' %}" type="audio/mpeg">
+    Your browser does not support the audio element.
+    </audio>
 
-        <br>價錢範圍
-        <div class="prices">
-          <input type="radio" class="btn-check" name="price" id="level1" value="1" checked="checked" autocomplete="off">
-          <label class="btn btn-outline-danger" for="level1">$$</label>
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAlNRaHqtGB3sTDKymkHmJtYRfPFpfFVsU&libraries=places&callback=initMap"></script>
 
-          <input type="radio" class="btn-check" name="price" id="level2" value="2" autocomplete="off">
-          <label class="btn btn-outline-danger" for="level2">$$$</label>
+    <!-- draw the whole wheels -->
+    <!-- TODO:JS 包起來 -->
+    <script>
+      let theWheel;
+      let colorMap = [
+      '#eae56f',
+      '#e7706f',
+      '#7de6ef',
+      ]
 
-          <input type="radio" class="btn-check" name="price" id="level3" value="3" autocomplete="off">
-          <label class="btn btn-outline-danger" for="level3">$$$$</label>
+      function drawTheWheel(numberValid) {
+        delete theWheel;
+        const numSegments = numberValid;
+        let segments = [];
+        // TODO:輪盤樣式、顏色改好看一點
+        for (let i = 0; i < numSegments; i++) {
+          let colorIndex = (i % colorMap.length);
+          // console.log(Info[i].placeName);
+          // console.log(Info[i].placeName.length);
+          // if(Info[i].placeName.length>8) {
+          //   console.log("too long");
+          // } else {
+          //   console.log("OK");
+          // }
+          let segmentInfo = {'fillStyle': colorMap[colorIndex], 'text': Info[i].placeName.slice(0, 7)};
+          segments.push(segmentInfo)
+        }
 
-          <input type="radio" class="btn-check" name="price" id="level4" value="4" autocomplete="off">
-          <label class="btn btn-outline-danger" for="level4">no limit</label>
-        </div>
-
-        <br>評價
-        <div class="reivew rate">
-          <input type="radio" class="btn-check" name="rate" id="one" value="1" checked="checked" autocomplete="off">
-          <label class="btn btn-outline-danger" for="two">1星</label>
-
-          <input type="radio" class="btn-check" name="rate" id="two" value="2" autocomplete="off">
-          <label class="btn btn-outline-danger" for="two">2星</label>
-
-          <input type="radio" class="btn-check" name="rate" id="three" value="3" autocomplete="off">
-          <label class="btn btn-outline-danger" for="three">3星</label>
-
-          <input type="radio" class="btn-check" name="rate" id="four" value="4" autocomplete="off">
-          <label class="btn btn-outline-danger" for="four">4星</label>
-
-          <input type="radio" class="btn-check" name="rate" id="five" value="5" autocomplete="off">
-          <label class="btn btn-outline-danger" for="five">5星</label>
-        </div>
-      </form>
-
-
-      <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAlNRaHqtGB3sTDKymkHmJtYRfPFpfFVsU&libraries=places&callback=initMap"></script>
-
-      <!-- draw the whole wheels -->
-      <!-- TODO:JS 包起來 -->
-      <script>
-          let theWheel;
-          let colorMap = [
-            '#eae56f',
-            '#e7706f',
-            '#7de6ef',
-          ]
-
-          function drawTheWheel(numberValid) {
-              delete theWheel;
-              const numSegments = numberValid;
-              let segments = [];
-              // TODO:輪盤樣式、顏色改好看一點
-              for (let i = 0; i < numSegments; i++) {
-                    let colorIndex = (i % colorMap.length);
-                    let segmentInfo = {'fillStyle': colorMap[colorIndex], 'text': Info[i].placeName};
-                    segments.push(segmentInfo)
-              }
-
-              theWheel = new Winwheel({
-                  'numSegments'  : numSegments,
-                  'textFontSize' : 14,
-                  'responsive'   : true,  // This wheel is responsive!
-                  'pointerAngle' : 90,    // Ensure this is set correctly
-                  'segments'     : segments,
-                  'animation' :
-                  {
-                      'type'     : 'spinToStop',
-                      'duration' : 5,
-                      'spins'    : 8,
-                      'callbackSound' : 'playSound()' , 
-                      'soundTrigger'  : 'pin',
-                      'callbackFinished' : 'alertPrize()',
-                      'callbackAfter' : 'drawTriangle()',
-                  },
-                  'pins' :
-                  {
-                      'number' : 16,
-                      'outerRadius': 6,
-                      'responsive' : true, // This must be set to true if pin size is to be responsive.
-                  }
-              });
-              
-              drawTriangle();
-            }
-
-
-          function drawTriangle() {
-              // Get the canvas context the wheel uses.
-              let ctx = theWheel.ctx;
-
-              ctx.strokeStyle = 'navy';     // Set line colour.
-              ctx.fillStyle   = 'aqua';     // Set fill colour.
-              ctx.lineWidth   = 2;
-              ctx.beginPath();              // Begin path
-
-              // degree 45
-              ctx.moveTo(670, 194);      // Move to initial position.
-              ctx.lineTo(670, 246);      // Draw lines to make the shape.
-              ctx.lineTo(630, 220);
-              ctx.lineTo(670, 195);
-              ctx.stroke();                 // Complete the path by stroking (draw lines).
-              ctx.fill();                   // Then fill.
+        theWheel = new Winwheel({
+          'numSegments'  : numSegments,
+          'textFontSize' : 20,
+          'responsive'   : true,  // This wheel is responsive!
+          'pointerAngle' : 90,    // Ensure this is set correctly
+          'segments'     : segments,
+          'animation' :
+          {
+          'type'     : 'spinToStop',
+          'duration' : 5,
+          'spins'    : 8,
+          'callbackSound' : 'playSound()' , 
+          'soundTrigger'  : 'pin',
+          'callbackFinished' : 'alertPrize()',
+          'callbackAfter' : 'drawTriangle()',
+          },
+          'pins' :
+          {
+          'number' : 16,
+          'outerRadius': 6,
+          'responsive' : true, // This must be set to true if pin size is to be responsive.
           }
-      </script>
+        });
+
+        drawTriangle();
+      }
 
 
-      <!-- wheels utilis -->
-      <script>
-          function startSpin() {
-              theWheel.stopAnimation(false);
-              theWheel.rotationAngle = theWheel.rotationAngle % 360;
-              theWheel.startAnimation();
-          }
+      function drawTriangle() {
+        // Get the canvas context the wheel uses.
+        let ctx = theWheel.ctx;
 
-          //TODO:看要不要給提示說目的地距離多少, 到那邊要多久
-          function alertPrize() {
-              let winningSegment = theWheel.getIndicatedSegment();
-              playSound();
-              alert("You have won " + winningSegment.text + "!");
-          }
+        ctx.strokeStyle = 'navy';     // Set line colour.
+        ctx.fillStyle   = 'aqua';     // Set fill colour.
+        ctx.lineWidth   = 2;
+        ctx.beginPath();              // Begin path
 
-          let audio = document.getElementById("myAudio");
-          function playSound() {
-              audio.pause();
-              audio.currentTime = 0;
-              audio.play();
-          }
-      </script>
+        // degree 45
+        ctx.moveTo(670, 194);      // Move to initial position.
+        ctx.lineTo(670, 246);      // Draw lines to make the shape.
+        ctx.lineTo(630, 220);
+        ctx.lineTo(670, 195);
+        ctx.stroke();                 // Complete the path by stroking (draw lines).
+        ctx.fill();                   // Then fill.
+      }
+    </script>
 
-      <!--check utilis-->
-      <script>
-          function isVaildNumEnough(validNumber) {
-            if (validNumber < 2) {
-              return false
-            } 
-            return true
-          }
-          function isOpeningNow(open) {
-            if (open) {
-              return true
-            } 
-            return false
-          }
-      </script>
 
-      <!-- utilis -->
-      <script>
-        function isNumber(inputs) {
-            if(inputs == '' || inputs == ' ') {
-                return false;
-            }
-            return Number(inputs).toString() != "NaN";
+    <!-- wheels utilis -->
+    <script>
+      function startSpin() {
+        theWheel.stopAnimation(false);
+        theWheel.rotationAngle = theWheel.rotationAngle % 360;
+        theWheel.startAnimation();
+      }
+
+      //TODO:看要不要給提示說目的地距離多少, 到那邊要多久
+      function alertPrize() {
+        let winningSegment = theWheel.getIndicatedSegment();
+        playSound();
+        alert("You have won " + winningSegment.text + "!");
+      }
+
+      let audio = document.getElementById("myAudio");
+      function playSound() {
+        audio.pause();
+        audio.currentTime = 0;
+        audio.play();
+      }
+    </script>
+
+    <!--check utilis-->
+    <script>
+      function isVaildNumEnough(validNumber) {
+        if (validNumber < 2) {
+          return false
         } 
-        // console.log("100:", isNumber(num_01));
-        function isAddress(inputs) {
-            if(inputs == '' || inputs == ' ') {
-                return false;
-            }
-            return true;
+        return true
+      }
+      function isOpeningNow(open) {
+        if (open) {
+          return true
         } 
-      </script>
+        return false
+      }
+    </script>
+
+    <!-- utilis -->
+    <script>
+    function isNumber(inputs) {
+      if(inputs === '' || inputs === ' ') {
+        return false;
+      }
+      return Number(inputs).toString() !== "NaN";
+    } 
+    // console.log("100:", isNumber(num_01));
+    function isAddress(inputs) {
+      if(inputs === '' || inputs === ' ') {
+        return false;
+      }
+      return true;
+    } 
+    </script>
 
 
-      <script>
-          var map, infoWindow;
-          function initMap() {
-              map = new google.maps.Map(document.getElementById("map"), {
-                  center: { lat: 23.5, lng: 121 },
-                  zoom: 8,
-              });
+    <script>
+      var map, infoWindow;
+      function initMap() {
+        map = new google.maps.Map(document.getElementById("map"), {
+          center: { lat: 23.5, lng: 121 },
+          zoom: 8,
+        });
 
-              infoWindow = new google.maps.InfoWindow();
+        infoWindow = new google.maps.InfoWindow();
+      }
+
+
+      window.initMap = initMap;
+      let dis, myloc, geocoder;
+      let pos, service;
+      let Info = [];
+      const DEFAULT_NUM = 5;
+
+      class placeInfo {
+      constructor() {
+        this.rating = 0;
+        this.durationTxt = "None";
+        this.durationVal = 0;
+        this.distanceFrom = 0;
+        this.placeName = "None";
+        this.priceLevel = 0;
+        this.isOpening = false;
+      }
+    }
+
+
+    for(let i=0; i<DEFAULT_NUM; i++) {
+      Info.push(new placeInfo());
+    }
+    drawTheWheel(DEFAULT_NUM);
+
+
+    function cal() {
+      // TODO:若dis或myloc為空，跳錯誤通知
+      // TODO:若dis不是數字或非有效值，報錯
+      // TODO:若myloc結果非有效值，報錯
+      // TODO:距離算法(DRIVING/WALKING/...)讓使用者選擇
+      // TODO:餐廳營業時間篩選
+      // TODO:轉盤相同顏色順序相鄰
+      dis = document.querySelectorAll('input[type="radio"][name="distance"]:checked')[0].value;
+      myloc = document.getElementById("mylocation").value;
+      if (!isNumber(dis)) {
+        console.log('距離非有效值');
+      }
+      if (!isAddress(myloc)) {
+        console.log('地址非有效值');
+        alert('地址非有效值');
+      }
+      geocoder = new google.maps.Geocoder();
+      geocoder.geocode({
+        'address': myloc
+      }, 
+      function(results, status) {
+        if (status == 'OK') {
+          map.setCenter(results[0].geometry.location);
+          map.setZoom(16);
+          var marker = new google.maps.Marker({
+            map: map,
+            position: results[0].geometry.location
+          });
+          pos = {
+            lat: results[0].geometry.location.lat(),
+            lng: results[0].geometry.location.lng()
+          };
+          getNearbyPlaces(pos);
+        } else {
+          console.log(status);
         }
-
-                
-        window.initMap = initMap;
-        let dis, myloc, geocoder;
-        let pos, service;
-        let Info = [];
-        const DEFAULT_NUM = 5;
-         
-        class placeInfo {
-            constructor() {
-                this.rating = 0;
-                this.durationTxt = "None";
-                this.durationVal = 0;
-                this.distanceFrom = 0;
-                this.placeName = "None";
-                this.priceLevel = 0;
-                this.isOpening = false;
-            }
-        }
+      });
+    }
 
 
-        for(let i=0; i<DEFAULT_NUM; i++) {
-            Info.push(new placeInfo());
-        }
-        drawTheWheel(DEFAULT_NUM);
+    function getNearbyPlaces(position) {
+      console.log('call getNearbyPlaces');
+      let request = {
+        location: position,
+        rankBy: google.maps.places.RankBy.DISTANCE, //依照距離排列
+        keyword: 'restaurant',
+        Field: ["price_level, rating", "open_now"]
+      };
+      service = new google.maps.places.PlacesService(map);
+      service.nearbySearch(request, nearbyCallback);
+    }
 
 
-        function cal() {
-            // TODO:若dis或myloc為空，跳錯誤通知
-            // TODO:若dis不是數字或非有效值，報錯
-            // TODO:若myloc結果非有效值，報錯
-            // TODO:距離算法(DRIVING/WALKING/...)讓使用者選擇
-            // TODO:餐廳營業時間篩選
-            // TODO:轉盤相同顏色順序相鄰
-            dis = document.getElementById("distance").value;
-            myloc = document.getElementById("mylocation").value;
-            if (!isNumber(dis)) {
-                console.log('距離非有效值');
-            }
-            if (!isAddress(myloc)) {
-                console.log('地址非有效值');
-            }
-            geocoder = new google.maps.Geocoder();
-            geocoder.geocode({
-                'address': myloc
-                }, 
-                function(results, status) {
-                    if (status == 'OK') {
-                        map.setCenter(results[0].geometry.location);
-                        map.setZoom(16);
-                        var marker = new google.maps.Marker({
-                            map: map,
-                            position: results[0].geometry.location
-                        });
-                        pos = {
-                            lat: results[0].geometry.location.lat(),
-                            lng: results[0].geometry.location.lng()
-                        };
-                        getNearbyPlaces(pos);
-                    } else {
-                        // console.log(status);
-                    }
-            });
-        }
+    function nearbyCallback(places, status) {
+      console.log('call nearbyCallback');
+      let destination = [];
+      Info = [];
 
-        
-        function getNearbyPlaces(position) {
-            console.log('call getNearbyPlaces')
-            let request = {
-                location: position,
-                rankBy: google.maps.places.RankBy.DISTANCE, //依照距離排列
-                keyword: 'restaurant',
-                Field: ["price_level, rating", "open_now"]
-            };
-            service = new google.maps.places.PlacesService(map);
-            service.nearbySearch(request, nearbyCallback);
-        }
+      if (status == google.maps.places.PlacesServiceStatus.OK) {
+        places.forEach(place => {
+          let currLocation = new google.maps.LatLng(place.geometry.location.lat(), 
+                                                    place.geometry.location.lng());
+          let instance = new placeInfo();
+          //TODO:check opening_hours.open_now <- "google may be discard this feature" 
+
+          instance.rating = place.rating;
+          instance.placeName = place.name;
+          instance.priceLevel = place.priceLevel;
+          // instance.isOpening = place.opening_hours.open_now
+
+          Info.push(instance);
+          destination.push(currLocation);
+        });
+        calculateDistance(destination);
+      }
+    }
 
 
-        function nearbyCallback(places, status) {
-            console.log('call nearbyCallback')
-            let destination = [];
-            Info = [];
-        
-            if (status == google.maps.places.PlacesServiceStatus.OK) {
-                places.forEach(place => {
-                    let currLocation = new google.maps.LatLng(place.geometry.location.lat(), 
-                                                              place.geometry.location.lng());
-                    let instance = new placeInfo()
-                    //TODO:check opening_hours.open_now <- "google may be discard this feature" 
-          
-                    instance.rating = place.rating
-                    instance.placeName = place.name;
-                    instance.priceLevel = place.priceLevel
-                    // instance.isOpening = place.opening_hours.open_now
-
-                    Info.push(instance);
-                    destination.push(currLocation);
-                });
-                calculateDistance(destination);
-            }
-        }
+    function calculateDistance(destination) {
+      console.log('call calculateDistance');
+      const serviceForDistance = new google.maps.DistanceMatrixService();
+      const methodType = document.querySelectorAll('input[type="radio"][name="method"]:checked')[0].value;
+      serviceForDistance.getDistanceMatrix(
+      {
+        origins: [pos],
+        destinations: destination,
+        travelMode: methodType,
+        unitSystem: google.maps.UnitSystem.METRIC,
+        avoidHighways: true,
+        avoidTolls: true,
+      }, testCallBack);
+    }
 
 
-        function calculateDistance(destination) {
-            console.log('call calculateDistance')
-            const serviceForDistance = new google.maps.DistanceMatrixService();
-            const methodType = document.querySelectorAll('input[type="radio"][name="method"]:checked')[0].value;
-            serviceForDistance.getDistanceMatrix(
-                {
-                    origins: [pos],
-                    destinations: destination,
-                    travelMode: methodType,
-                    unitSystem: google.maps.UnitSystem.METRIC,
-                    avoidHighways: true,
-                    avoidTolls: true,
-                }, testCallBack);
-        }
+    function testCallBack(results, status) {
+      console.log('call testCallBack');
+      const rate = document.querySelectorAll('input[type="radio"][name="rate"]:checked')[0].value;
+      const price = document.querySelectorAll('input[type="radio"][name="price"]:checked')[0].value;
 
 
-        function testCallBack(results, status) {
-            console.log('call testCallBack');
-            const rate = document.querySelectorAll('input[type="radio"][name="rate"]:checked')[0].value;
-            const price = document.querySelectorAll('input[type="radio"][name="price"]:checked')[0].value;
+      for (let i = 0; i < results.rows[0].elements.length; i++) {
+        Info[i].distanceFrom = results.rows[0].elements[i].distance.value;
+        Info[i].durationVal = results.rows[0].elements[i].duration.value;
+        Info[i].durationTxt = results.rows[0].elements[i].duration.text;
+      }
+
+      Info.sort(function(a, b) {
+        return a.distanceFrom > b.distanceFrom ? 1 : -1; ///????
+      });
+
+      let numberValid = 0;
+      for (let i = 0; i < Info.length; i++) {
+        if (Info[i].distanceFrom < dis ) {  //& isOpeningNow(Info[i].isOpening)
+          Info[numberValid] = Info[i];
+          numberValid += 1;
+        } 
+      }
+
+      if (isVaildNumEnough(numberValid)) {
+        drawTheWheel(numberValid);
+      } else {
+        console.log("To reset your within distance for more choices");
+      }
+
+    }
+    </script>
 
 
-            for (let i = 0; i < results.rows[0].elements.length; i++) {
-                Info[i].distanceFrom = results.rows[0].elements[i].distance.value;
-                Info[i].durationVal = results.rows[0].elements[i].duration.value;
-                Info[i].durationTxt = results.rows[0].elements[i].duration.text;
-            }
-
-            Info.sort(function(a, b) {
-                return a.distanceFrom > b.distanceFrom ? 1 : -1; ///????
-            });
-
-            let numberValid = 0
-            for (let i = 0; i < Info.length; i++) {
-                if (Info[i].distanceFrom < dis & isOpeningNow(Info[i].isOpening)) {
-                  Info[numberValid] = Info[i];
-                  numberValid += 1
-                } 
-            }
-          
-            if (isVaildNumEnough(numberValid)) {
-                drawTheWheel(numberValid);
-            } else {
-                console.log("To reset your within distance for more choices")
-            }
-
-        }
-      </script>
-
-  
-    </body>
+  </body>
 </html>
