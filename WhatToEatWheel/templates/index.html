@@ -5,6 +5,8 @@
         <title>Branch Test</title>
         <script src='https://cdn.jsdelivr.net/npm/winwheeljs@2.7.0/dist/Winwheel.min.js'></script>
         <script src="http://cdnjs.cloudflare.com/ajax/libs/gsap/latest/TweenMax.min.js"></script>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
+        
         <style>
             .container{
                 width: 100%;
@@ -56,7 +58,71 @@
       <!-- TODO:前端切版、排版CSS -->
       <div class="container">
         <div id="map" class="left"></div>
-        <div class="right">
+          <div class="right">
+      
+            <div class="wrap">
+              <div class="search">
+                  <input class="search-bar" type="text" name="search" id="distance" placeholder="多少距離之內">
+              </div>
+            </div>
+
+            <div class="wrap">
+                <div class="search">
+                    <input class="search-bar" type="text" name="search" id="mylocation" placeholder="目前位置">
+                    <button class="btn btn-success" type="button" id="btn" onclick="cal()">點擊決定您的命運</button>
+                </div>
+            </div>
+
+            <form>
+              請選擇交通方式<br>
+              <div class="transportation">
+                <input type="radio" class="btn-check" name="method" id="option1" value="DRIVING" checked="checked" autocomplete="off">
+                <label class="btn btn-outline-danger" for="option1">開車</label>
+
+                <input type="radio" class="btn-check" name="method" id="option2" value="WALKING" autocomplete="off">
+                <label class="btn btn-outline-danger" for="option2">走路</label>
+
+                <input type="radio" class="btn-check" name="method" id="option3" value="BICYCLING" autocomplete="off">
+                <label class="btn btn-outline-danger" for="option3">腳踏車</label>
+              </div>
+
+              <br>價錢範圍
+              <div class="prices">
+                <input type="radio" class="btn-check" name="price" id="level1" value="1"  autocomplete="off">
+                <label class="btn btn-outline-danger" for="level1">$</label>
+
+                <input type="radio" class="btn-check" name="price" id="level2" value="2" autocomplete="off">
+                <label class="btn btn-outline-danger" for="level2">$$</label>
+
+                <input type="radio" class="btn-check" name="price" id="level3" value="3" autocomplete="off">
+                <label class="btn btn-outline-danger" for="level3">$$$</label>
+
+                <input type="radio" class="btn-check" name="price" id="level4" value="4" autocomplete="off">
+                <label class="btn btn-outline-danger" for="level4">$$$$</label>
+
+                <input type="radio" class="btn-check" name="price" id="level5" value="5" checked="checked" autocomplete="off">
+                <label class="btn btn-outline-danger" for="level5">no limit</label>
+              </div>
+
+              <br>評價
+              <div class="reivew rate">
+                <input type="radio" class="btn-check" name="rate" id="one" value="1" checked="checked" autocomplete="off">
+                <label class="btn btn-outline-danger" for="one">1星</label>
+
+                <input type="radio" class="btn-check" name="rate" id="two" value="2" autocomplete="off">
+                <label class="btn btn-outline-danger" for="two">2星</label>
+
+                <input type="radio" class="btn-check" name="rate" id="three" value="3" autocomplete="off">
+                <label class="btn btn-outline-danger" for="three">3星</label>
+
+                <input type="radio" class="btn-check" name="rate" id="four" value="4" autocomplete="off">
+                <label class="btn btn-outline-danger" for="four">4星</label>
+
+                <input type="radio" class="btn-check" name="rate" id="five" value="5" autocomplete="off">
+                <label class="btn btn-outline-danger" for="five">5星</label>
+              </div>
+            </form>
+
             <canvas id="canvas" 
             width="880" height="440"  style="z-index: 3;"
               data-responsiveMinWidth="180"
@@ -64,21 +130,9 @@
               data-responsiveMargin="50"
               onclick="startSpin()">
             </canvas>
-            <!-- TODO: 如果其中有一個格子沒有值的話, 需要提示-->
-            <div class="wrap">
-                <div class="search">
-                    <label for="distance" style="padding-right: 10px;">距離</label>
-                    <input class="search-bar" type="text" name="search" id="distance" placeholder="多少距離之內">
-                <!-- TODO: 按鈕、搜尋樣式改好看-->
-                </div>
-                <div class="search">
-                    <label for="mylocation" style="padding-right: 10px;">地址</label>
-                    <input class="search-bar" type="text" name="search" id="mylocation" placeholder="目前位置">
-                </div>
-                
-                <button class="search-btn" id="btn" onclick="cal()"></button>
+
             </div>
-        </div>
+          </div>
       </div>
       
       <audio id="myAudio"> 
@@ -87,68 +141,7 @@
       </audio>
 
 
-      <!-- TODO: 如果其中有一個格子沒有值的話, 需要提示-->
-      <div class="wrap">
-        <div class="search">
-            <input class="search-bar" type="text" name="search" id="distance" placeholder="多少距離之內">
-        </div>
-      </div>
 
-
-      <!-- TODO: 按鈕、搜尋樣式改好看-->
-      <div class="wrap">
-          <div class="search">
-              <input class="search-bar" type="text" name="search" id="mylocation" placeholder="目前位置">
-              <button class="btn btn-success" type="button" id="btn" onclick="cal()">點擊決定您的命運</button>
-          </div>
-      </div>
-
-      <form>
-        請選擇交通方式<br>
-        <div class="transportation">
-          <input type="radio" class="btn-check" name="method" id="option1" value="DRIVING" checked="checked" autocomplete="off">
-          <label class="btn btn-outline-danger" for="option1">開車</label>
-
-          <input type="radio" class="btn-check" name="method" id="option2" value="WALKING" autocomplete="off">
-          <label class="btn btn-outline-danger" for="option2">走路</label>
-
-          <input type="radio" class="btn-check" name="method" id="option3" value="BICYCLING" autocomplete="off">
-          <label class="btn btn-outline-danger" for="option3">腳踏車</label>
-        </div>
-
-        <br>價錢範圍
-        <div class="prices">
-          <input type="radio" class="btn-check" name="price" id="level1" value="1" checked="checked" autocomplete="off">
-          <label class="btn btn-outline-danger" for="level1">$$</label>
-
-          <input type="radio" class="btn-check" name="price" id="level2" value="2" autocomplete="off">
-          <label class="btn btn-outline-danger" for="level2">$$$</label>
-
-          <input type="radio" class="btn-check" name="price" id="level3" value="3" autocomplete="off">
-          <label class="btn btn-outline-danger" for="level3">$$$$</label>
-
-          <input type="radio" class="btn-check" name="price" id="level4" value="4" autocomplete="off">
-          <label class="btn btn-outline-danger" for="level4">no limit</label>
-        </div>
-
-        <br>評價
-        <div class="reivew rate">
-          <input type="radio" class="btn-check" name="rate" id="one" value="1" checked="checked" autocomplete="off">
-          <label class="btn btn-outline-danger" for="two">1星</label>
-
-          <input type="radio" class="btn-check" name="rate" id="two" value="2" autocomplete="off">
-          <label class="btn btn-outline-danger" for="two">2星</label>
-
-          <input type="radio" class="btn-check" name="rate" id="three" value="3" autocomplete="off">
-          <label class="btn btn-outline-danger" for="three">3星</label>
-
-          <input type="radio" class="btn-check" name="rate" id="four" value="4" autocomplete="off">
-          <label class="btn btn-outline-danger" for="four">4星</label>
-
-          <input type="radio" class="btn-check" name="rate" id="five" value="5" autocomplete="off">
-          <label class="btn btn-outline-danger" for="five">5星</label>
-        </div>
-      </form>
 
 
       <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAlNRaHqtGB3sTDKymkHmJtYRfPFpfFVsU&libraries=places&callback=initMap"></script>
@@ -247,36 +240,57 @@
 
       <!--check utilis-->
       <script>
-          function isVaildNumEnough(validNumber) {
+          const NO_LIMIT = 5;
+          function isNumber(inputs) {
+            if(inputs === '' || inputs === ' ') {
+                return false;
+            }
+            return Number(inputs).toString() != "NaN";
+          } 
+
+          function isAddress(inputs) {
+            if(inputs === '' || inputs === ' ') {
+                return false;
+            }
+            return true;
+          } 
+
+          function isVaildEntryEnough(validNumber) {
             if (validNumber < 2) {
               return false
             } 
             return true
           }
+
+          function isWithinDis(thisDis, upperBound) {
+            if (thisDis <= upperBound) {
+              return true;
+            }
+            return false;
+          }
+
           function isOpeningNow(open) {
             if (open) {
               return true
             } 
             return false
           }
+
+          function isHigherCertainRate(thisRate, lowerBound) {
+            if (thisRate >= lowerBound) {
+              return true
+            }
+            return false
+          }
+
+          function isMeetThePrice(thisPrice, target) {
+            if (thisPrice == target || target == NO_LIMIT) {
+              return true;
+            }
+            return false;
+          }
       </script>
 
-      <!-- utilis -->
-      <script>
-        function isNumber(inputs) {
-            if(inputs == '' || inputs == ' ') {
-                return false;
-            }
-            return Number(inputs).toString() != "NaN";
-        } 
-        // console.log("100:", isNumber(num_01));
-        function isAddress(inputs) {
-            if(inputs == '' || inputs == ' ') {
-                return false;
-            }
-            return true;
-        } 
-      </script>
 
 
       <script>
@@ -310,7 +324,7 @@
         }
 
 
-        for(let i=0; i<DEFAULT_NUM; i++) {
+        for (let i=0; i<DEFAULT_NUM; i++) {
             Info.push(new placeInfo());
         }
         drawTheWheel(DEFAULT_NUM);
@@ -379,10 +393,11 @@
                                                               place.geometry.location.lng());
                     let instance = new placeInfo()
                     //TODO:check opening_hours.open_now <- "google may be discard this feature" 
-          
-                    instance.rating = place.rating
+                    //x = (x === undefined) ? your_default_value : x;
+                    instance.rating = (place.rating === undefined) ? 1 : place.rating;
+                    instance.priceLevel = (place.price_level === undefined) ? NO_LIMIT : place.price_level;
                     instance.placeName = place.name;
-                    instance.priceLevel = place.priceLevel
+                    console.log(instance.priceLevel)
                     // instance.isOpening = place.opening_hours.open_now
 
                     Info.push(instance);
@@ -411,9 +426,9 @@
 
         function testCallBack(results, status) {
             console.log('call testCallBack');
-            const rate = document.querySelectorAll('input[type="radio"][name="rate"]:checked')[0].value;
-            const price = document.querySelectorAll('input[type="radio"][name="price"]:checked')[0].value;
-
+            const lowerBoundRate = document.querySelectorAll('input[type="radio"][name="rate"]:checked')[0].value;
+            const targetPrice = document.querySelectorAll('input[type="radio"][name="price"]:checked')[0].value;
+            // console.log(lowerBoundRate, targetPrice)
 
             for (let i = 0; i < results.rows[0].elements.length; i++) {
                 Info[i].distanceFrom = results.rows[0].elements[i].distance.value;
@@ -421,24 +436,27 @@
                 Info[i].durationTxt = results.rows[0].elements[i].duration.text;
             }
 
+
             Info.sort(function(a, b) {
                 return a.distanceFrom > b.distanceFrom ? 1 : -1; ///????
             });
 
-            let numberValid = 0
+
+            let numberValid=0;
             for (let i = 0; i < Info.length; i++) {
-                if (Info[i].distanceFrom < dis & isOpeningNow(Info[i].isOpening)) {
+                if (isWithinDis(Info[i].distanceFrom, dis) & 
+                    isHigherCertainRate(Info[i].rating, lowerBoundRate) & 
+                    isMeetThePrice(Info[i].priceLevel, targetPrice)) {
                   Info[numberValid] = Info[i];
                   numberValid += 1
                 } 
             }
           
-            if (isVaildNumEnough(numberValid)) {
+            if (isVaildEntryEnough(numberValid)) {
                 drawTheWheel(numberValid);
             } else {
                 console.log("To reset your within distance for more choices")
             }
-
         }
       </script>
 
