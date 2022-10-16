@@ -12,8 +12,16 @@
     {% load static %}
     <!-- TODO:前端切版、排版CSS -->
     <div class="container">
-      <div id="map" class="left">
+      <div id="map" class="left"></div>
+
+      <div id="infowindow-content">
+
+        <span id="place-name" class="title"></span><br/>
+        評價:<span id="place-rate"></span><br/>
+        價格:<span id="place-price"></span><br/>
+        到達時間:<span id="place-duration"></span>
       </div>
+
       <div class="right">
         <canvas id="canvas" 
           width="880" height="440"  style="z-index: 3;"
@@ -111,8 +119,8 @@
       Your browser does not support the audio element.
     </audio>
 
-    <script src="C:\\Users\\0000\\.vscode\\s56207824inc.github.io\\WhatToEatWheel\\static\\js\\app.js"></script>
     <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAlNRaHqtGB3sTDKymkHmJtYRfPFpfFVsU&libraries=places&callback=initMap"></script>
-
+    <script src="C:\\Users\\0000\\.vscode\\s56207824inc.github.io\\WhatToEatWheel\\static\\js\\app.js"></script>
+    
   </body>
 </html>

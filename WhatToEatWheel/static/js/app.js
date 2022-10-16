@@ -1,9 +1,14 @@
 
 const NO_LIMIT = 5;
 const DEFAULT_NUM = 5;
+const infowindowContent = document.getElementById(
+  "infowindow-content"
+);
+
 
 let theWheel;
-let map, infoWindow;
+let map, marker, infowindow;
+let markerList = [];
 
 let err = document.getElementById("msg-error");
 let result = document.getElementById("msg-result");
@@ -21,6 +26,8 @@ let colorMap = [
 
 class placeInfo {
   constructor() {
+    this.placeId = 0;
+    this.location = 0;
     this.rating = 0;
     this.durationTxt = "None";
     this.durationVal = 0;
@@ -105,11 +112,33 @@ function startSpin() {
 }
 
 
+
 function alertPrize() {
   let winningSegment = theWheel.getIndicatedSegment();
   playSound();
-  // alert("You have won " + winningSegment.text + "!");
+
+  
   result.innerHTML = winningSegment.text;
+  const targetLocation = winningSegment.location;
+  map.panTo(targetLocation);
+  markerRemove();
+
+
+  marker = new google.maps.Marker({
+    map: map,
+    position: targetLocation
+  });
+
+
+  infowindowContent.children.namedItem("place-name").innerHTML = winningSegment.placeName;
+  infowindowContent.children.namedItem("place-rate").innerHTML = winningSegment.rate;
+  infowindowContent.children.namedItem("place-duration").innerHTML = winningSegment.durationTxt;
+  infowindowContent.children.namedItem("place-price").innerHTML = winningSegment.price;
+  infowindow.setContent(infowindowContent);
+  infowindow.open(map, marker);
+
+
+  markerList.push(marker);
   result.style.display = "block";
   err.style.display = "none";
 }
@@ -132,7 +161,13 @@ function drawTheWheel(numberValid) {
   // TODO:輪盤樣式、顏色改好看一點
   for (let i = 0; i < numSegments; i++) {
     let colorIndex = (i % colorMap.length);
-    let segmentInfo = {'fillStyle': colorMap[colorIndex], 'text': Info[i].placeName.slice(0, 7)};
+    let segmentInfo = {'fillStyle': colorMap[colorIndex],
+                       'text': Info[i].placeName.slice(0, 7), 
+                       'location': Info[i].location,
+                       'placeName': Info[i].placeName,
+                       'rate': Info[i].rating, 
+                       'price': Info[i].priceLevel,
+                       'durationTxt': Info[i].durationTxt};
     segments.push(segmentInfo)
   }
   theWheel = new Winwheel({
@@ -187,6 +222,18 @@ function drawTriangle() {
 }
 
 
+//marker utilis
+function markerRemove() {
+  for (let i = 0; i < markerList.length; i++) {
+    markerList[i].setMap(null);
+  }
+}
+
+function show
+
+
+
+
 
 
 //callback functions
@@ -195,7 +242,7 @@ function initMap() {
     center: { lat: 23.5, lng: 121 },
     zoom: 8,
   });
-  infoWindow = new google.maps.InfoWindow();
+  infowindow = new google.maps.InfoWindow();
   drawTheWheel(DEFAULT_NUM);
 }
 
@@ -204,6 +251,7 @@ function initMap() {
 function cal() {
   // TODO:餐廳營業時間篩選
   // TODO:轉盤相同顏色順序相鄰
+  markerRemove();
   dis = document.querySelectorAll('input[type="radio"][name="distance"]:checked')[0].value;
   myloc = document.getElementById("mylocation").value;
 
@@ -221,9 +269,11 @@ function cal() {
     }, 
     function(results, status) {
       if (status == 'OK') {
-        map.setCenter(results[0].geometry.location);
+        console.log(results[0].geometry.location)
+        map.panTo(results[0].geometry.location);
+        // map.setCenter(results[0].geometry.location);
         map.setZoom(16);
-        var marker = new google.maps.Marker({
+        marker = new google.maps.Marker({
           map: map,
           position: results[0].geometry.location
         });
@@ -232,6 +282,7 @@ function cal() {
           lng: results[0].geometry.location.lng()
         };
         getNearbyPlaces(pos);
+        markerList.push(marker);
       } else {
         console.log(status);
       }
@@ -258,17 +309,18 @@ function nearbyCallback(places, status) {
   Info = [];
 
   if (status == google.maps.places.PlacesServiceStatus.OK) {
+
     places.forEach(place => {
-      let currLocation = new google.maps.LatLng(place.geometry.location.lat(), 
-                                                place.geometry.location.lng());
+      let currLocation = new google.maps.LatLng(place.geometry.location.lat(), place.geometry.location.lng());
       let instance = new placeInfo()
       //TODO:check opening_hours.open_now <- "google may be discard this feature" 
       //x = (x === undefined) ? your_default_value : x;
       instance.rating = (place.rating === undefined) ? 1 : place.rating;
       instance.priceLevel = (place.price_level === undefined) ? NO_LIMIT : place.price_level;
       instance.placeName = place.name;
+      instance.location = place.geometry.location;
+      instance.placeId = place.place_id;
       // instance.isOpening = place.opening_hours.open_now
-
       Info.push(instance);
       destination.push(currLocation);
     });
@@ -291,7 +343,7 @@ function calculateDistance(destination) {
   }, testCallBack);
 }
 
-function testCallBack(results, status) {
+function testCallBack(results) {
   console.log('call testCallBack');
   const lowerBoundRate = document.querySelectorAll('input[type="radio"][name="rate"]:checked')[0].value;
   const targetPrice = document.querySelectorAll('input[type="radio"][name="price"]:checked')[0].value;
@@ -330,3 +382,4 @@ function testCallBack(results, status) {
     err.style.display = "block";
   }
 }
+
