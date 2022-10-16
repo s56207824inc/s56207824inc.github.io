@@ -13,6 +13,9 @@
   margin-top: 90px;
 }
 
+#infowindow-content{
+  display: none;
+}
 
 #map{
   width: 50%;
