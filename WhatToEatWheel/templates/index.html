@@ -49,6 +49,17 @@
       .search-bar{
         height: 30px;
       }
+      .alert{
+        margin-top :10px;
+      }
+      #msg-error{
+        display: none;
+        text-align: center;
+      }
+      #msg-result{
+        display: none;
+        text-align: center;
+      }
     </style>
   </head>
 
@@ -146,6 +157,9 @@
         </form>
         
         <button class="btn btn-success" type="button" id="btn" onclick="cal()">點擊決定您的命運</button>
+        
+        <p class="alert alert-danger" id="msg-error">錯誤訊息</p>
+        <p class="alert alert-success" id="msg-result">結果</p>
       </div>
 
 
@@ -231,9 +245,11 @@
     <!-- wheels utilis -->
     <script>
       function startSpin() {
-        theWheel.stopAnimation(false);
-        theWheel.rotationAngle = theWheel.rotationAngle % 360;
-        theWheel.startAnimation();
+        if(Info[0].durationTxt !=='None') {
+          theWheel.stopAnimation(false);
+          theWheel.rotationAngle = theWheel.rotationAngle % 360;
+          theWheel.startAnimation();
+        }
       }
 
       //TODO:看要不要給提示說目的地距離多少, 到那邊要多久
@@ -241,6 +257,9 @@
         let winningSegment = theWheel.getIndicatedSegment();
         playSound();
         alert("You have won " + winningSegment.text + "!");
+        result.innerHTML = winningSegment.text;
+        result.style.display = "block";
+        err.style.display = "none";
       }
 
       let audio = document.getElementById("myAudio");
@@ -307,6 +326,8 @@
 
     <script>
       var map, infoWindow;
+      let err = document.getElementById("msg-error");
+      let result = document.getElementById("msg-result");
       function initMap() {
         map = new google.maps.Map(document.getElementById("map"), {
           center: { lat: 23.5, lng: 121 },
@@ -341,21 +362,22 @@
     }
     drawTheWheel(DEFAULT_NUM);
 
-
     function cal() {
       // TODO:若dis或myloc為空，跳錯誤通知
       // TODO:若dis不是數字或非有效值，報錯
       // TODO:若myloc結果非有效值，報錯
-      // TODO:距離算法(DRIVING/WALKING/...)讓使用者選擇
       // TODO:餐廳營業時間篩選
       // TODO:轉盤相同顏色順序相鄰
       dis = document.querySelectorAll('input[type="radio"][name="distance"]:checked')[0].value;
       myloc = document.getElementById("mylocation").value;
-      if (!isNumber(dis)) {
-        console.log('距離非有效值');
-      }
+
       if (!isAddress(myloc)) {
-        console.log('地址非有效值');
+        // console.log('地址非有效值');
+        err.innerHTML= "地址非有效值";
+        err.style.display = "block";
+        result.style.display = "none";
+      } else {
+        err.style.display = "none";
       }
       geocoder = new google.maps.Geocoder();
       geocoder.geocode({
@@ -466,7 +488,10 @@
     
       if (isVaildEntryEnough(numberValid)) {
         drawTheWheel(numberValid);
+        err.style.display = "none";
       } else {
+        err.innerHTML= "目標地點太少";
+        err.style.display = "block";
         console.log("To reset your within distance for more choices")
       }
     }
