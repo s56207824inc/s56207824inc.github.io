@@ -1,83 +1,25 @@
 <html>
+
   <head>
     <title>Branch Test</title>
     <script src='https://cdn.jsdelivr.net/npm/winwheeljs@2.7.0/dist/Winwheel.min.js'></script>
     <script src="http://cdnjs.cloudflare.com/ajax/libs/gsap/latest/TweenMax.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
-    <style>
-      .container{
-        width: 100%;
-        height: 100vh;
-        display: flex;
-      }
-      .left{
-        width: 50%;
-        height: 100vh;
-      }
-      #map{
-        width: 50%;
-        height: 100vh;
-      }
-      .rigth{
-        width: 50%;
-        height: 100vh;
-        display: flex;
-        /* 水平置中 */
-        justify-content: center;    
-        /* 垂直置中 */
-        align-items: center;   
-      }
-
-      #canvas{
-        width: 100%;
-        height: width;
-      }
-      .wrap{
-        width: 100%;
-        height: 50%;
-        padding: 20px 10px 20px 10px;
-        text-align: center;
-      }
-      .search{
-        padding: 10px 50px 10px 0px;
-        width: 100%;
-        display: block ;
-      }
-      .search-label{
-        padding-right: 10px;
-      }
-      .search-bar{
-        height: 30px;
-      }
-      .alert{
-        margin-top :10px;
-      }
-      #msg-error{
-        display: none;
-        text-align: center;
-      }
-      #msg-result{
-        display: none;
-        text-align: center;
-      }
-    </style>
+    <link href="C:\\Users\\0000\\.vscode\\s56207824inc.github.io\\WhatToEatWheel\\static\\css\\style.css" rel="stylesheet" >
   </head>
-
 
   <body>
     {% load static %}
     <!-- TODO:前端切版、排版CSS -->
     <div class="container">
       <div id="map" class="left">
-
       </div>
       <div class="right">
         <canvas id="canvas" 
           width="880" height="440"  style="z-index: 3;"
           data-responsiveMinWidth="180"
           data-responsiveScaleHeight="true"   
-          data-responsiveMargin="50"
-          onclick="startSpin()">
+          data-responsiveMargin="50">
         </canvas>
 
       <!-- TODO: 如果其中有一個格子沒有值的話, 需要提示-->
@@ -155,348 +97,22 @@
             <label class="btn btn-outline-danger" for="five">5星</label>
           </div>
         </form>
-        
-        <button class="btn btn-success" type="button" id="btn" onclick="cal()">點擊決定您的命運</button>
-        
+          <div class="button-for-destiney">
+            <button class="btn btn-success" type="button" id="btn" onclick="cal()">點擊決定您的命運</button>
+          </div>
         <p class="alert alert-danger" id="msg-error">錯誤訊息</p>
         <p class="alert alert-success" id="msg-result">結果</p>
       </div>
-
-
-      </div>
+    </div>
     </div>
 
     <audio id="myAudio"> 
-    <source src="{% static '/media/tick.mp3' %}" type="audio/mpeg">
-    Your browser does not support the audio element.
+      <source src="{% static '/media/tick.mp3' %}" type="audio/mpeg">
+      Your browser does not support the audio element.
     </audio>
 
+    <script src="C:\\Users\\0000\\.vscode\\s56207824inc.github.io\\WhatToEatWheel\\static\\js\\app.js"></script>
     <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAlNRaHqtGB3sTDKymkHmJtYRfPFpfFVsU&libraries=places&callback=initMap"></script>
-
-    <!-- draw the whole wheels -->
-    <!-- TODO:JS 包起來 -->
-    <script>
-      let theWheel;
-      let colorMap = [
-      '#eae56f',
-      '#e7706f',
-      '#7de6ef',
-      ]
-
-      function drawTheWheel(numberValid) {
-        delete theWheel;
-        const numSegments = numberValid;
-        let segments = [];
-        // TODO:輪盤樣式、顏色改好看一點
-        for (let i = 0; i < numSegments; i++) {
-          let colorIndex = (i % colorMap.length);
-          let segmentInfo = {'fillStyle': colorMap[colorIndex], 'text': Info[i].placeName.slice(0, 7)};
-          segments.push(segmentInfo)
-        }
-
-        theWheel = new Winwheel({
-          'numSegments'  : numSegments,
-          'textFontSize' : 20,
-          'responsive'   : true,  // This wheel is responsive!
-          'pointerAngle' : 90,    // Ensure this is set correctly
-          'segments'     : segments,
-          'animation' :
-          {
-          'type'     : 'spinToStop',
-          'duration' : 5,
-          'spins'    : 8,
-          'callbackSound' : 'playSound()' , 
-          'soundTrigger'  : 'pin',
-          'callbackFinished' : 'alertPrize()',
-          'callbackAfter' : 'drawTriangle()',
-          },
-          'pins' :
-          {
-          'number' : 16,
-          'outerRadius': 6,
-          'responsive' : true, // This must be set to true if pin size is to be responsive.
-          }
-        });
-
-        drawTriangle();
-      }
-
-
-      function drawTriangle() {
-        // Get the canvas context the wheel uses.
-        let ctx = theWheel.ctx;
-
-        ctx.strokeStyle = 'navy';     // Set line colour.
-        ctx.fillStyle   = 'aqua';     // Set fill colour.
-        ctx.lineWidth   = 2;
-        ctx.beginPath();              // Begin path
-
-        // degree 45
-        ctx.moveTo(670, 194);      // Move to initial position.
-        ctx.lineTo(670, 246);      // Draw lines to make the shape.
-        ctx.lineTo(630, 220);
-        ctx.lineTo(670, 195);
-        ctx.stroke();                 // Complete the path by stroking (draw lines).
-        ctx.fill();                   // Then fill.
-      }
-    </script>
-
-
-    <!-- wheels utilis -->
-    <script>
-      function startSpin() {
-        if(Info[0].durationTxt !=='None') {
-          theWheel.stopAnimation(false);
-          theWheel.rotationAngle = theWheel.rotationAngle % 360;
-          theWheel.startAnimation();
-        }
-      }
-
-      //TODO:看要不要給提示說目的地距離多少, 到那邊要多久
-      function alertPrize() {
-        let winningSegment = theWheel.getIndicatedSegment();
-        playSound();
-        alert("You have won " + winningSegment.text + "!");
-        result.innerHTML = winningSegment.text;
-        result.style.display = "block";
-        err.style.display = "none";
-      }
-
-      let audio = document.getElementById("myAudio");
-      function playSound() {
-        audio.pause();
-        audio.currentTime = 0;
-        audio.play();
-      }
-    </script>
-
-    <!--check utilis-->
-    <script>
-      const NO_LIMIT = 5;
-      function isNumber(inputs) {
-        if(inputs === '' || inputs === ' ') {
-            return false;
-        }
-        return Number(inputs).toString() != "NaN";
-      } 
-
-      function isAddress(inputs) {
-        if(inputs === '' || inputs === ' ') {
-            return false;
-        }
-        return true;
-      } 
-
-      function isVaildEntryEnough(validNumber) {
-        if (validNumber < 2) {
-          return false
-        } 
-        return true
-      }
-
-      function isWithinDis(thisDis, upperBound) {
-        if (thisDis <= upperBound) {
-          return true;
-        }
-        return false;
-      }
-
-      function isOpeningNow(open) {
-        if (open) {
-          return true
-        } 
-        return false
-      }
-
-      function isHigherCertainRate(thisRate, lowerBound) {
-        if (thisRate >= lowerBound) {
-          return true
-        }
-        return false
-      }
-
-      function isMeetThePrice(thisPrice, target) {
-        if (thisPrice == target || target == NO_LIMIT) {
-          return true;
-        }
-        return false;
-      }
-    </script>
-
-
-    <script>
-      var map, infoWindow;
-      let err = document.getElementById("msg-error");
-      let result = document.getElementById("msg-result");
-      function initMap() {
-        map = new google.maps.Map(document.getElementById("map"), {
-          center: { lat: 23.5, lng: 121 },
-          zoom: 8,
-        });
-
-        infoWindow = new google.maps.InfoWindow();
-      }
-
-
-      window.initMap = initMap;
-      let dis, myloc, geocoder;
-      let pos, service;
-      let Info = [];
-      const DEFAULT_NUM = 5;
-
-      class placeInfo {
-      constructor() {
-        this.rating = 0;
-        this.durationTxt = "None";
-        this.durationVal = 0;
-        this.distanceFrom = 0;
-        this.placeName = "None";
-        this.priceLevel = 0;
-        this.isOpening = false;
-      }
-    }
-
-
-    for(let i=0; i<DEFAULT_NUM; i++) {
-      Info.push(new placeInfo());
-    }
-    drawTheWheel(DEFAULT_NUM);
-
-    function cal() {
-      // TODO:若dis或myloc為空，跳錯誤通知
-      // TODO:若dis不是數字或非有效值，報錯
-      // TODO:若myloc結果非有效值，報錯
-      // TODO:餐廳營業時間篩選
-      // TODO:轉盤相同顏色順序相鄰
-      dis = document.querySelectorAll('input[type="radio"][name="distance"]:checked')[0].value;
-      myloc = document.getElementById("mylocation").value;
-
-      if (!isAddress(myloc)) {
-        // console.log('地址非有效值');
-        err.innerHTML= "地址非有效值";
-        err.style.display = "block";
-        result.style.display = "none";
-      } else {
-        err.style.display = "none";
-      }
-      geocoder = new google.maps.Geocoder();
-      geocoder.geocode({
-        'address': myloc
-      }, 
-      function(results, status) {
-        if (status == 'OK') {
-          map.setCenter(results[0].geometry.location);
-          map.setZoom(16);
-          var marker = new google.maps.Marker({
-            map: map,
-            position: results[0].geometry.location
-          });
-          pos = {
-            lat: results[0].geometry.location.lat(),
-            lng: results[0].geometry.location.lng()
-          };
-          getNearbyPlaces(pos);
-        } else {
-          console.log(status);
-        }
-      });
-    }
-
-
-    function getNearbyPlaces(position) {
-      console.log('call getNearbyPlaces');
-      let request = {
-        location: position,
-        rankBy: google.maps.places.RankBy.DISTANCE, //依照距離排列
-        keyword: 'restaurant',
-        Field: ["price_level, rating", "open_now"]
-      };
-      service = new google.maps.places.PlacesService(map);
-      service.nearbySearch(request, nearbyCallback);
-    }
-
-
-    function nearbyCallback(places, status) {
-        console.log('call nearbyCallback')
-        let destination = [];
-        Info = [];
-    
-        if (status == google.maps.places.PlacesServiceStatus.OK) {
-            places.forEach(place => {
-                let currLocation = new google.maps.LatLng(place.geometry.location.lat(), 
-                                                          place.geometry.location.lng());
-                let instance = new placeInfo()
-                //TODO:check opening_hours.open_now <- "google may be discard this feature" 
-                //x = (x === undefined) ? your_default_value : x;
-                instance.rating = (place.rating === undefined) ? 1 : place.rating;
-                instance.priceLevel = (place.price_level === undefined) ? NO_LIMIT : place.price_level;
-                instance.placeName = place.name;
-                // console.log(instance.priceLevel)
-                // instance.isOpening = place.opening_hours.open_now
-
-                Info.push(instance);
-                destination.push(currLocation);
-            });
-            calculateDistance(destination);
-        }
-    }
-
-
-    function calculateDistance(destination) {
-      console.log('call calculateDistance');
-      const serviceForDistance = new google.maps.DistanceMatrixService();
-      const methodType = document.querySelectorAll('input[type="radio"][name="method"]:checked')[0].value;
-      serviceForDistance.getDistanceMatrix(
-      {
-        origins: [pos],
-        destinations: destination,
-        travelMode: methodType,
-        unitSystem: google.maps.UnitSystem.METRIC,
-        avoidHighways: true,
-        avoidTolls: true,
-      }, testCallBack);
-    }
-
-
-    function testCallBack(results, status) {
-      console.log('call testCallBack');
-      const lowerBoundRate = document.querySelectorAll('input[type="radio"][name="rate"]:checked')[0].value;
-      const targetPrice = document.querySelectorAll('input[type="radio"][name="price"]:checked')[0].value;
-      // console.log(lowerBoundRate, targetPrice)
-
-      for (let i = 0; i < results.rows[0].elements.length; i++) {
-        Info[i].distanceFrom = results.rows[0].elements[i].distance.value;
-        Info[i].durationVal = results.rows[0].elements[i].duration.value;
-        Info[i].durationTxt = results.rows[0].elements[i].duration.text;
-      }
-
-
-      Info.sort(function(a, b) {
-        return a.distanceFrom > b.distanceFrom ? 1 : -1; ///????
-      });
-
-
-      let numberValid=0;
-      for (let i = 0; i < Info.length; i++) {
-        if (isWithinDis(Info[i].distanceFrom, dis) & 
-            isHigherCertainRate(Info[i].rating, lowerBoundRate) & 
-            isMeetThePrice(Info[i].priceLevel, targetPrice)) {
-          Info[numberValid] = Info[i];
-          numberValid += 1
-        } 
-      }
-    
-      if (isVaildEntryEnough(numberValid)) {
-        drawTheWheel(numberValid);
-        err.style.display = "none";
-      } else {
-        err.innerHTML= "目標地點太少";
-        err.style.display = "block";
-        console.log("To reset your within distance for more choices")
-      }
-    }
-    </script>
-
 
   </body>
 </html>
