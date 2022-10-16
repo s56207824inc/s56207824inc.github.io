@@ -108,18 +108,21 @@
 
           <br>
           <div class="prices">
-            價錢範圍
-            <input type="radio" class="btn-check" name="price" id="level1" value="1" checked="checked" autocomplete="off">
-            <label class="btn btn-outline-danger" for="level1">$$</label>
+            價格範圍
+            <input type="radio" class="btn-check" name="price" id="level1" value="1"  autocomplete="off">
+            <label class="btn btn-outline-danger" for="level1">$</label>
 
             <input type="radio" class="btn-check" name="price" id="level2" value="2" autocomplete="off">
-            <label class="btn btn-outline-danger" for="level2">$$$</label>
+            <label class="btn btn-outline-danger" for="level2">$$</label>
 
             <input type="radio" class="btn-check" name="price" id="level3" value="3" autocomplete="off">
-            <label class="btn btn-outline-danger" for="level3">$$$$</label>
+            <label class="btn btn-outline-danger" for="level3">$$$</label>
 
             <input type="radio" class="btn-check" name="price" id="level4" value="4" autocomplete="off">
-            <label class="btn btn-outline-danger" for="level4">不限</label>
+            <label class="btn btn-outline-danger" for="level4">$$$$</label>
+
+            <input type="radio" class="btn-check" name="price" id="level5" value="5" checked="checked" autocomplete="off">
+            <label class="btn btn-outline-danger" for="level5">不限</label>
           </div>
 
           <br>
@@ -173,13 +176,6 @@
         // TODO:輪盤樣式、顏色改好看一點
         for (let i = 0; i < numSegments; i++) {
           let colorIndex = (i % colorMap.length);
-          // console.log(Info[i].placeName);
-          // console.log(Info[i].placeName.length);
-          // if(Info[i].placeName.length>8) {
-          //   console.log("too long");
-          // } else {
-          //   console.log("OK");
-          // }
           let segmentInfo = {'fillStyle': colorMap[colorIndex], 'text': Info[i].placeName.slice(0, 7)};
           segments.push(segmentInfo)
         }
@@ -257,35 +253,55 @@
 
     <!--check utilis-->
     <script>
-      function isVaildNumEnough(validNumber) {
+      const NO_LIMIT = 5;
+      function isNumber(inputs) {
+        if(inputs === '' || inputs === ' ') {
+            return false;
+        }
+        return Number(inputs).toString() != "NaN";
+      } 
+
+      function isAddress(inputs) {
+        if(inputs === '' || inputs === ' ') {
+            return false;
+        }
+        return true;
+      } 
+
+      function isVaildEntryEnough(validNumber) {
         if (validNumber < 2) {
           return false
         } 
         return true
       }
+
+      function isWithinDis(thisDis, upperBound) {
+        if (thisDis <= upperBound) {
+          return true;
+        }
+        return false;
+      }
+
       function isOpeningNow(open) {
         if (open) {
           return true
         } 
         return false
       }
-    </script>
 
-    <!-- utilis -->
-    <script>
-    function isNumber(inputs) {
-      if(inputs === '' || inputs === ' ') {
+      function isHigherCertainRate(thisRate, lowerBound) {
+        if (thisRate >= lowerBound) {
+          return true
+        }
+        return false
+      }
+
+      function isMeetThePrice(thisPrice, target) {
+        if (thisPrice == target || target == NO_LIMIT) {
+          return true;
+        }
         return false;
       }
-      return Number(inputs).toString() !== "NaN";
-    } 
-    // console.log("100:", isNumber(num_01));
-    function isAddress(inputs) {
-      if(inputs === '' || inputs === ' ') {
-        return false;
-      }
-      return true;
-    } 
     </script>
 
 
@@ -340,7 +356,6 @@
       }
       if (!isAddress(myloc)) {
         console.log('地址非有效值');
-        alert('地址非有效值');
       }
       geocoder = new google.maps.Geocoder();
       geocoder.geocode({
@@ -380,27 +395,28 @@
 
 
     function nearbyCallback(places, status) {
-      console.log('call nearbyCallback');
-      let destination = [];
-      Info = [];
+        console.log('call nearbyCallback')
+        let destination = [];
+        Info = [];
+    
+        if (status == google.maps.places.PlacesServiceStatus.OK) {
+            places.forEach(place => {
+                let currLocation = new google.maps.LatLng(place.geometry.location.lat(), 
+                                                          place.geometry.location.lng());
+                let instance = new placeInfo()
+                //TODO:check opening_hours.open_now <- "google may be discard this feature" 
+                //x = (x === undefined) ? your_default_value : x;
+                instance.rating = (place.rating === undefined) ? 1 : place.rating;
+                instance.priceLevel = (place.price_level === undefined) ? NO_LIMIT : place.price_level;
+                instance.placeName = place.name;
+                // console.log(instance.priceLevel)
+                // instance.isOpening = place.opening_hours.open_now
 
-      if (status == google.maps.places.PlacesServiceStatus.OK) {
-        places.forEach(place => {
-          let currLocation = new google.maps.LatLng(place.geometry.location.lat(), 
-                                                    place.geometry.location.lng());
-          let instance = new placeInfo();
-          //TODO:check opening_hours.open_now <- "google may be discard this feature" 
-
-          instance.rating = place.rating;
-          instance.placeName = place.name;
-          instance.priceLevel = place.priceLevel;
-          // instance.isOpening = place.opening_hours.open_now
-
-          Info.push(instance);
-          destination.push(currLocation);
-        });
-        calculateDistance(destination);
-      }
+                Info.push(instance);
+                destination.push(currLocation);
+            });
+            calculateDistance(destination);
+        }
     }
 
 
@@ -422,9 +438,9 @@
 
     function testCallBack(results, status) {
       console.log('call testCallBack');
-      const rate = document.querySelectorAll('input[type="radio"][name="rate"]:checked')[0].value;
-      const price = document.querySelectorAll('input[type="radio"][name="price"]:checked')[0].value;
-
+      const lowerBoundRate = document.querySelectorAll('input[type="radio"][name="rate"]:checked')[0].value;
+      const targetPrice = document.querySelectorAll('input[type="radio"][name="price"]:checked')[0].value;
+      // console.log(lowerBoundRate, targetPrice)
 
       for (let i = 0; i < results.rows[0].elements.length; i++) {
         Info[i].distanceFrom = results.rows[0].elements[i].distance.value;
@@ -432,24 +448,27 @@
         Info[i].durationTxt = results.rows[0].elements[i].duration.text;
       }
 
+
       Info.sort(function(a, b) {
         return a.distanceFrom > b.distanceFrom ? 1 : -1; ///????
       });
 
-      let numberValid = 0;
+
+      let numberValid=0;
       for (let i = 0; i < Info.length; i++) {
-        if (Info[i].distanceFrom < dis ) {  //& isOpeningNow(Info[i].isOpening)
+        if (isWithinDis(Info[i].distanceFrom, dis) & 
+            isHigherCertainRate(Info[i].rating, lowerBoundRate) & 
+            isMeetThePrice(Info[i].priceLevel, targetPrice)) {
           Info[numberValid] = Info[i];
-          numberValid += 1;
+          numberValid += 1
         } 
       }
-
-      if (isVaildNumEnough(numberValid)) {
+    
+      if (isVaildEntryEnough(numberValid)) {
         drawTheWheel(numberValid);
       } else {
-        console.log("To reset your within distance for more choices");
+        console.log("To reset your within distance for more choices")
       }
-
     }
     </script>
 
