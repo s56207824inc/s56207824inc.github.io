@@ -1,4 +1,4 @@
-.container{
+.container-1{
   width: 100%;
   height: 100vh;
   display: flex;
@@ -41,14 +41,35 @@
   text-align: center;
 }
 
-.search{
+/* .search{
   padding: 10px 50px 10px 0px;
   width: 100%;
   display: block ;
+} */
+
+.search, .search-checkbox{
+  display: inline-block;
+  line-height: 50px;
+  width: 100%;
 }
 
 .search-label{
   padding-right: 10px;
+  width: 30%;
+  text-align: right;
+}
+
+.search-bar{
+  width: 35%;
+  margin-right: 15%;
+  display: inline-block;
+  text-align: left;
+}
+
+.search-checkbox-label{
+  width: 50%;
+  display: inline-block;
+  text-align: left;
 }
 
 .search-bar{

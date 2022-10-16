@@ -5,13 +5,13 @@
     <script src='https://cdn.jsdelivr.net/npm/winwheeljs@2.7.0/dist/Winwheel.min.js'></script>
     <script src="http://cdnjs.cloudflare.com/ajax/libs/gsap/latest/TweenMax.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
-    <link href="C:\\Users\\0000\\.vscode\\s56207824inc.github.io\\WhatToEatWheel\\static\\css\\style.css" rel="stylesheet" >
+    <link href="..\\static\\css\\style.css" rel="stylesheet" >
   </head>
 
   <body>
     {% load static %}
     <!-- TODO:前端切版、排版CSS -->
-    <div class="container">
+    <div class="container-1">
       <div id="map" class="left">
       </div>
       <div class="right">
@@ -32,74 +32,83 @@
         
         <form>
           <br>
-          <div class="transportation">
-            請選擇交通方式
-            <input type="radio" class="btn-check" name="method" id="option1" value="DRIVING" checked="checked" autocomplete="off">
-            <label class="btn btn-outline-danger" for="option1">開車</label>
+          <div class="search-checkbox transportation">
+            <label class="search-label">交通</label>
+            <div class="search-checkbox-label">
+              <input type="radio" class="btn-check" name="method" id="option1" value="DRIVING" checked="checked" autocomplete="off">
+              <label class="btn btn-outline-danger" for="option1">開車</label>
 
-            <input type="radio" class="btn-check" name="method" id="option2" value="WALKING" autocomplete="off">
-            <label class="btn btn-outline-danger" for="option2">走路</label>
+              <input type="radio" class="btn-check" name="method" id="option2" value="WALKING" autocomplete="off">
+              <label class="btn btn-outline-danger" for="option2">走路</label>
 
-            <input type="radio" class="btn-check" name="method" id="option3" value="BICYCLING" autocomplete="off">
-            <label class="btn btn-outline-danger" for="option3">腳踏車</label>
+              <input type="radio" class="btn-check" name="method" id="option3" value="BICYCLING" autocomplete="off">
+              <label class="btn btn-outline-danger" for="option3">腳踏車</label>
+            </div>
           </div>
           <br>
-          <div class="distance">
-            距離(公尺)
-            <input type="radio" class="btn-check" name="distance" id="option1-dis" value="500" checked="checked" autocomplete="off">
-            <label class="btn btn-outline-danger" for="option1-dis">500</label>
+          <div class="search-checkbox distance">
+            <label class="search-label">距離</label>
+            <div class="search-checkbox-label">
+              <input type="radio" class="btn-check" name="distance" id="option1-dis" value="500" checked="checked" autocomplete="off">
+              <label class="btn btn-outline-danger" for="option1-dis">500</label>
 
-            <input type="radio" class="btn-check" name="distance" id="option2-dis" value="1000" autocomplete="off">
-            <label class="btn btn-outline-danger" for="option2-dis">1000</label>
+              <input type="radio" class="btn-check" name="distance" id="option2-dis" value="1000" autocomplete="off">
+              <label class="btn btn-outline-danger" for="option2-dis">1000</label>
 
-            <input type="radio" class="btn-check" name="distance" id="option3-dis" value="3000" autocomplete="off">
-            <label class="btn btn-outline-danger" for="option3-dis">3000</label>
+              <input type="radio" class="btn-check" name="distance" id="option3-dis" value="3000" autocomplete="off">
+              <label class="btn btn-outline-danger" for="option3-dis">3000</label>
 
-            <input type="radio" class="btn-check" name="distance" id="option4-dis" value="100000" autocomplete="off">
-            <label class="btn btn-outline-danger" for="option4-dis">不限</label>
-          </div>
-
-          <br>
-          <div class="prices">
-            價格範圍
-            <input type="radio" class="btn-check" name="price" id="level1" value="1"  autocomplete="off">
-            <label class="btn btn-outline-danger" for="level1">$</label>
-
-            <input type="radio" class="btn-check" name="price" id="level2" value="2" autocomplete="off">
-            <label class="btn btn-outline-danger" for="level2">$$</label>
-
-            <input type="radio" class="btn-check" name="price" id="level3" value="3" autocomplete="off">
-            <label class="btn btn-outline-danger" for="level3">$$$</label>
-
-            <input type="radio" class="btn-check" name="price" id="level4" value="4" autocomplete="off">
-            <label class="btn btn-outline-danger" for="level4">$$$$</label>
-
-            <input type="radio" class="btn-check" name="price" id="level5" value="5" checked="checked" autocomplete="off">
-            <label class="btn btn-outline-danger" for="level5">不限</label>
+              <input type="radio" class="btn-check" name="distance" id="option4-dis" value="100000" autocomplete="off">
+              <label class="btn btn-outline-danger" for="option4-dis">不限</label>
+            </div>
           </div>
 
           <br>
-          <div class="reivew rate">
-            評價
-            <input type="radio" class="btn-check" name="rate" id="one" value="1" checked="checked" autocomplete="off">
-            <label class="btn btn-outline-danger" for="one">1星</label>
+          <div class="search-checkbox prices">
+            <label class="search-label">價格</label>
+            <div class="search-checkbox-label">
+              <input type="radio" class="btn-check" name="price" id="level1" value="1"  autocomplete="off">
+              <label class="btn btn-outline-danger" for="level1">$</label>
 
-            <input type="radio" class="btn-check" name="rate" id="two" value="2" autocomplete="off">
-            <label class="btn btn-outline-danger" for="two">2星</label>
+              <input type="radio" class="btn-check" name="price" id="level2" value="2" autocomplete="off">
+              <label class="btn btn-outline-danger" for="level2">$$</label>
 
-            <input type="radio" class="btn-check" name="rate" id="three" value="3" autocomplete="off">
-            <label class="btn btn-outline-danger" for="three">3星</label>
+              <input type="radio" class="btn-check" name="price" id="level3" value="3" autocomplete="off">
+              <label class="btn btn-outline-danger" for="level3">$$$</label>
 
-            <input type="radio" class="btn-check" name="rate" id="four" value="4" autocomplete="off">
-            <label class="btn btn-outline-danger" for="four">4星</label>
+              <input type="radio" class="btn-check" name="price" id="level4" value="4" autocomplete="off">
+              <label class="btn btn-outline-danger" for="level4">$$$$</label>
 
-            <input type="radio" class="btn-check" name="rate" id="five" value="5" autocomplete="off">
-            <label class="btn btn-outline-danger" for="five">5星</label>
+              <input type="radio" class="btn-check" name="price" id="level5" value="5" checked="checked" autocomplete="off">
+              <label class="btn btn-outline-danger" for="level5">不限</label>
+            </div>
+          </div>
+
+          <br>
+          <div class="search-checkbox reivew rate">
+            <label class="search-label">評價</label>
+            <div class="search-checkbox-label">
+              <input type="radio" class="btn-check" name="rate" id="one" value="1" checked="checked" autocomplete="off">
+              <label class="btn btn-outline-danger" for="one">1星</label>
+
+              <input type="radio" class="btn-check" name="rate" id="two" value="2" autocomplete="off">
+              <label class="btn btn-outline-danger" for="two">2星</label>
+
+              <input type="radio" class="btn-check" name="rate" id="three" value="3" autocomplete="off">
+              <label class="btn btn-outline-danger" for="three">3星</label>
+
+              <input type="radio" class="btn-check" name="rate" id="four" value="4" autocomplete="off">
+              <label class="btn btn-outline-danger" for="four">4星</label>
+
+              <input type="radio" class="btn-check" name="rate" id="five" value="5" autocomplete="off">
+              <label class="btn btn-outline-danger" for="five">5星</label>
+            </div>
           </div>
         </form>
           <div class="button-for-destiney">
-            <button class="btn btn-success" type="button" id="btn" onclick="cal()">點擊決定您的命運</button>
+            <button class="btn btn-success glow-on-hover" type="button" id="btn" onclick="cal()">點擊決定您的命運</button>
           </div>
+          
         <p class="alert alert-danger" id="msg-error">錯誤訊息</p>
         <p class="alert alert-success" id="msg-result">結果</p>
       </div>
@@ -111,7 +120,7 @@
       Your browser does not support the audio element.
     </audio>
 
-    <script src="C:\\Users\\0000\\.vscode\\s56207824inc.github.io\\WhatToEatWheel\\static\\js\\app.js"></script>
+    <script src="..\\static\\js\\app.js"></script>
     <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAlNRaHqtGB3sTDKymkHmJtYRfPFpfFVsU&libraries=places&callback=initMap"></script>
 
   </body>
