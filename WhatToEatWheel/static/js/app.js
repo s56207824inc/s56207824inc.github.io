@@ -296,58 +296,116 @@ function getNearbyPlaces(position) {
     Field: ["price_level", "rating", "formatted_phone_number", "photos", "adr_address", "url"]
   };
   service = new google.maps.places.PlacesService(map);
-  service.nearbySearch(request, nearbyCallback);
+  service.nearbySearch(request, callback);
+
+
 }
 
+function callback(places, status) {
+  promiseA(places, status).then(promiseB());
+}
 
+let destination, destinationv2;
+function promiseA(places, status) {
+  console.log('StartA');
+  return new Promise(function(reslove, reject) {
+    Info = [];
+    destination = [];
+    destinationv2 = [];
+    if (status == google.maps.places.PlacesServiceStatus.OK) {
+      places.forEach(place => {
+        let request = {
+          placeId: place.place_id,
+        };
+        let loc = new google.maps.LatLng(place.geometry.location.lat(), place.geometry.location.lng());
+        destinationv2.push(loc);
+        service.getDetails(request, function(placeDtails, status) {
+          if (status == google.maps.places.PlacesServiceStatus.OK) {
+            let currLocation = new google.maps.LatLng(placeDtails.geometry.location.lat(), placeDtails.geometry.location.lng());
+            let instance = new placeInfo()
+            instance.rating = (placeDtails.rating === undefined) ? 1 : placeDtails.rating;
+            instance.priceLevel = (placeDtails.price_level === undefined) ? NO_LIMIT : placeDtails.price_level;
+            instance.placeName = placeDtails.name;
+            instance.location = placeDtails.geometry.location;
+            instance.placeId = placeDtails.place_id;
+            Info.push(instance);
+            destination.push(currLocation);
+            console.log(Info);
+          }
+        });
+      });
+    }
+    console.log('StartA end');
+  });
+}
 
-function nearbyCallback(places, status) {
-  console.log('call nearbyCallback')
-  let destination = [];
-  Info = [];
+function promiseB() {
+  console.log('StartB');
+  return new Promise(function(reslove, reject){
+    const serviceForDistance = new google.maps.DistanceMatrixService();
+    const methodType = document.querySelectorAll('input[type="radio"][name="method"]:checked')[0].value;
 
-  if (status == google.maps.places.PlacesServiceStatus.OK) {
+    serviceForDistance.getDistanceMatrix({
+      origins: [pos],
+      destinations: destinationv2,
+      travelMode: methodType,
+      unitSystem: google.maps.UnitSystem.METRIC,
+      avoidHighways: true,
+      avoidTolls: true,
+    }, testCallBack);
+    console.log('StartB end');
+  }); 
+}
+
+// function nearbyCallback(places, status) {
+//   console.log('call nearbyCallback')
+//   let destination = [];
+//   Info = [];
+
+//   if (status == google.maps.places.PlacesServiceStatus.OK) {
     
-    places.forEach(place => {
+//     places.forEach(place => {
 
-      let currLocation = new google.maps.LatLng(place.geometry.location.lat(), place.geometry.location.lng());
-      let instance = new placeInfo()
-      console.log(place)
-      //TODO:check opening_hours.open_now <- "google may be discard this feature" 
-      //x = (x === undefined) ? your_default_value : x;
-      instance.rating = (place.rating === undefined) ? 1 : place.rating;
-      instance.priceLevel = (place.price_level === undefined) ? NO_LIMIT : place.price_level;
-      instance.placeName = place.name;
-      instance.location = place.geometry.location;
-      instance.placeId = place.place_id;
-      instance.photo = place.photos
-      instance.address = place.vicinity
+//       let currLocation = new google.maps.LatLng(place.geometry.location.lat(), place.geometry.location.lng());
+//       let instance = new placeInfo()
+//       console.log(place)
+//       //TODO:check opening_hours.open_now <- "google may be discard this feature" 
+//       //x = (x === undefined) ? your_default_value : x;
+//       instance.rating = (place.rating === undefined) ? 1 : place.rating;
+//       instance.priceLevel = (place.price_level === undefined) ? NO_LIMIT : place.price_level;
+//       instance.placeName = place.name;
+//       instance.location = place.geometry.location;
+//       instance.placeId = place.place_id;
+//       instance.photo = place.photos
+//       instance.address = place.vicinity
 
-      // instance.isOpening = place.opening_hours.open_now
-      Info.push(instance);
-      destination.push(currLocation);
-    });
-    calculateDistance(destination);
-  }
-}
+//       // instance.isOpening = place.opening_hours.open_now
+//       Info.push(instance);
+//       destination.push(currLocation);
+//     });
+//     calculateDistance(destination);
+//   }
+// }
 
 
-function calculateDistance(destination) {
-  console.log('call calculateDistance');
-  const serviceForDistance = new google.maps.DistanceMatrixService();
-  const methodType = document.querySelectorAll('input[type="radio"][name="method"]:checked')[0].value;
-  serviceForDistance.getDistanceMatrix({
-    origins: [pos],
-    destinations: destination,
-    travelMode: methodType,
-    unitSystem: google.maps.UnitSystem.METRIC,
-    avoidHighways: true,
-    avoidTolls: true,
-  }, testCallBack);
-}
+// function calculateDistance(destination) {
+//   console.log('call calculateDistance');
+//   const serviceForDistance = new google.maps.DistanceMatrixService();
+//   const methodType = document.querySelectorAll('input[type="radio"][name="method"]:checked')[0].value;
+//   serviceForDistance.getDistanceMatrix({
+//     origins: [pos],
+//     destinations: destination,
+//     travelMode: methodType,
+//     unitSystem: google.maps.UnitSystem.METRIC,
+//     avoidHighways: true,
+//     avoidTolls: true,
+//   }, testCallBack);
+// }
 
 function testCallBack(results) {
   console.log('call testCallBack');
+  // console.log(results);
+  console.log(Info);
   const lowerBoundRate = document.querySelectorAll('input[type="radio"][name="rate"]:checked')[0].value;
   const targetPrice = document.querySelectorAll('input[type="radio"][name="price"]:checked')[0].value;
 
@@ -356,6 +414,7 @@ function testCallBack(results) {
     Info[i].distanceFrom = results.rows[0].elements[i].distance.value;
     Info[i].durationVal = results.rows[0].elements[i].duration.value;
     Info[i].durationTxt = results.rows[0].elements[i].duration.text;
+
   }
 
 
@@ -384,5 +443,6 @@ function testCallBack(results) {
     err.innerHTML= "目標地點太少";
     err.style.display = "block";
   }
+  console.log("testCallback end")
 }
 
