@@ -35,6 +35,7 @@ class placeInfo {
     this.placeName = "None";
     this.priceLevel = 0;
     this.isOpening = false;
+    this.photo;
   }
 }
 
@@ -166,9 +167,11 @@ function drawTheWheel(numberValid) {
                        'text': Info[i].placeName.slice(0, 7), 
                        'location': Info[i].location,
                        'placeName': Info[i].placeName,
+                       'address': Info[i].address,
                        'rate': Info[i].rating, 
                        'price': Info[i].priceLevel,
-                       'durationTxt': Info[i].durationTxt};
+                       'durationTxt': Info[i].durationTxt,
+                       'photo': Info[i].photo};
     segments.push(segmentInfo)
   }
   theWheel = new Winwheel({
@@ -290,11 +293,12 @@ function getNearbyPlaces(position) {
     location: position,
     rankBy: google.maps.places.RankBy.DISTANCE,
     keyword: 'restaurant',
-    Field: ["price_level", "rating", "open_now"]
+    Field: ["price_level", "rating", "formatted_phone_number", "photos", "adr_address", "url"]
   };
   service = new google.maps.places.PlacesService(map);
   service.nearbySearch(request, nearbyCallback);
 }
+
 
 
 function nearbyCallback(places, status) {
@@ -303,10 +307,12 @@ function nearbyCallback(places, status) {
   Info = [];
 
   if (status == google.maps.places.PlacesServiceStatus.OK) {
-
+    
     places.forEach(place => {
+
       let currLocation = new google.maps.LatLng(place.geometry.location.lat(), place.geometry.location.lng());
       let instance = new placeInfo()
+      console.log(place)
       //TODO:check opening_hours.open_now <- "google may be discard this feature" 
       //x = (x === undefined) ? your_default_value : x;
       instance.rating = (place.rating === undefined) ? 1 : place.rating;
@@ -314,6 +320,9 @@ function nearbyCallback(places, status) {
       instance.placeName = place.name;
       instance.location = place.geometry.location;
       instance.placeId = place.place_id;
+      instance.photo = place.photos
+      instance.address = place.vicinity
+
       // instance.isOpening = place.opening_hours.open_now
       Info.push(instance);
       destination.push(currLocation);
