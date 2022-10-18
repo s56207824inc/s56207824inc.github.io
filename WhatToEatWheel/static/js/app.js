@@ -77,14 +77,6 @@ window.initMap = initMap;
 
 
 //--check utilis--
-function isNumber(inputs) {
-  if(inputs === '' || inputs === ' ') {
-    return false;
-  }
-  return Number(inputs).toString() != "NaN";
-} 
-
-
 function isAddress(inputs) {
   if(inputs === '' || inputs === ' ') {
     return false;
@@ -411,7 +403,6 @@ function testCallBack(results) {
     } 
   }
 
-  console.log(results)
   if (isVaildEntryEnough(numberValid)) {
     drawTheWheel(numberValid);
     startSpin();
