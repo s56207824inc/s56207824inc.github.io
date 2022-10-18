@@ -1,30 +1,45 @@
-
 const NO_LIMIT = 5;
 const DEFAULT_NUM = 5;
 const infowindowContent = document.getElementById(
   "infowindow-content"
 );
+
+
 const STAR_FILLED       = "<span class='fa fa-star checked'></span>";
 const STAR_FILLED_HALF  = "<span class='fa fa-star-half-o checked'></span>";
 const STAR_EMPTY        = "<span class='fa fa-star-o checked'></span>";
 
-let theWheel;
-let map, marker, infowindow;
-let markerList = [];
 
-let err = document.getElementById("msg-error");
-let result = document.getElementById("msg-result");
+const priceMap = [
+  "None",
+  "$",
+  "$$",
+  "$$$",
+  "$$$$",
+  "-"
+];
 
 
-let dis, myloc, geocoder;
-let pos, service;
-let Info = [];
-
-let colorMap = [
+const colorMap = [
   '#eae56f',
   '#e7706f',
   '#7de6ef',
-]
+];
+
+
+const startMAp = [
+  STAR_EMPTY + STAR_EMPTY + STAR_EMPTY + STAR_EMPTY + STAR_EMPTY,
+  STAR_FILLED_HALF + STAR_EMPTY + STAR_EMPTY + STAR_EMPTY + STAR_EMPTY,
+  STAR_FILLED + STAR_EMPTY + STAR_EMPTY + STAR_EMPTY + STAR_EMPTY,
+  STAR_FILLED + STAR_FILLED_HALF + STAR_EMPTY + STAR_EMPTY + STAR_EMPTY,
+  STAR_FILLED + STAR_FILLED + STAR_EMPTY + STAR_EMPTY + STAR_EMPTY,
+  STAR_FILLED + STAR_FILLED + STAR_FILLED_HALF + STAR_EMPTY + STAR_EMPTY,
+  STAR_FILLED + STAR_FILLED + STAR_FILLED + STAR_EMPTY + STAR_EMPTY,
+  STAR_FILLED + STAR_FILLED + STAR_FILLED + STAR_FILLED_HALF + STAR_EMPTY,
+  STAR_FILLED + STAR_FILLED + STAR_FILLED + STAR_FILLED + STAR_EMPTY,
+  STAR_FILLED + STAR_FILLED + STAR_FILLED + STAR_FILLED + STAR_FILLED_HALF,
+  STAR_FILLED + STAR_FILLED + STAR_FILLED + STAR_FILLED + STAR_FILLED
+];
 
 class placeInfo {
   constructor() {
@@ -39,6 +54,20 @@ class placeInfo {
     this.isOpening = false;
   }
 }
+
+
+let theWheel;
+let map, marker, infowindow;
+let markerList = [];
+
+let err = document.getElementById("msg-error");
+let result = document.getElementById("msg-result");
+
+
+let dis, myloc, geocoder;
+let pos, service;
+let Info = [];
+
 
 
 for(let i=0; i<DEFAULT_NUM; i++) {
@@ -135,37 +164,14 @@ function alertPrize() {
   infowindowContent.children.namedItem("place-name").innerHTML = winningSegment.placeName;
   infowindowContent.children.namedItem("place-content-1").children.namedItem("place-rate").children.namedItem("place-rate-num").innerHTML = winningSegment.rate;
 
-  let star_html="";
-  let price_html="";
-  for (let i=0; i<5; i++) {
-    let temp = ~~(winningSegment.rate)-i;
-    if (temp>0) {
-      star_html=star_html+STAR_FILLED;
-    }
-    else if (temp === 0) {
-      if(winningSegment.rate-~~(winningSegment.rate)>=0.8){
-        star_html=star_html+STAR_FILLED;
-      } 
-      else if(winningSegment.rate-~~(winningSegment.rate)>=0.3){
-        star_html=star_html+STAR_FILLED_HALF;
-      } 
-      else {
-        star_html=star_html+STAR_EMPTY;
-      }
-    }
-    else {
-      star_html=star_html+STAR_EMPTY;
-    }
-  }
-  console.log(winningSegment.vicinity);
-  for (let i=0; i<winningSegment.price ; i++ ) {
-    price_html = price_html + '$';
-  }
-  infowindowContent.children.namedItem("place-content-1").children.namedItem("place-rate").children.namedItem("place-rate-stars").innerHTML = star_html;
-  infowindowContent.children.namedItem("place-content-2").children.namedItem("place-price").innerHTML = price_html;
+  const reweightRate = Math.round(winningSegment.rate * 2);
+
+  infowindowContent.children.namedItem("place-content-1").children.namedItem("place-rate").children.namedItem("place-rate-stars").innerHTML = startMAp[reweightRate];
+  infowindowContent.children.namedItem("place-content-2").children.namedItem("place-price").innerHTML = priceMap[winningSegment.price];
   infowindowContent.children.namedItem("place-content-3").children.namedItem("place-address").innerHTML = winningSegment.vicinity;
-  infowindowContent.children.namedItem("place-content-4").children.namedItem("place-distance").innerHTML = winningSegment.distanceFrom+"公尺";
+  infowindowContent.children.namedItem("place-content-4").children.namedItem("place-distance").innerHTML = winningSegment.distanceFrom + "公尺";
   infowindowContent.children.namedItem("place-content-5").children.namedItem("place-duration").innerHTML = winningSegment.durationTxt;
+
   infowindow.setContent(infowindowContent);
   infowindow.open(map, marker);
 
@@ -173,7 +179,6 @@ function alertPrize() {
   result.style.display = "block";
   err.style.display = "none";
 }
-
 
 function playSound() {
   let audio = document.getElementById("myAudio");
@@ -324,8 +329,7 @@ function getNearbyPlaces(position) {
   let request = {
     location: position,
     rankBy: google.maps.places.RankBy.DISTANCE,
-    keyword: 'restaurant',
-    Field: ["price_level", "rating", "open_now"]
+    types: ['restaurant'],
   };
   service = new google.maps.places.PlacesService(map);
   service.nearbySearch(request, nearbyCallback);
@@ -350,12 +354,12 @@ function nearbyCallback(places, status) {
       instance.location = place.geometry.location;
       instance.placeId = place.place_id;    
       instance.vicinity = place.vicinity;  
-      try {
-        instance.isOpening = place.opening_hours.open_now;
-      }
-      catch (e) {
-          console.log(e) // 把例外物件傳給錯誤處理器
-      }
+      // try {
+      //   instance.isOpening = place.opening_hours.open_now;
+      // }
+      // catch (e) {
+      //     console.log(e) // 把例外物件傳給錯誤處理器
+      // }
       Info.push(instance);
       destination.push(currLocation);
     });
@@ -407,7 +411,7 @@ function testCallBack(results) {
     } 
   }
 
-  
+  console.log(results)
   if (isVaildEntryEnough(numberValid)) {
     drawTheWheel(numberValid);
     startSpin();
