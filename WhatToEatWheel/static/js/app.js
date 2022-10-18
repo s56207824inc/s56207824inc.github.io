@@ -4,7 +4,9 @@ const DEFAULT_NUM = 5;
 const infowindowContent = document.getElementById(
   "infowindow-content"
 );
-
+const STAR_FILLED       = "<span class='fa fa-star checked'></span>";
+const STAR_FILLED_HALF  = "<span class='fa fa-star-half-o checked'></span>";
+const STAR_EMPTY        = "<span class='fa fa-star-o checked'></span>";
 
 let theWheel;
 let map, marker, infowindow;
@@ -121,23 +123,51 @@ function alertPrize() {
   result.innerHTML = winningSegment.text;
   const targetLocation = winningSegment.location;
   map.panTo(targetLocation);
-  markerRemove();
+  // markerRemove();
 
 
   marker = new google.maps.Marker({
     map: map,
     position: targetLocation
   });
-
+  
   infowindowContent.style.display = "block";
   infowindowContent.children.namedItem("place-name").innerHTML = winningSegment.placeName;
-  infowindowContent.children.namedItem("place-rate").innerHTML = winningSegment.rate;
-  infowindowContent.children.namedItem("place-duration").innerHTML = winningSegment.durationTxt;
-  infowindowContent.children.namedItem("place-price").innerHTML = winningSegment.price;
+  infowindowContent.children.namedItem("place-content-1").children.namedItem("place-rate").children.namedItem("place-rate-num").innerHTML = winningSegment.rate;
+
+  let star_html="";
+  let price_html="";
+  for (let i=0; i<5; i++) {
+    let temp = ~~(winningSegment.rate)-i;
+    if (temp>0) {
+      star_html=star_html+STAR_FILLED;
+    }
+    else if (temp === 0) {
+      if(winningSegment.rate-~~(winningSegment.rate)>=0.8){
+        star_html=star_html+STAR_FILLED;
+      } 
+      else if(winningSegment.rate-~~(winningSegment.rate)>=0.3){
+        star_html=star_html+STAR_FILLED_HALF;
+      } 
+      else {
+        star_html=star_html+STAR_EMPTY;
+      }
+    }
+    else {
+      star_html=star_html+STAR_EMPTY;
+    }
+  }
+  console.log(winningSegment.vicinity);
+  for (let i=0; i<winningSegment.price ; i++ ) {
+    price_html = price_html + '$';
+  }
+  infowindowContent.children.namedItem("place-content-1").children.namedItem("place-rate").children.namedItem("place-rate-stars").innerHTML = star_html;
+  infowindowContent.children.namedItem("place-content-2").children.namedItem("place-price").innerHTML = price_html;
+  infowindowContent.children.namedItem("place-content-3").children.namedItem("place-address").innerHTML = winningSegment.vicinity;
+  infowindowContent.children.namedItem("place-content-4").children.namedItem("place-distance").innerHTML = winningSegment.distanceFrom+"公尺";
+  infowindowContent.children.namedItem("place-content-5").children.namedItem("place-duration").innerHTML = winningSegment.durationTxt;
   infowindow.setContent(infowindowContent);
   infowindow.open(map, marker);
-  
-
 
   markerList.push(marker);
   result.style.display = "block";
@@ -168,8 +198,10 @@ function drawTheWheel(numberValid) {
                        'placeName': Info[i].placeName,
                        'rate': Info[i].rating, 
                        'price': Info[i].priceLevel,
-                       'durationTxt': Info[i].durationTxt};
-    segments.push(segmentInfo)
+                       'durationTxt': Info[i].durationTxt,
+                       'distanceFrom': Info[i].distanceFrom,
+                       'vicinity': Info[i].vicinity};
+    segments.push(segmentInfo);
   }
   theWheel = new Winwheel({
     'numSegments'  : numSegments,
@@ -249,7 +281,8 @@ function cal() {
   markerRemove();
   dis = document.querySelectorAll('input[type="radio"][name="distance"]:checked')[0].value;
   myloc = document.getElementById("mylocation").value;
-
+  result.style.display = "none";
+  err.style.display = "none";
   if (!isAddress(myloc)) {
     err.innerHTML= "地址非有效值";
     err.style.display = "block";
@@ -280,6 +313,8 @@ function cal() {
         markerList.push(marker);
       } else {
         console.log(status);
+        err.innerHTML= "目標地點太少";
+        err.style.display = "block";
       }
   });
 }
@@ -304,18 +339,24 @@ function nearbyCallback(places, status) {
   Info = [];
 
   if (status == google.maps.places.PlacesServiceStatus.OK) {
-
+    console.log(places);
     places.forEach(place => {
       let currLocation = new google.maps.LatLng(place.geometry.location.lat(), place.geometry.location.lng());
-      let instance = new placeInfo()
+      let instance = new placeInfo();
       //TODO:check opening_hours.open_now <- "google may be discard this feature" 
       //x = (x === undefined) ? your_default_value : x;
       instance.rating = (place.rating === undefined) ? 1 : place.rating;
       instance.priceLevel = (place.price_level === undefined) ? NO_LIMIT : place.price_level;
       instance.placeName = place.name;
       instance.location = place.geometry.location;
-      instance.placeId = place.place_id;
-      // instance.isOpening = place.opening_hours.open_now
+      instance.placeId = place.place_id;    
+      instance.vicinity = place.vicinity;  
+      try {
+        instance.isOpening = place.opening_hours.open_now;
+      }
+      catch (e) {
+          console.log(e) // 把例外物件傳給錯誤處理器
+      }
       Info.push(instance);
       destination.push(currLocation);
     });
