@@ -6,21 +6,42 @@
     <script src="http://cdnjs.cloudflare.com/ajax/libs/gsap/latest/TweenMax.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
     <link href="..\\static\\css\\style.css" rel="stylesheet" >
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
   </head>
 
   <body>
     {% load static %}
     <!-- TODO:前端切版、排版CSS -->
+
     <div class="container-1">
       <div id="map" class="left"></div>
-
       <div id="infowindow-content">
-
         <span id="place-name" class="title"></span><br/>
-        評價:<span id="place-rate"></span><br/>
-        價格:<span id="place-price"></span><br/>
-        到達時間:<span id="place-duration"></span>
+        <span class="place-content" id = "place-content-1"> 
+          <span class="place-content-subtitle">評價:</span>
+          <span id="place-rate">
+            <span class="place-content-paragraph" id="place-rate-num"></span>
+            <span id="place-rate-stars"></span>
+          </span>
+        </span><br/>
+        <span class="place-content" id = "place-content-2"> 
+          <span class="place-content-subtitle">價格:</span>
+          <span class="place-content-paragraph" id="place-price"></span>
+        </span><br/>
+        <span class="place-content" id = "place-content-3"> 
+          <span class="place-content-subtitle">地址:</span>
+          <span class="place-content-paragraph" id="place-address"></span>
+        </span><br/>
+        <span class="place-content" id = "place-content-4"> 
+          <span class="place-content-subtitle">距離:</span>
+          <span class="place-content-paragraph" id="place-distance"></span>
+        </span><br/>
+        <span class="place-content" id = "place-content-5"> 
+          <span class="place-content-subtitle">抵達時間:</span>
+          <span class="place-content-paragraph" id="place-duration"></span>
+        </span><br/>
       </div>
+
 
       <div class="right">
         <canvas id="canvas" 
@@ -39,7 +60,6 @@
         </div>
         
         <form>
-          <br>
           <div class="search-checkbox transportation">
             <label class="search-label">交通</label>
             <div class="search-checkbox-label">
@@ -113,9 +133,8 @@
             </div>
           </div>
         </form>
-          <div class="button-for-destiney">
-            <button class="btn btn-success glow-on-hover" type="button" id="btn" onclick="cal()">點擊決定您的命運</button>
-          </div>
+        <button class="btn btn-success glow-on-hover" type="button" id="btn" onclick="cal()">點擊決定您的命運</button>
+
           
         <p class="alert alert-danger" id="msg-error">錯誤訊息</p>
         <p class="alert alert-success" id="msg-result">結果</p>
@@ -127,9 +146,9 @@
       <source src="{% static '/media/tick.mp3' %}" type="audio/mpeg">
       Your browser does not support the audio element.
     </audio>
-
-    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAlNRaHqtGB3sTDKymkHmJtYRfPFpfFVsU&libraries=places&callback=initMap"></script>
     <script src="..\\static\\js\\app.js"></script>
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAlNRaHqtGB3sTDKymkHmJtYRfPFpfFVsU&libraries=places&callback=initMap"></script>
+    
        
     
   </body>
