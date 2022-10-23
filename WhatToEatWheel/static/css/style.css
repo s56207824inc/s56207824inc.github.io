@@ -5,30 +5,34 @@
 }
 
 .left{
-  width: 50%;
+  width: 70%;
   height: 100vh;
-}
-
-.button-for-destiney{
-  margin-top: 90px;
 }
 
 #infowindow-content{
   display: none;
+  /* width: 300px; */
 }
 
-#map{
-  width: 50%;
-  height: 100vh;
+#place-name{
+  display: block;
+  width: 100%;
+  font-size: x-large;
+  font-weight:bolder;
+} 
+
+.place-content{
+  font-size: large;
+  padding: 10px 10px 10px 10px ;
+  color: #000;
+  line-height: 30px;
 }
 
 .rigth{
-  width: 50%;
+  width: 30%;
   height: 100vh;
   display: flex;
-  /* 水平置中 */
   justify-content: center;    
-  /* 垂直置中 */
   align-items: center;   
 }
 
@@ -44,12 +48,6 @@
   text-align: center;
 }
 
-/* .search{
-  padding: 10px 50px 10px 0px;
-  width: 100%;
-  display: block ;
-} */
-
 .search, .search-checkbox{
   display: inline-block;
   line-height: 50px;
@@ -58,11 +56,12 @@
 
 .search-label{
   padding-right: 10px;
-  width: 30%;
+  width: 20%;
   text-align: right;
 }
 
 .search-bar{
+  height: 30px;
   width: 35%;
   margin-right: 15%;
   display: inline-block;
@@ -73,10 +72,6 @@
   width: 50%;
   display: inline-block;
   text-align: left;
-}
-
-.search-bar{
-  height: 30px;
 }
 
 .alert{
@@ -91,4 +86,8 @@
 #msg-result{
   display: none;
   text-align: center;
+}
+
+.checked {
+  color: orange;
 }

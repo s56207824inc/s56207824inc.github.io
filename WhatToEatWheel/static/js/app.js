@@ -18,7 +18,34 @@ let colorMap = [
   '#eae56f',
   '#e7706f',
   '#7de6ef',
-]
+];
+
+const priceMap = [
+  "None",
+  "$",
+  "$$",
+  "$$$",
+  "$$$$",
+  "-"
+];
+
+const STAR_FILLED       = "<span class='fa fa-star checked'></span>";
+const STAR_FILLED_HALF  = "<span class='fa fa-star-half-o checked'></span>";
+const STAR_EMPTY        = "<span class='fa fa-star-o checked'></span>";
+const startMAp = [
+  STAR_EMPTY + STAR_EMPTY + STAR_EMPTY + STAR_EMPTY + STAR_EMPTY,
+  STAR_FILLED_HALF + STAR_EMPTY + STAR_EMPTY + STAR_EMPTY + STAR_EMPTY,
+  STAR_FILLED + STAR_EMPTY + STAR_EMPTY + STAR_EMPTY + STAR_EMPTY,
+  STAR_FILLED + STAR_FILLED_HALF + STAR_EMPTY + STAR_EMPTY + STAR_EMPTY,
+  STAR_FILLED + STAR_FILLED + STAR_EMPTY + STAR_EMPTY + STAR_EMPTY,
+  STAR_FILLED + STAR_FILLED + STAR_FILLED_HALF + STAR_EMPTY + STAR_EMPTY,
+  STAR_FILLED + STAR_FILLED + STAR_FILLED + STAR_EMPTY + STAR_EMPTY,
+  STAR_FILLED + STAR_FILLED + STAR_FILLED + STAR_FILLED_HALF + STAR_EMPTY,
+  STAR_FILLED + STAR_FILLED + STAR_FILLED + STAR_FILLED + STAR_EMPTY,
+  STAR_FILLED + STAR_FILLED + STAR_FILLED + STAR_FILLED + STAR_FILLED_HALF,
+  STAR_FILLED + STAR_FILLED + STAR_FILLED + STAR_FILLED + STAR_FILLED
+];
+
 
 class placeInfo {
   constructor(
@@ -36,9 +63,6 @@ class placeInfo {
     this.priceLevel = (priceLevel === undefined) ? NO_LIMIT : priceLevel;
   }
 }
-
-
-window.initMap = initMap;
 
 
 //--check utilis--
@@ -99,47 +123,9 @@ function startSpin(infos) {
   }
 }
 
-function alertPrize() {
-  let winningSegment = theWheel.getIndicatedSegment();
-  playSound();
-
-
-  result.innerHTML = winningSegment.text;
-  const targetLocation = winningSegment.location;
-  map.panTo(targetLocation);
-  markerRemove();
-
-
-  marker = new google.maps.Marker({
-    map: map,
-    position: targetLocation
-  });
-
-  infowindowContent.style.display = "block";
-  infowindowContent.children.namedItem("place-name").innerHTML = winningSegment.placeName;
-  infowindowContent.children.namedItem("place-rate").innerHTML = winningSegment.rate;
-  infowindowContent.children.namedItem("place-duration").innerHTML = winningSegment.durationTxt;
-  infowindowContent.children.namedItem("place-price").innerHTML = winningSegment.price;
-  infowindow.setContent(infowindowContent);
-  infowindow.open(map, marker);
-  
-  markerList.push(marker);
-  result.style.display = "block";
-  err.style.display = "none";
-}
-
-
-function playSound() {
-  let audio = document.getElementById("myAudio");
-  audio.pause();
-  audio.currentTime = 0;
-  audio.play();
-}
-
 
 //draw the wheels
 function drawTheWheel(infos) {
-  //刪除default wheel
   delete theWheel; 
   const numSegments = infos.length;
   let segments = [];
@@ -150,9 +136,10 @@ function drawTheWheel(infos) {
                        'text': infos[i].placeName.slice(0, 7), 
                        'location': infos[i].location,
                        'placeName': infos[i].placeName,
-                       'address': infos[i].address,
-                       'rate': infos[i].rating, 
-                       'price': infos[i].priceLevel,
+                       'vicinity': infos[i].vicinity,
+                       'rate': infos[i].rate, 
+                       'priceLevel': infos[i].priceLevel,
+                       'distanceFrom': infos[i].distanceFrom,
                        'durationTxt': infos[i].durationTxt};
     segments.push(segmentInfo)
   }
@@ -179,7 +166,6 @@ function drawTheWheel(infos) {
       'responsive' : true, // This must be set to true if pin size is to be responsive.
     }
   });
-  drawTriangle();
 }
 
 
@@ -205,6 +191,45 @@ function drawTriangle() {
   ctx.stroke(); 
   // Then fill.                
   ctx.fill();             
+}
+
+function alertPrize() {
+  let winningSegment = theWheel.getIndicatedSegment();
+  playSound();
+  result.innerHTML = winningSegment.text;
+  const targetLocation = winningSegment.location;
+  map.panTo(targetLocation);
+
+  marker = new google.maps.Marker({
+    map: map,
+    position: targetLocation
+  });
+  
+  infowindowContent.style.display = "block";
+  infowindowContent.children.namedItem("place-name").innerHTML = winningSegment.placeName;
+  infowindowContent.children.namedItem("place-content-1").children.namedItem("place-rate").children.namedItem("place-rate-num").innerHTML = winningSegment.rate;
+
+  const reweightRate = Math.round(winningSegment.rate * 2);
+  infowindowContent.children.namedItem("place-content-1").children.namedItem("place-rate").children.namedItem("place-rate-stars").innerHTML = startMAp[reweightRate];
+  infowindowContent.children.namedItem("place-content-2").children.namedItem("place-price").innerHTML = priceMap[winningSegment.priceLevel];
+  infowindowContent.children.namedItem("place-content-3").children.namedItem("place-address").innerHTML = winningSegment.vicinity;
+  infowindowContent.children.namedItem("place-content-4").children.namedItem("place-distance").innerHTML = winningSegment.distanceFrom + "公尺";
+  infowindowContent.children.namedItem("place-content-5").children.namedItem("place-duration").innerHTML = winningSegment.durationTxt;
+
+  infowindow.setContent(infowindowContent);
+  infowindow.open(map, marker);
+
+  markerList.push(marker);
+  result.style.display = "block";
+  // err.style.display = "none";
+}
+
+
+function playSound() {
+  let audio = document.getElementById("myAudio");
+  audio.pause();
+  audio.currentTime = 0;
+  audio.play();
 }
 
 
@@ -235,6 +260,9 @@ function initMap() {
 
 function addressDecoder(myloc) {
   return new Promise((resolve, reject) => {
+    if (!isAddress(myloc)) {
+      return reject("地址非有效值");
+    }
     const geocoder = new google.maps.Geocoder();
     geocoder.geocode({
       'address': myloc
@@ -267,6 +295,7 @@ function addressDecoder(myloc) {
     });
   });
 }
+
 
 function getPlacesLocation(pos) {
   return new Promise((resolve, reject) => {
@@ -354,84 +383,70 @@ function getFilterResult(infos) {
     });
 
     if (isVaildEntryEnough(newResult.length)) {
-      
       resolve(newResult);
     } else {
       reject("目標地點太少");
     }
-
-
   });
 }
-
-
 
 function cal() {
 
   markerRemove();
+  result.style.display = "none";
+  err.style.display = "none";
+
   const myloc = document.getElementById("mylocation").value;
 
-  if (!isAddress(myloc)) {
-    err.innerHTML= "地址非有效值";
-    err.style.display = "block";
-    result.style.display = "none";
-  } else {
-    err.style.display = "none";
-  }
-
-  let loc;
-
+  //To transfer input address into place's location 
   const ori = addressDecoder(myloc)
   .then(ori => {
     loc = ori;
     return ori;
   })
   .catch(fail => {
-    console.log("addressDecoder");
+    err.innerHTML = fail;
+    err.style.display = "block";
     return fail;
   });
 
-  
+  //To get nearby places according to the origin
   const dest = ori.then(ori => {
     return getPlacesLocation(ori);
   })
   .catch(fail=>{
-    console.log("getPlacesLocation");
     return fail;
   });
 
-
+  //Reordered the nearby places array based on time
   const orderedDest = dest.then(dest => {
     return orederResultbyTime(loc, dest);
   })
   .catch(fail => {
-    console.log("orederResultbyTime");
     return fail;
   });
 
-  err.style.display = "none";
-  
+  //Filter out the result based on the certained constrains
   const filteredRes = orderedDest.then(orderedDest => {
+    err.style.display = "none";
     return getFilterResult(orderedDest);
   })
   .catch(fail => {
-    console.log("getFilterResult");
     err.style.display = "block";
     err.innerHTML = fail;
     return fail;
   });
 
-  filteredRes
-  .then(filteredRes => {
-
+  //Display the filtered out result on the wheels
+  filteredRes.then(filteredRes => {
     drawTheWheel(filteredRes);
     startSpin(filteredRes);
-    alertPrize();
   })
   .catch(fail => {
       return fail;
     }
   );
+  
 }
 
 
@@ -442,13 +457,3 @@ function cal() {
 
 
 
-
-  // if (isVaildEntryEnough(numberValid)) {
-  //   drawTheWheel(numberValid);
-  //   startSpin();
-  //   err.style.display = "none";
-  // } else {
-  //   err.innerHTML= "目標地點太少";
-  //   err.style.display = "block";
-  // }
-  // console.log("testCallback end")
