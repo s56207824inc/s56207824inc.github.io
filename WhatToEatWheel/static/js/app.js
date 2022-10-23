@@ -274,7 +274,7 @@ function getPlacesLocation(pos) {
     let request = {
       location: pos,
       rankBy: google.maps.places.RankBy.DISTANCE,
-      types: ['restaurant']
+      keyword: 'restaurant'
     };
     
     const service = new google.maps.places.PlacesService(map);
@@ -304,7 +304,7 @@ function orederResultbyTime(ori, places) {
                                    place.vicinity,
                                    place.price_level,
                                    place.rating);
-      console.log(place.price_level);
+
       infos.push(instance);
       dests.push(location);
     });
@@ -348,14 +348,13 @@ function getFilterResult(infos) {
     const targetPrice = document.querySelectorAll('input[type="radio"][name="price"]:checked')[0].value;
 
     const newResult = infos.filter(function(curr) {
-      return  !(isWithinDis(curr.distanceFrom, dis) ||
-              isHigherCertainRate(curr.rate, lowerBoundRate) ||
+      return  (isWithinDis(curr.distanceFrom, dis) &
+              isHigherCertainRate(curr.rate, lowerBoundRate) &
               isMeetThePrice(curr.priceLevel, targetPrice));
     });
 
-    console.log(newResult);
-
     if (isVaildEntryEnough(newResult.length)) {
+      
       resolve(newResult);
     } else {
       reject("目標地點太少");
@@ -367,13 +366,9 @@ function getFilterResult(infos) {
 
 
 
-
-
 function cal() {
 
-  let ori;
   markerRemove();
-
   const myloc = document.getElementById("mylocation").value;
 
   if (!isAddress(myloc)) {
@@ -384,28 +379,59 @@ function cal() {
     err.style.display = "none";
   }
 
+  let loc;
 
-  addressDecoder(myloc)
-  .then(pos => {
-    ori = pos;
-    return getPlacesLocation(pos);
+  const ori = addressDecoder(myloc)
+  .then(ori => {
+    loc = ori;
+    return ori;
   })
-  .then(dest => {
-    return orederResultbyTime(ori, dest);
+  .catch(fail => {
+    console.log("addressDecoder");
+    return fail;
+  });
+
+  
+  const dest = ori.then(ori => {
+    return getPlacesLocation(ori);
   })
-  .then(orderRes => {
-    return getFilterResult(orderRes);
+  .catch(fail=>{
+    console.log("getPlacesLocation");
+    return fail;
+  });
+
+
+  const orderedDest = dest.then(dest => {
+    return orederResultbyTime(loc, dest);
   })
+  .catch(fail => {
+    console.log("orederResultbyTime");
+    return fail;
+  });
+
+  err.style.display = "none";
+  
+  const filteredRes = orderedDest.then(orderedDest => {
+    return getFilterResult(orderedDest);
+  })
+  .catch(fail => {
+    console.log("getFilterResult");
+    err.style.display = "block";
+    err.innerHTML = fail;
+    return fail;
+  });
+
+  filteredRes
   .then(filteredRes => {
+
     drawTheWheel(filteredRes);
     startSpin(filteredRes);
     alertPrize();
   })
   .catch(fail => {
-    console.log(fail);
-  });
-  
-
+      return fail;
+    }
+  );
 }
 
 
