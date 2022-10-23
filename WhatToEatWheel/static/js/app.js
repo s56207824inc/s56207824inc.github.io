@@ -6,17 +6,13 @@ const infowindowContent = document.getElementById(
 );
 
 
-let theWheel;
-let map, marker, infowindow;
+// let theWheel;
+let map, marker, infowindow, theWheel;
 let markerList = [];
 
 let err = document.getElementById("msg-error");
 let result = document.getElementById("msg-result");
 
-
-let dis, myloc, geocoder;
-let pos, service;
-let Info = [];
 
 let colorMap = [
   '#eae56f',
@@ -25,36 +21,27 @@ let colorMap = [
 ]
 
 class placeInfo {
-  constructor() {
-    this.placeId = 0;
-    this.location = 0;
-    this.rating = 0;
-    this.durationTxt = "None";
-    this.durationVal = 0;
-    this.distanceFrom = 0;
-    this.placeName = "None";
-    this.priceLevel = 0;
-    this.isOpening = false;
-    this.photo;
+  constructor(
+    location, placeName, vicinity,
+    priceLevel, rate,
+    durationTxt, durationVal, distanceFrom
+  ) {
+    this.location = location === undefined ? "None" : location;
+    this.vicinity = vicinity === undefined ? "None" : vicinity;
+    this.durationTxt = durationTxt === undefined ? "None" : durationTxt;
+    this.durationVal = durationVal === undefined ? 0 : durationVal;
+    this.distanceFrom = distanceFrom === undefined ? 0 : distanceFrom;
+    this.placeName = placeName === undefined ? "None" : placeName;
+    this.rate = (rate === undefined) ? 1 : rate;
+    this.priceLevel = (priceLevel === undefined) ? NO_LIMIT : priceLevel;
   }
 }
 
 
-for(let i=0; i<DEFAULT_NUM; i++) {
-  Info.push(new placeInfo());
-}
 window.initMap = initMap;
 
 
 //--check utilis--
-function isNumber(inputs) {
-  if(inputs === '' || inputs === ' ') {
-    return false;
-  }
-  return Number(inputs).toString() != "NaN";
-} 
-
-
 function isAddress(inputs) {
   if(inputs === '' || inputs === ' ') {
     return false;
@@ -104,15 +91,13 @@ function isMeetThePrice(thisPrice, target) {
 
 
 // -- wheels utilis --
-function startSpin() {
-  if(Info[0].durationTxt !=='None') {
+function startSpin(infos) {
+  if(infos[0].durationTxt !=='None') {
     theWheel.stopAnimation(false);
     theWheel.rotationAngle = theWheel.rotationAngle % 360;
     theWheel.startAnimation();
   }
 }
-
-
 
 function alertPrize() {
   let winningSegment = theWheel.getIndicatedSegment();
@@ -138,8 +123,6 @@ function alertPrize() {
   infowindow.setContent(infowindowContent);
   infowindow.open(map, marker);
   
-
-
   markerList.push(marker);
   result.style.display = "block";
   err.style.display = "none";
@@ -155,23 +138,22 @@ function playSound() {
 
 
 //draw the wheels
-function drawTheWheel(numberValid) {
+function drawTheWheel(infos) {
   //刪除default wheel
   delete theWheel; 
-  const numSegments = numberValid;
+  const numSegments = infos.length;
   let segments = [];
-  // TODO:輪盤樣式、顏色改好看一點
+
   for (let i = 0; i < numSegments; i++) {
     let colorIndex = (i % colorMap.length);
     let segmentInfo = {'fillStyle': colorMap[colorIndex],
-                       'text': Info[i].placeName.slice(0, 7), 
-                       'location': Info[i].location,
-                       'placeName': Info[i].placeName,
-                       'address': Info[i].address,
-                       'rate': Info[i].rating, 
-                       'price': Info[i].priceLevel,
-                       'durationTxt': Info[i].durationTxt,
-                       'photo': Info[i].photo};
+                       'text': infos[i].placeName.slice(0, 7), 
+                       'location': infos[i].location,
+                       'placeName': infos[i].placeName,
+                       'address': infos[i].address,
+                       'rate': infos[i].rating, 
+                       'price': infos[i].priceLevel,
+                       'durationTxt': infos[i].durationTxt};
     segments.push(segmentInfo)
   }
   theWheel = new Winwheel({
@@ -222,7 +204,7 @@ function drawTriangle() {
   // Complete the path by stroking (draw lines).
   ctx.stroke(); 
   // Then fill.                
-  ctx.fill();                   
+  ctx.fill();             
 }
 
 
@@ -234,23 +216,165 @@ function markerRemove() {
 }
 
 
-//callback functions
+//main functions
 function initMap() {
+
+  let filler = [];
+  for (let i = 0; i < DEFAULT_NUM; i++) {
+    filler.push(new placeInfo());
+  }
+
   map = new google.maps.Map(document.getElementById("map"), {
     center: { lat: 23.5, lng: 121 },
     zoom: 8,
   });
   infowindow = new google.maps.InfoWindow();
-  drawTheWheel(DEFAULT_NUM);
+  drawTheWheel(filler);
 }
 
 
+function addressDecoder(myloc) {
+  return new Promise((resolve, reject) => {
+    const geocoder = new google.maps.Geocoder();
+    geocoder.geocode({
+      'address': myloc
+      }, 
+      function(results, status) {
+          if (status == 'OK') {
+
+            map.panTo(results[0].geometry.location);
+            map.setZoom(16);
+
+            marker = new google.maps.Marker({
+              map: map,
+              position: results[0].geometry.location
+            });
+
+            pos = {
+              lat: results[0].geometry.location.lat(),
+              lng: results[0].geometry.location.lng()
+            };
+
+            resolve(pos);
+            markerList.push(marker);
+
+          } else {
+            
+            reject(status);
+            console.log(status);
+
+          }
+    });
+  });
+}
+
+function getPlacesLocation(pos) {
+  return new Promise((resolve, reject) => {
+
+    let request = {
+      location: pos,
+      rankBy: google.maps.places.RankBy.DISTANCE,
+      types: ['restaurant']
+    };
+    
+    const service = new google.maps.places.PlacesService(map);
+    service.nearbySearch(request, (places, status) => {
+      if (status === google.maps.places.PlacesServiceStatus.OK) {
+        resolve(places);
+      } else {
+        reject(status);
+      }
+    });
+  });
+}
+
+
+function orederResultbyTime(ori, places) {
+  return new Promise((resolve, reject) => {
+    let dests = []
+    let infos = []
+    const serviceForDistance = new google.maps.DistanceMatrixService();
+    const methodType = document.querySelectorAll('input[type="radio"][name="method"]:checked')[0].value;
+
+    places.forEach(place => {
+      const location =  new google.maps.LatLng(place.geometry.location.lat(), 
+                                                place.geometry.location.lng());
+      let instance = new placeInfo(place.geometry.location,
+                                   place.name,
+                                   place.vicinity,
+                                   place.price_level,
+                                   place.rating);
+      console.log(place.price_level);
+      infos.push(instance);
+      dests.push(location);
+    });
+
+    serviceForDistance.getDistanceMatrix({
+      origins: [ori], 
+      destinations: dests,
+      travelMode: methodType,
+      unitSystem: google.maps.UnitSystem.METRIC,
+      avoidHighways: true,
+      avoidTolls: true,
+    }, 
+
+    function(results, status) {
+      if (status === google.maps.places.PlacesServiceStatus.OK) {
+        
+        for (let i = 0; i < infos.length; i++) {
+          infos[i].distanceFrom = results.rows[0].elements[i].distance.value;
+          infos[i].durationVal = results.rows[0].elements[i].duration.value;
+          infos[i].durationTxt = results.rows[0].elements[i].duration.text;
+        }
+
+        infos.sort(function(a, b) {
+          return a.durationVal > b.durationVal ? 1 : -1;
+        });
+        resolve(infos);
+      } else {
+        reject(status);
+      }
+    });
+
+  });
+}
+
+
+function getFilterResult(infos) {
+  return new Promise((resolve, reject) => {
+
+    const dis = document.querySelectorAll('input[type="radio"][name="distance"]:checked')[0].value;
+    const lowerBoundRate = document.querySelectorAll('input[type="radio"][name="rate"]:checked')[0].value;
+    const targetPrice = document.querySelectorAll('input[type="radio"][name="price"]:checked')[0].value;
+
+    const newResult = infos.filter(function(curr) {
+      return  !(isWithinDis(curr.distanceFrom, dis) ||
+              isHigherCertainRate(curr.rate, lowerBoundRate) ||
+              isMeetThePrice(curr.priceLevel, targetPrice));
+    });
+
+    console.log(newResult);
+
+    if (isVaildEntryEnough(newResult.length)) {
+      resolve(newResult);
+    } else {
+      reject("目標地點太少");
+    }
+
+
+  });
+}
+
+
+
+
+
 function cal() {
-  // TODO:餐廳營業時間篩選
-  // TODO:轉盤相同顏色順序相鄰
+
+  let ori;
   markerRemove();
-  dis = document.querySelectorAll('input[type="radio"][name="distance"]:checked')[0].value;
-  myloc = document.getElementById("mylocation").value;
+
+  const myloc = document.getElementById("mylocation").value;
 
   if (!isAddress(myloc)) {
     err.innerHTML= "地址非有效值";
@@ -260,189 +384,45 @@ function cal() {
     err.style.display = "none";
   }
 
-  geocoder = new google.maps.Geocoder();
-  geocoder.geocode({
-    'address': myloc
-    }, 
-    function(results, status) {
-      if (status == 'OK') {
-        console.log(results[0].geometry.location)
-        map.panTo(results[0].geometry.location);
-        // map.setCenter(results[0].geometry.location);
-        map.setZoom(16);
-        marker = new google.maps.Marker({
-          map: map,
-          position: results[0].geometry.location
-        });
-        pos = {
-          lat: results[0].geometry.location.lat(),
-          lng: results[0].geometry.location.lng()
-        };
-        getNearbyPlaces(pos);
-        markerList.push(marker);
-      } else {
-        console.log(status);
-      }
+
+  addressDecoder(myloc)
+  .then(pos => {
+    ori = pos;
+    return getPlacesLocation(pos);
+  })
+  .then(dest => {
+    return orederResultbyTime(ori, dest);
+  })
+  .then(orderRes => {
+    return getFilterResult(orderRes);
+  })
+  .then(filteredRes => {
+    drawTheWheel(filteredRes);
+    startSpin(filteredRes);
+    alertPrize();
+  })
+  .catch(fail => {
+    console.log(fail);
   });
-}
-
-
-function getNearbyPlaces(position) {
-  console.log('call getNearbyPlaces');
-  let request = {
-    location: position,
-    rankBy: google.maps.places.RankBy.DISTANCE,
-    keyword: 'restaurant',
-    Field: ["price_level", "rating", "formatted_phone_number", "photos", "adr_address", "url"]
-  };
-  service = new google.maps.places.PlacesService(map);
-  service.nearbySearch(request, callback);
-
-
-}
-
-function callback(places, status) {
-  promiseA(places, status).then(promiseB());
-}
-
-let destination, destinationv2;
-function promiseA(places, status) {
-  console.log('StartA');
-  return new Promise(function(reslove, reject) {
-    Info = [];
-    destination = [];
-    destinationv2 = [];
-    if (status == google.maps.places.PlacesServiceStatus.OK) {
-      places.forEach(place => {
-        let request = {
-          placeId: place.place_id,
-        };
-        let loc = new google.maps.LatLng(place.geometry.location.lat(), place.geometry.location.lng());
-        destinationv2.push(loc);
-        service.getDetails(request, function(placeDtails, status) {
-          if (status == google.maps.places.PlacesServiceStatus.OK) {
-            let currLocation = new google.maps.LatLng(placeDtails.geometry.location.lat(), placeDtails.geometry.location.lng());
-            let instance = new placeInfo()
-            instance.rating = (placeDtails.rating === undefined) ? 1 : placeDtails.rating;
-            instance.priceLevel = (placeDtails.price_level === undefined) ? NO_LIMIT : placeDtails.price_level;
-            instance.placeName = placeDtails.name;
-            instance.location = placeDtails.geometry.location;
-            instance.placeId = placeDtails.place_id;
-            Info.push(instance);
-            destination.push(currLocation);
-            console.log(Info);
-          }
-        });
-      });
-    }
-    console.log('StartA end');
-  });
-}
-
-function promiseB() {
-  console.log('StartB');
-  return new Promise(function(reslove, reject){
-    const serviceForDistance = new google.maps.DistanceMatrixService();
-    const methodType = document.querySelectorAll('input[type="radio"][name="method"]:checked')[0].value;
-
-    serviceForDistance.getDistanceMatrix({
-      origins: [pos],
-      destinations: destinationv2,
-      travelMode: methodType,
-      unitSystem: google.maps.UnitSystem.METRIC,
-      avoidHighways: true,
-      avoidTolls: true,
-    }, testCallBack);
-    console.log('StartB end');
-  }); 
-}
-
-// function nearbyCallback(places, status) {
-//   console.log('call nearbyCallback')
-//   let destination = [];
-//   Info = [];
-
-//   if (status == google.maps.places.PlacesServiceStatus.OK) {
-    
-//     places.forEach(place => {
-
-//       let currLocation = new google.maps.LatLng(place.geometry.location.lat(), place.geometry.location.lng());
-//       let instance = new placeInfo()
-//       console.log(place)
-//       //TODO:check opening_hours.open_now <- "google may be discard this feature" 
-//       //x = (x === undefined) ? your_default_value : x;
-//       instance.rating = (place.rating === undefined) ? 1 : place.rating;
-//       instance.priceLevel = (place.price_level === undefined) ? NO_LIMIT : place.price_level;
-//       instance.placeName = place.name;
-//       instance.location = place.geometry.location;
-//       instance.placeId = place.place_id;
-//       instance.photo = place.photos
-//       instance.address = place.vicinity
-
-//       // instance.isOpening = place.opening_hours.open_now
-//       Info.push(instance);
-//       destination.push(currLocation);
-//     });
-//     calculateDistance(destination);
-//   }
-// }
-
-
-// function calculateDistance(destination) {
-//   console.log('call calculateDistance');
-//   const serviceForDistance = new google.maps.DistanceMatrixService();
-//   const methodType = document.querySelectorAll('input[type="radio"][name="method"]:checked')[0].value;
-//   serviceForDistance.getDistanceMatrix({
-//     origins: [pos],
-//     destinations: destination,
-//     travelMode: methodType,
-//     unitSystem: google.maps.UnitSystem.METRIC,
-//     avoidHighways: true,
-//     avoidTolls: true,
-//   }, testCallBack);
-// }
-
-function testCallBack(results) {
-  console.log('call testCallBack');
-  // console.log(results);
-  console.log(Info);
-  const lowerBoundRate = document.querySelectorAll('input[type="radio"][name="rate"]:checked')[0].value;
-  const targetPrice = document.querySelectorAll('input[type="radio"][name="price"]:checked')[0].value;
-
-
-  for (let i = 0; i < results.rows[0].elements.length; i++) {
-    Info[i].distanceFrom = results.rows[0].elements[i].distance.value;
-    Info[i].durationVal = results.rows[0].elements[i].duration.value;
-    Info[i].durationTxt = results.rows[0].elements[i].duration.text;
-
-  }
-
-
-  Info.sort(function(a, b) {
-    ///the sort format need to explore!!!!
-    return a.distanceFrom > b.distanceFrom ? 1 : -1; 
-  });
-
-
-  let numberValid=0;
-  for (let i = 0; i < Info.length; i++) {
-    if (isWithinDis(Info[i].distanceFrom, dis) & 
-        isHigherCertainRate(Info[i].rating, lowerBoundRate) & 
-        isMeetThePrice(Info[i].priceLevel, targetPrice)) {
-      Info[numberValid] = Info[i];
-      numberValid += 1
-    } 
-  }
-
   
-  if (isVaildEntryEnough(numberValid)) {
-    drawTheWheel(numberValid);
-    startSpin();
-    err.style.display = "none";
-  } else {
-    err.innerHTML= "目標地點太少";
-    err.style.display = "block";
-  }
-  console.log("testCallback end")
+
 }
 
+
+
+
+
+
+
+
+
+
+  // if (isVaildEntryEnough(numberValid)) {
+  //   drawTheWheel(numberValid);
+  //   startSpin();
+  //   err.style.display = "none";
+  // } else {
+  //   err.innerHTML= "目標地點太少";
+  //   err.style.display = "block";
+  // }
+  // console.log("testCallback end")
