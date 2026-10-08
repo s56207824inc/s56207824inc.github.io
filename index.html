@@ -249,7 +249,7 @@
     <h1>Yuquan Wang</h1>
     <p>iOS engineer at Perfect Corp. Features I built in YouCam Makeup.</p>
   </div>
-  <a href="[LinkedIn URL]">LinkedIn</a>
+  <a href="https://www.linkedin.com/in/%E6%B7%AF%E9%8A%93-%E7%8E%8B-57a98b244" target="_blank" rel="noopener">LinkedIn</a>
 </header>
 
 <main class="stage" aria-roledescription="carousel" aria-label="Features I built in YouCam Makeup">
@@ -561,6 +561,7 @@
   let hoverLift = 0;       // 0..1, eases towards hoverTarget
   let hoverTarget = 0;
   let restFrame = 0;
+  let growSince = -Infinity; // After the landing, the corner curls up from flat.
 
   function restLoop(now) {
     restFrame = 0;
@@ -570,8 +571,9 @@
     const c = restCorner(s);
     const t = now / 1000;
     const breeze = reduceMotion ? 0 : Math.min(1, (now - restSince) / 1200) * (1 - 0.6 * hoverLift);
-    const lift = REST + (REST_HOVER - REST) * hoverLift +
-      breeze * (9 * Math.sin(t * 2.1) + 5 * Math.sin(t * 3.7 + 1.3) + 3 * Math.sin(t * 6.1 + 0.4));
+    const grow = easeOut(clamp01((now - growSince) / 700));
+    const lift = grow * (REST + (REST_HOVER - REST) * hoverLift +
+      breeze * (9 * Math.sin(t * 2.1) + 5 * Math.sin(t * 3.7 + 1.3) + 3 * Math.sin(t * 6.1 + 0.4)));
     const turn = breeze * (0.07 * Math.sin(t * 1.3 + 0.7) + 0.04 * Math.sin(t * 2.9));
     const u = rotate(inward(s, c), turn);
     restPull = [u[0] * lift, u[1] * lift];
@@ -873,21 +875,87 @@
     }
   }
 
-  // First load: the first sticker is laid down onto the page and its title rises in.
+  // First load: the stickers are slapped down one at a time into a stack, so the visitor sees
+  // how many features there are. The first feature lands last, on top. The stack lines up,
+  // then the top corner curls up and the title rises in.
+
+  function tween(ms, delay, fn) {
+    const t0 = performance.now() + delay;
+    (function step(now) {
+      const t = clamp01((now - t0) / ms);
+      if (now >= t0) fn(t);
+      if (t < 1) requestAnimationFrame(step);
+    })(performance.now());
+  }
+
   setPlaying(playing);
   if (reduceMotion) {
+    intro = false;
     setActive(0);
     startVideo(slides[0]);
   } else {
+    busy = true;
     const first = slides[0];
-    root.style.setProperty('--shade', shadeOf(first));
+    const order = slides.slice().reverse(); // The last feature lands first, at the bottom.
+    const tilts = [-6, 4, -3, 5, -4, 3];
+    const DROP = 640;
+    const GAP = 170;
+    const START = 250;
+    const impact = k => START + k * GAP + DROP * 0.6;
+
     markDot(0);
-    begin(first, null, restCorner(first));
-    hideCopy(first);
-    render(1);
+    root.style.setProperty('--shade', shadeOf(first));
+    stage.style.background = 'var(--base)';
     startVideo(first);
-    copyIn(first, 700);
-    setTimeout(() => animateTo(0, 1100, easeInOut, () => end(first)), 350);
+
+    order.forEach((s, k) => {
+      const tilt = s === first ? 0 : tilts[k % tilts.length];
+      const sticker = s.querySelector('.sticker');
+      s.classList.add(s === first ? 'is-top' : 'is-under');
+      s.style.zIndex = k + 1;
+      hideCopy(s);
+      sticker.style.transform = `rotate(${tilt}deg)`;
+      sticker.animate([
+        { transform: `translateY(-48px) rotate(${tilt * 2.5}deg) scale(1.28)`, opacity: 0, filter: 'drop-shadow(0 36px 28px rgb(0 0 0 / .28))' },
+        { opacity: 1, offset: 0.18 }, // Opaque early, so a falling sticker never looks see-through
+        { transform: `rotate(${tilt}deg) scale(.97)`, opacity: 1, filter: 'drop-shadow(0 3px 5px rgb(0 0 0 / .12))', offset: 0.6 },
+        { transform: `rotate(${tilt}deg) scale(1.012)`, offset: 0.8 },
+        { transform: `rotate(${tilt}deg) scale(1)`, opacity: 1, filter: 'drop-shadow(0 0 0 rgb(0 0 0 / 0))' }
+      ], { duration: DROP, delay: START + k * GAP, easing: 'cubic-bezier(.3, .6, .3, 1)', fill: 'backwards' });
+    });
+
+    // The page takes the first feature's shade as its sticker lands.
+    const landed = impact(n - 1);
+    tween(500, landed - 80, t => {
+      stage.style.background = `color-mix(in oklab, var(--base) ${((1 - easeOut(t)) * 100).toFixed(2)}%, ${tintOf(first)})`;
+    });
+    copyIn(first, landed + 120);
+
+    // The stickers below straighten up under the top one.
+    const settle = START + (n - 1) * GAP + DROP + 60;
+    order.forEach((s, k) => {
+      if (s === first) return;
+      const tilt = tilts[k % tilts.length];
+      s.querySelector('.sticker').animate(
+        [{ transform: `rotate(${tilt}deg)` }, { transform: 'rotate(0deg)' }],
+        { duration: 420, delay: settle, easing: 'cubic-bezier(.45, 0, .2, 1)', fill: 'forwards' }
+      );
+    });
+
+    setTimeout(() => {
+      for (const s of slides) {
+        const sticker = s.querySelector('.sticker');
+        sticker.getAnimations().forEach(a => a.cancel());
+        sticker.style.transform = '';
+        s.style.zIndex = '';
+        s.classList.remove('is-top', 'is-under');
+        if (s !== first) clearCopy(s);
+      }
+      busy = false;
+      intro = false;
+      growSince = performance.now();
+      setActive(0);
+    }, settle + 440);
   }
 </script>
 </body>
