@@ -113,6 +113,15 @@
   .copy .tags li + li::before { content: "·"; margin: 0 8px; }
   .copy .notes { display: grid; grid-template-columns: auto minmax(0, 1fr); margin: 40px 0 0; border-top: 1px solid var(--line); }
   .copy .notes > div { display: contents; }
+  .notes-btn {
+    display: none; place-items: center;
+    position: absolute; top: 0; right: 0;
+    width: 40px; height: 40px; padding: 0;
+    border: 1px solid var(--line); border-radius: 50%;
+    background: none; color: var(--ink); cursor: pointer;
+  }
+  .notes-btn .i-phone, .notes-btn[aria-pressed="true"] .i-notes { display: none; }
+  .notes-btn[aria-pressed="true"] .i-phone { display: block; }
   .copy .notes dt, .copy .notes dd { margin: 0; padding: 18px 0; border-bottom: 1px solid var(--line); }
   .copy .notes dt { padding-right: 40px; color: var(--mauve); font-size: 15px; font-weight: 500; white-space: nowrap; }
   .copy .notes dd { font-size: 17px; line-height: 1.55; }
@@ -238,28 +247,41 @@
   @media (max-width: 900px) {
     :root { --edge: 20px; }
     .topbar { padding: 18px var(--edge); }
-    .slide { padding: 112px var(--edge) 88px; }
+    .slide { padding: 96px var(--edge) 76px; }
     .slide-inner {
       grid-template-columns: minmax(0, 1fr);
       align-content: start;
       row-gap: 20px;
     }
-    .sticker { --r: 44px; order: -1; justify-self: center; }
+    /* On a phone the recording is a plain video: no phone, no sticker. Pages slide with the finger. */
+    .sticker { --r: 10px; order: -1; justify-self: center; cursor: auto; touch-action: pan-y; }
+    .phone::after, .flap-shadow { display: none; }
     .phone { height: min(calc(100svh - 340px), 560px); border-width: 8px; }
-    .phone { height: min(calc(100svh - 440px), 460px); }
+    /* The recording leads on a phone. The notes open in its place from the button by the title. */
+    /* Wider than the recording (9:16 instead of 9:19.5): the video fills it and loses a little at the top and bottom */
+    .phone { height: max(250px, min(calc(100svh - 300px), 560px)); aspect-ratio: 9 / 16; border-width: 0; box-shadow: none; background: #000; }
     /* Phone on top, notes below; the notes scroll inside their own area */
-    .slide-inner { display: flex; flex-direction: column; height: 100%; }
+    .slide-inner { display: flex; flex-direction: column; align-items: stretch; height: 100%; }
     .sticker { flex: none; align-self: center; }
-    .copy { flex: 1; max-width: none; min-height: 0; overflow-y: auto; }
+    .copy { position: relative; flex: 1; max-width: none; min-height: 0; overflow-y: auto; touch-action: pan-y; }
+    .copy h2 { padding-right: 52px; }
+    .copy .meta { margin-top: 10px; }
+    .copy .tags { margin-top: 4px; }
+    .copy .notes { display: none; }
+    .notes-btn { display: grid; }
+    .slide.show-notes .sticker { display: none; }
+    .slide.show-notes .copy .notes { display: grid; }
     .topbar h1 { font-size: 20px; }
     .topbar p { font-size: 14px; }
     .copy h2 { font-size: 22px; }
     .copy .summary { margin-top: 6px; font-size: 16px; }
-    .copy .meta { margin-top: 12px; }
     .copy .notes { grid-template-columns: minmax(0, 1fr); margin-top: 16px; }
     .copy .notes dt { padding: 14px 0 2px; border: 0; white-space: normal; font-size: 14px; }
     .copy .notes dd { padding: 0 0 14px; font-size: 16px; }
     .pager { padding: 16px var(--edge) 20px; }
+    .swatch { height: 24px; padding: 0 4px; }
+    .swatch::before { width: 6px; height: 6px; }
+    .swatch[aria-current="true"]::before { width: 18px; }
     .hint { display: none; }
   }
 
@@ -273,7 +295,6 @@
 <header class="topbar">
   <div>
     <h1>Yuquan Wang</h1>
-    <p>iOS Engineer, YouCam Makeup · Perfect Corp.</p>
   </div>
   <a class="li" href="https://www.linkedin.com/in/%E6%B7%AF%E9%8A%93-%E7%8E%8B-57a98b244" target="_blank" rel="noopener" aria-label="LinkedIn">
     <svg width="22" height="22" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M13.6 0H2.4A2.4 2.4 0 0 0 0 2.4v11.2A2.4 2.4 0 0 0 2.4 16h11.2a2.4 2.4 0 0 0 2.4-2.4V2.4A2.4 2.4 0 0 0 13.6 0ZM4.9 13.4H2.6V6h2.3v7.4ZM3.7 5a1.3 1.3 0 1 1 0-2.7 1.3 1.3 0 0 1 0 2.7Zm9.7 8.4h-2.3V9.8c0-.9 0-2-1.2-2s-1.4.9-1.4 1.9v3.7H6.2V6h2.2v1h.1c.3-.6 1.1-1.2 2.2-1.2 2.4 0 2.8 1.6 2.8 3.6v4Z"/></svg>
@@ -400,6 +421,7 @@
   const hint = document.querySelector('.hint');
   const live = document.querySelector('[aria-live]');
   const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const flat = matchMedia('(max-width: 900px)'); // Phone layout: plain video, pages slide instead of peel
   const n = slides.length;
 
   const EDGE = 6;          // White die-cut edge around each sticker, px
@@ -447,6 +469,16 @@
     sticker.append(phone);
     sticker.insertAdjacentHTML('beforeend', '<div class="flap-shadow"><div class="flap"></div></div>');
 
+    const nb = document.createElement('button');
+    nb.type = 'button';
+    nb.className = 'notes-btn';
+    nb.setAttribute('aria-pressed', 'false');
+    nb.setAttribute('aria-label', 'Show notes');
+    nb.innerHTML = '<svg class="i-notes" width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M3 4.5h12M3 9h12M3 13.5h7.5"/></svg>' +
+      '<svg class="i-phone" width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="4.5" y="1.5" width="9" height="15" rx="2.2"/></svg>';
+    nb.addEventListener('click', () => showNotes(s, !s.classList.contains('show-notes')));
+    s.querySelector('.copy').prepend(nb);
+
     s.setAttribute('role', 'group');
     s.setAttribute('aria-roledescription', 'slide');
     s.setAttribute('aria-label', `${i + 1} of ${n}`);
@@ -460,6 +492,17 @@
     document.querySelector('.swatches').append(b);
     return b;
   });
+
+  // Phone layout: the notes take the recording's place, and the recording waits.
+  function showNotes(s, on) {
+    s.classList.toggle('show-notes', on);
+    const b = s.querySelector('.notes-btn');
+    b.setAttribute('aria-pressed', String(on));
+    b.setAttribute('aria-label', on ? 'Show recording' : 'Show notes');
+    const v = videoOf(s);
+    if (on) v.pause();
+    else if (playing && !v.hidden && s.classList.contains('is-active')) v.play().catch(() => {});
+  }
 
   function startVideo(s) {
     const v = videoOf(s);
@@ -634,6 +677,7 @@
   function restLoop(now) {
     restFrame = 0;
     if (current < 0 || busy) return;
+    if (flat.matches) { clearPeel(slides[current]); return; }
     hoverLift = reduceMotion ? hoverTarget : hoverLift + (hoverTarget - hoverLift) * 0.12;
     const s = slides[current];
     const c = restCorner(s);
@@ -661,6 +705,7 @@
       s.inert = !on;
       s.setAttribute('aria-hidden', String(!on));
       clearPeel(s);
+      if (s.classList.contains('show-notes')) showNotes(s, false);
       if (!on) videoOf(s).pause();
     });
     markDot(i);
@@ -735,9 +780,62 @@
     })(t0);
   }
 
+  // Phone layout: the page slides sideways. The finger drives it, or it runs on its own.
+  let slideMove = null; // { here, target, dir, offset }
+
+  function slideStart(dir, i) {
+    busy = true;
+    const here = slides[current];
+    const target = slides[i];
+    here.classList.add('is-top');
+    target.classList.add('is-under');
+    clearCopy(target);
+    startVideo(target);
+    slideMove = { here, target, dir, offset: 0 };
+  }
+
+  function slideRender(offset) {
+    const { here, target, dir } = slideMove;
+    const w = stage.clientWidth;
+    slideMove.offset = offset;
+    here.style.transform = `translateX(${offset}px)`;
+    target.style.transform = `translateX(${offset + dir * w}px)`;
+    const p = clamp01(Math.abs(offset) / w);
+    stage.style.background = `color-mix(in oklab, ${tintOf(here)} ${((1 - p) * 100).toFixed(2)}%, ${tintOf(target)})`;
+    markDot(p > 0.5 ? slides.indexOf(target) : current);
+  }
+
+  function slideFinish(commit, ms) {
+    const { here, target, dir } = slideMove;
+    const from = slideMove.offset;
+    const to = commit ? -dir * stage.clientWidth : 0;
+    if (reduceMotion) ms = 0;
+    const t0 = performance.now();
+    (function frame(now) {
+      const t = ms ? Math.min(1, (now - t0) / ms) : 1;
+      slideRender(from + (to - from) * easeOut(t));
+      if (t < 1) { requestAnimationFrame(frame); return; }
+      for (const s of [here, target]) { s.classList.remove('is-top', 'is-under'); s.style.transform = ''; }
+      slideMove = null;
+      busy = false;
+      const active = commit ? target : here;
+      setActive(slides.indexOf(active));
+      if (commit) {
+        live.textContent = `${titleOf(active)}, ${current + 1} of ${n}`;
+        hint.classList.add('is-gone');
+      }
+    })(t0);
+  }
+
   function go(i, d) {
     if (busy || i === current || current < 0) return;
     d = d || (i > current ? 1 : -1);
+    if (flat.matches) {
+      slideStart(d, i);
+      slideRender(0);
+      slideFinish(true, 420);
+      return;
+    }
     const here = slides[current];
     const target = slides[i];
     markDot(i);
@@ -765,23 +863,54 @@
 
   stage.addEventListener('pointerdown', e => {
     if (busy || e.button !== 0 || n < 2 || current < 0) return;
-    if (!e.target.closest('.slide.is-active .sticker') || e.target.closest('.pause')) return;
-    drag = { x: e.clientX, y: e.clientY, id: e.pointerId, started: false, vx: 0, vy: 0, lx: e.clientX, ly: e.clientY, lt: performance.now() };
+    if (e.target.closest('.pause, .notes-btn, a')) return;
+    // The mouse peels only the sticker. A finger can swipe anywhere on the page.
+    const onSticker = !!e.target.closest('.slide.is-active .sticker');
+    if (!onSticker && e.pointerType !== 'touch' && !flat.matches) return;
+    drag = { x: e.clientX, y: e.clientY, id: e.pointerId, touch: e.pointerType === 'touch', started: false, onSticker, lastX: e.clientX, vx: 0, vy: 0, lx: e.clientX, ly: e.clientY, lt: performance.now() };
   });
 
   stage.addEventListener('pointermove', e => {
     if (!drag || e.pointerId !== drag.id) return;
     const dx = e.clientX - drag.x;
     const dy = e.clientY - drag.y;
+    drag.lastX = e.clientX;
+    if (flat.matches) {
+      if (!drag.started) {
+        if (Math.hypot(dx, dy) < 8) return;
+        if (Math.abs(dx) < Math.abs(dy) * 1.2) { drag = null; return; } // Vertical: the notes scroll
+        drag.started = true;
+        drag.flat = true;
+        stage.setPointerCapture(e.pointerId);
+        const dir = dx < 0 ? 1 : -1;
+        slideStart(dir, (current + dir + n) % n);
+      }
+      const now = performance.now();
+      drag.vx = (e.clientX - drag.lx) / Math.max(1, now - drag.lt);
+      drag.lx = e.clientX;
+      drag.lt = now;
+      // The page follows the finger, but not past its starting place in the other direction.
+      slideRender(slideMove.dir > 0 ? Math.min(dx, 0) : Math.max(dx, 0));
+      return;
+    }
+    if (drag.swipe) return;
     if (!drag.started) {
       if (Math.hypot(dx, dy) < 8) return;
+      if (!drag.onSticker && Math.abs(dx) < Math.abs(dy) * 1.2) { drag = null; return; } // Vertical: the notes scroll
+      // A finger swiping right, or swiping while the notes cover the sticker, pages on release.
+      if (drag.touch && Math.abs(dx) >= Math.abs(dy) && (dx > 0 || slides[current].classList.contains('show-notes'))) {
+        drag.started = true; drag.swipe = true; return;
+      }
       drag.started = true;
       stage.setPointerCapture(e.pointerId);
       stage.classList.add('is-dragging');
       const top = slides[current];
       const r = phoneOf(top).getBoundingClientRect();
       const [w, h] = sizeOf(top);
-      const corner = [drag.x - r.left < w / 2 ? -EDGE : w + EDGE, drag.y - r.top < h / 2 ? -EDGE : h + EDGE];
+      // A swipe that starts off the sticker lifts its resting corner, so the peel follows the finger.
+      const corner = drag.onSticker
+        ? [drag.x - r.left < w / 2 ? -EDGE : w + EDGE, drag.y - r.top < h / 2 ? -EDGE : h + EDGE]
+        : restCorner(top);
       const rc = restCorner(top);
       const atRest = corner[0] === rc[0] && corner[1] === rc[1];
       drag.base = atRest ? restPull.slice() : [0, 0];
@@ -813,11 +942,23 @@
     const d = drag;
     drag = null;
     stage.classList.remove('is-dragging');
+    if (d.flat) {
+      if (!slideMove) return;
+      const fast = Math.abs(d.vx) > 0.4 && Math.sign(d.vx) === -slideMove.dir;
+      slideFinish(Math.abs(slideMove.offset) > stage.clientWidth * 0.25 || fast, 300);
+      return;
+    }
+    if (d.swipe) {
+      const dx = d.lastX - d.x; // The browser may cancel the pointer; the last move still counts
+      if (Math.abs(dx) > 40) dx < 0 ? next() : prev();
+      return;
+    }
     if (!d.started) {
+      if (!d.onSticker || flat.matches) return;
       if (e.type === 'pointerup') next(); // A click or tap
       return;
     }
-    const fling = d.vx * move.u[0] + d.vy * move.u[1] > 0.6; // px per ms along the pull
+    const fling = d.vx * move.u[0] + d.vy * move.u[1] > 0.6 || (d.touch && d.lastX - d.x < -60); // px per ms along the pull, or a clear swipe left
     const { top, under } = move;
     if (progress > 0.35 || fling) {
       markDot(slides.indexOf(under));
@@ -957,7 +1098,7 @@
   }
 
   setPlaying(playing);
-  if (reduceMotion) {
+  if (reduceMotion || flat.matches) {
     intro = false;
     setActive(0);
     startVideo(slides[0]);
