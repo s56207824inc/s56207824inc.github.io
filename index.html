@@ -13,9 +13,6 @@
 <meta property="og:image" content="https://s56207824inc.github.io/assets/og.png">
 -->
 <meta name="twitter:card" content="summary_large_image">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wdth,wght@75..100,400..700&display=swap">
 <style>
   :root {
     --base: #F7F4F5;
@@ -27,6 +24,7 @@
     --page: color-mix(in oklab, var(--shade) var(--tint), var(--base));
     --fx: color-mix(in oklab, var(--shade) 75%, var(--ink)); /* Pointer ring and ripples */
     --edge: max(clamp(20px, 6vw, 96px), calc((100vw - 1280px) / 2));
+    --line: color-mix(in oklab, var(--ink) 14%, transparent);
     color-scheme: light dark;
   }
   @media (prefers-color-scheme: dark) {
@@ -46,7 +44,8 @@
     overflow: hidden;
     background: var(--base);
     color: var(--ink);
-    font-family: "Instrument Sans", -apple-system, "Helvetica Neue", sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", "PingFang TC", sans-serif;
+    font-variant-numeric: tabular-nums;
     font-size: 17px;
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
@@ -62,9 +61,10 @@
     padding: 28px var(--edge);
     pointer-events: none;
   }
-  .topbar a { pointer-events: auto; font-weight: 500; }
-  .topbar h1 { margin: 0; font-size: 17px; font-weight: 600; line-height: 1.3; }
-  .topbar p { margin: 0; color: var(--mauve); font-size: 15px; }
+  .topbar h1 { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", sans-serif; font-size: 22px; font-weight: 700; letter-spacing: -0.01em; line-height: 1.25; }
+  .topbar p { margin: 4px 0 0; color: var(--mauve); font-size: 15px; }
+  .topbar .li { pointer-events: auto; display: inline-flex; padding: 4px; color: var(--mauve); transition: color .2s ease; }
+  .topbar .li:hover { color: var(--ink); }
 
   /* Slides */
   .stage {
@@ -90,14 +90,14 @@
     column-gap: clamp(48px, 8vw, 140px);
     min-height: 0;
   }
+  .copy { max-width: 540px; min-width: 0; }
   .copy h2 {
     margin: 0;
     color: var(--ink);
-    color: color-mix(in oklab, var(--shade) 62%, var(--ink));
-    font-size: clamp(56px, 7.6vw, 124px);
-    font-stretch: 75%;
-    font-weight: 600;
-    line-height: .92;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", sans-serif;
+    font-size: clamp(26px, 2.2vw, 32px);
+    font-weight: 700;
+    line-height: 1.2;
     letter-spacing: -0.02em;
     text-wrap: balance;
     /* A mask for the title's slide-up reveal. The padding keeps brackets and descenders whole. */
@@ -106,7 +106,22 @@
     margin: -.08em 0 -.14em;
   }
   .copy h2 .line { display: block; }
-  .copy p { max-width: 26em; margin: 24px 0 0; color: var(--mauve); font-size: 18px; }
+  .copy .summary { margin: 14px 0 0; color: var(--mauve); font-size: 18px; line-height: 1.55; }
+  .copy .meta, .copy .tags { display: flex; flex-wrap: wrap; margin: 0; padding: 0; list-style: none; color: var(--mauve); font-size: 14px; }
+  .copy .meta { margin-top: 28px; }
+  .copy .tags { margin-top: 8px; }
+  .copy .tags li + li::before { content: "·"; margin: 0 8px; }
+  .copy .notes { display: grid; grid-template-columns: auto minmax(0, 1fr); margin: 40px 0 0; border-top: 1px solid var(--line); }
+  .copy .notes > div { display: contents; }
+  .copy .notes dt, .copy .notes dd { margin: 0; padding: 18px 0; border-bottom: 1px solid var(--line); }
+  .copy .notes dt { padding-right: 40px; color: var(--mauve); font-size: 15px; font-weight: 500; white-space: nowrap; }
+  .copy .notes dd { font-size: 17px; line-height: 1.55; }
+  @media (max-height: 820px) and (min-width: 901px) {
+    .copy .meta { margin-top: 20px; }
+    .copy .notes { margin-top: 28px; }
+    .copy .notes dt, .copy .notes dd { padding-top: 11px; padding-bottom: 11px; }
+    .copy .notes dd { font-size: 16px; }
+  }
 
   /* Each phone is a sticker: a white die-cut edge, a soft shadow, and a flap that shows
      the paper back when the sticker is peeled. The script sets the peel. */
@@ -231,8 +246,19 @@
     }
     .sticker { --r: 44px; order: -1; justify-self: center; }
     .phone { height: min(calc(100svh - 340px), 560px); border-width: 8px; }
-    .copy h2 { font-size: clamp(38px, 11vw, 52px); }
-    .copy p { margin-top: 10px; font-size: 15px; }
+    .phone { height: min(calc(100svh - 440px), 460px); }
+    /* Phone on top, notes below; the notes scroll inside their own area */
+    .slide-inner { display: flex; flex-direction: column; height: 100%; }
+    .sticker { flex: none; align-self: center; }
+    .copy { flex: 1; max-width: none; min-height: 0; overflow-y: auto; }
+    .topbar h1 { font-size: 20px; }
+    .topbar p { font-size: 14px; }
+    .copy h2 { font-size: 22px; }
+    .copy .summary { margin-top: 6px; font-size: 16px; }
+    .copy .meta { margin-top: 12px; }
+    .copy .notes { grid-template-columns: minmax(0, 1fr); margin-top: 16px; }
+    .copy .notes dt { padding: 14px 0 2px; border: 0; white-space: normal; font-size: 14px; }
+    .copy .notes dd { padding: 0 0 14px; font-size: 16px; }
     .pager { padding: 16px var(--edge) 20px; }
     .hint { display: none; }
   }
@@ -247,18 +273,30 @@
 <header class="topbar">
   <div>
     <h1>Yuquan Wang</h1>
-    <p>iOS engineer at Perfect Corp. Features I built in YouCam Makeup.</p>
+    <p>iOS Engineer, YouCam Makeup · Perfect Corp.</p>
   </div>
-  <a href="https://www.linkedin.com/in/%E6%B7%AF%E9%8A%93-%E7%8E%8B-57a98b244" target="_blank" rel="noopener">LinkedIn</a>
+  <a class="li" href="https://www.linkedin.com/in/%E6%B7%AF%E9%8A%93-%E7%8E%8B-57a98b244" target="_blank" rel="noopener" aria-label="LinkedIn">
+    <svg width="22" height="22" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M13.6 0H2.4A2.4 2.4 0 0 0 0 2.4v11.2A2.4 2.4 0 0 0 2.4 16h11.2a2.4 2.4 0 0 0 2.4-2.4V2.4A2.4 2.4 0 0 0 13.6 0ZM4.9 13.4H2.6V6h2.3v7.4ZM3.7 5a1.3 1.3 0 1 1 0-2.7 1.3 1.3 0 0 1 0 2.7Zm9.7 8.4h-2.3V9.8c0-.9 0-2-1.2-2s-1.4.9-1.4 1.9v3.7H6.2V6h2.2v1h.1c.3-.6 1.1-1.2 2.2-1.2 2.4 0 2.8 1.6 2.8 3.6v4Z"/></svg>
+  </a>
 </header>
 
 <main class="stage" aria-roledescription="carousel" aria-label="Features I built in YouCam Makeup">
-  <!-- One <section> per feature. Copy a block, then change the shade, the video and the text. -->
+  <!-- One <section> per feature. Copy a block, then change the shade, the video and the text. Keep each note to one or two sentences. -->
   <section class="slide" style="--shade: #A3164F">
     <div class="slide-inner">
       <div class="copy">
         <h2>[Feature name]</h2>
-        <p>[One line: what the feature does]</p>
+        <div class="copy-body">
+          <p class="summary">[One line: what the user sees and does]</p>
+          <p class="meta"><time>[YYYY.MM]</time></p>
+          <ul class="tags"><li>[Swift]</li><li>[UIKit]</li><li>[AVFoundation]</li></ul>
+          <dl class="notes">
+            <div><dt>My part</dt><dd>[What you owned: the screens, modules or pipeline you built]</dd></div>
+            <div><dt>Problem</dt><dd>[The hard part, in one or two sentences]</dd></div>
+            <div><dt>Approach</dt><dd>[How you solved it: the design, the APIs, the trade-off]</dd></div>
+            <div><dt>Result</dt><dd>[What changed: a public number, or what it made possible]</dd></div>
+          </dl>
+        </div>
       </div>
       <div class="phone">
         <p class="empty"></p>
@@ -271,7 +309,17 @@
     <div class="slide-inner">
       <div class="copy">
         <h2>[Feature name]</h2>
-        <p>[One line: what the feature does]</p>
+        <div class="copy-body">
+          <p class="summary">[One line: what the user sees and does]</p>
+          <p class="meta"><time>[YYYY.MM]</time></p>
+          <ul class="tags"><li>[Swift]</li><li>[Metal]</li></ul>
+          <dl class="notes">
+            <div><dt>My part</dt><dd>[What you owned: the screens, modules or pipeline you built]</dd></div>
+            <div><dt>Problem</dt><dd>[The hard part, in one or two sentences]</dd></div>
+            <div><dt>Approach</dt><dd>[How you solved it: the design, the APIs, the trade-off]</dd></div>
+            <div><dt>Result</dt><dd>[What changed: a public number, or what it made possible]</dd></div>
+          </dl>
+        </div>
       </div>
       <div class="phone">
         <p class="empty"></p>
@@ -284,7 +332,17 @@
     <div class="slide-inner">
       <div class="copy">
         <h2>[Feature name]</h2>
-        <p>[One line: what the feature does]</p>
+        <div class="copy-body">
+          <p class="summary">[One line: what the user sees and does]</p>
+          <p class="meta"><time>[YYYY.MM]</time></p>
+          <ul class="tags"><li>[SwiftUI]</li><li>[Core Image]</li></ul>
+          <dl class="notes">
+            <div><dt>My part</dt><dd>[What you owned: the screens, modules or pipeline you built]</dd></div>
+            <div><dt>Problem</dt><dd>[The hard part, in one or two sentences]</dd></div>
+            <div><dt>Approach</dt><dd>[How you solved it: the design, the APIs, the trade-off]</dd></div>
+            <div><dt>Result</dt><dd>[What changed: a public number, or what it made possible]</dd></div>
+          </dl>
+        </div>
       </div>
       <div class="phone">
         <p class="empty"></p>
@@ -297,7 +355,17 @@
     <div class="slide-inner">
       <div class="copy">
         <h2>[Feature name]</h2>
-        <p>[One line: what the feature does]</p>
+        <div class="copy-body">
+          <p class="summary">[One line: what the user sees and does]</p>
+          <p class="meta"><time>[YYYY.MM]</time></p>
+          <ul class="tags"><li>[Swift]</li><li>[Combine]</li></ul>
+          <dl class="notes">
+            <div><dt>My part</dt><dd>[What you owned: the screens, modules or pipeline you built]</dd></div>
+            <div><dt>Problem</dt><dd>[The hard part, in one or two sentences]</dd></div>
+            <div><dt>Approach</dt><dd>[How you solved it: the design, the APIs, the trade-off]</dd></div>
+            <div><dt>Result</dt><dd>[What changed: a public number, or what it made possible]</dd></div>
+          </dl>
+        </div>
       </div>
       <div class="phone">
         <p class="empty"></p>
@@ -343,7 +411,7 @@
   const videoOf = s => s.querySelector('video');
   const phoneOf = s => s.querySelector('.phone');
   const lineOf = s => s.querySelector('.copy h2 .line');
-  const descOf = s => s.querySelector('.copy p');
+  const descOf = s => s.querySelector('.copy .copy-body');
   const flapOf = s => s.querySelector('.flap');
   const flapShadowOf = s => s.querySelector('.flap-shadow');
   const tintOf = s => (s ? `color-mix(in oklab, ${shadeOf(s)} var(--tint), var(--base))` : 'var(--base)');
