@@ -1,962 +1,691 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Yuquan Wang, iOS engineer</title>
-<meta name="description" content="Features I built in YouCam Makeup.">
+<meta name="description" content="Features I built in YouCam Makeup, with the engineering behind each one.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://s56207824inc.github.io/">
 <meta property="og:title" content="Yuquan Wang, iOS engineer">
-<meta property="og:description" content="Features I built in YouCam Makeup.">
+<meta property="og:description" content="Features I built in YouCam Makeup, with the engineering behind each one.">
 <!-- 1200x630 preview image for LinkedIn / email link cards. Add the file, then uncomment.
 <meta property="og:image" content="https://s56207824inc.github.io/assets/og.png">
 -->
 <meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#FAFAF9" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#101114" media="(prefers-color-scheme: dark)">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wdth,wght@75..100,400..700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&display=swap">
 <style>
   :root {
-    --base: #F7F4F5;
-    --ink: #241B21;
-    --mauve: #6E6168;
-    --bezel: #17121A;
-    --tint: 16%;
-    --shade: #A3164F; /* Set to the current feature's shade by the script. */
-    --page: color-mix(in oklab, var(--shade) var(--tint), var(--base));
-    --fx: color-mix(in oklab, var(--shade) 75%, var(--ink)); /* Pointer ring and ripples */
-    --edge: max(clamp(20px, 6vw, 96px), calc((100vw - 1280px) / 2));
+    --bg: #FAFAF9;
+    --ink: #16181D;
+    --muted: #5D626C;
+    --line: #E3E3E0;
+    --raise: #FFFFFF;
+    --accent: #A3123A;
+    --bezel: #121316;
+    /* SF Pro on Apple devices, the face of the platform this portfolio is about */
+    --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", "PingFang TC", "Noto Sans TC", sans-serif;
+    --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", "PingFang TC", "Noto Sans TC", sans-serif;
+    --pad: clamp(20px, 4.4vw, 72px);
+    --pad-y: clamp(32px, 7vh, 72px);
+    --ease: cubic-bezier(.2, .8, .2, 1);
     color-scheme: light dark;
   }
   @media (prefers-color-scheme: dark) {
     :root {
-      --base: #161114;
-      --ink: #F3EDF0;
-      --mauve: #B3A5AD;
+      --bg: #101114;
+      --ink: #ECEDEF;
+      --muted: #9CA1AB;
+      --line: #272A31;
+      --raise: #17191D;
+      --accent: #F2648A;
       --bezel: #000000;
-      --tint: 30%;
     }
   }
 
   * { box-sizing: border-box; }
   html, body { height: 100%; }
+  html { accent-color: var(--accent); scrollbar-color: color-mix(in oklab, var(--ink) 25%, transparent) transparent; }
   body {
     margin: 0;
     overflow: hidden;
-    background: var(--base);
+    background: var(--bg);
     color: var(--ink);
-    font-family: "Instrument Sans", -apple-system, "Helvetica Neue", sans-serif;
+    font-family: var(--font);
     font-size: 17px;
-    line-height: 1.5;
+    line-height: 1.6;
     -webkit-font-smoothing: antialiased;
+    font-variant-numeric: tabular-nums;
   }
-  a { color: inherit; text-decoration: underline 1.5px var(--shade); text-underline-offset: 4px; }
-  :focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
-  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  ::selection { background: color-mix(in oklab, var(--accent) 22%, transparent); }
+  a { color: inherit; text-decoration: none; }
+  button { font: inherit; color: inherit; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+  h1, h2 { margin: 0; text-wrap: balance; }
+  h2:focus { outline: none; }
+  p, ul, dl, dd { margin: 0; }
+  ul { padding: 0; list-style: none; }
 
-  /* Top bar and pager stay put. Only the slides change. */
-  .topbar {
-    position: fixed; top: 0; left: 0; right: 0; z-index: 5;
-    display: flex; align-items: flex-start; justify-content: space-between; gap: 16px;
-    padding: 28px var(--edge);
-    pointer-events: none;
-  }
-  .topbar a { pointer-events: auto; font-weight: 500; }
-  .topbar h1 { margin: 0; font-size: 17px; font-weight: 600; line-height: 1.3; }
-  .topbar p { margin: 0; color: var(--mauve); font-size: 15px; }
+  /* One language at a time. Every text has an English and a Chinese version. */
+  :root[data-lang="en"] [lang="zh-Hant"]:not(html, .lang),
+  :root[data-lang="zh"] [lang="en"]:not(html, .lang) { display: none; }
 
-  /* Slides */
-  .stage {
-    position: fixed; inset: 0;
-    background: var(--page);
-    touch-action: pan-y pinch-zoom;
-    user-select: none; -webkit-user-select: none;
-  }
-  .stage.is-dragging, .stage.is-dragging .sticker { cursor: grabbing; }
-  .slide {
-    position: absolute; inset: 0;
+  /* Page: a slim header, then one feature centered below it. Everything fits in one screen. */
+  .page {
     display: grid;
-    padding: 112px var(--edge) 120px;
-    visibility: hidden;
+    grid-template-rows: auto minmax(0, 1fr);
+    row-gap: clamp(24px, 6vh, 56px);
+    height: 100svh;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: clamp(24px, 5vh, 48px) var(--pad) clamp(32px, 6vh, 64px);
+    --phone-h: clamp(360px, calc(100svh - 230px), 600px);
+    --gap: clamp(56px, 7vw, 112px);
+    --detail-w: 520px;
+    /* The header lines up with the phone-and-notes block below it */
+    --content-w: calc(var(--phone-h) * 9 / 19.5 + var(--gap) + var(--detail-w));
   }
-  .slide.is-active, .slide.is-top, .slide.is-under { visibility: visible; }
-  .slide.is-top { z-index: 2; }
-  .slide.is-under { z-index: 1; }
-  .slide-inner {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    align-items: center;
-    column-gap: clamp(48px, 8vw, 140px);
-    min-height: 0;
-  }
-  .copy h2 {
-    margin: 0;
-    color: var(--ink);
-    color: color-mix(in oklab, var(--shade) 62%, var(--ink));
-    font-size: clamp(56px, 7.6vw, 124px);
-    font-stretch: 75%;
-    font-weight: 600;
-    line-height: .92;
-    letter-spacing: -0.02em;
-    text-wrap: balance;
-    /* A mask for the title's slide-up reveal. The padding keeps brackets and descenders whole. */
-    overflow: hidden;
-    padding: .08em 0 .14em;
-    margin: -.08em 0 -.14em;
-  }
-  .copy h2 .line { display: block; }
-  .copy p { max-width: 26em; margin: 24px 0 0; color: var(--mauve); font-size: 18px; }
 
-  /* Each phone is a sticker: a white die-cut edge, a soft shadow, and a flap that shows
-     the paper back when the sticker is peeled. The script sets the peel. */
-  .sticker {
-    --r: 52px;
-    position: relative;
-    justify-self: end;
-    touch-action: none;
-    cursor: grab;
+  .profile { display: flex; align-items: center; justify-content: space-between; gap: 24px; width: min(100%, var(--content-w)); justify-self: center; }
+  .profile > div { min-width: 0; }
+  .profile h1 { font-family: var(--font-display); font-size: 22px; font-weight: 700; letter-spacing: -0.01em; line-height: 1.25; }
+  .profile .role { margin-top: 4px; color: var(--muted); font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  .links { display: flex; flex: none; align-items: center; gap: 20px; }
+  .links a { display: inline-flex; color: var(--muted); transition: color .2s ease; }
+  .links a:hover { color: var(--accent); }
+  .lang {
+    min-width: 44px; height: 36px; padding: 0 12px;
+    border: 1px solid var(--line); border-radius: 999px; background: none;
+    color: var(--muted); font-size: 14px; font-weight: 500; white-space: nowrap; cursor: pointer;
   }
+  .lang:hover { color: var(--ink); border-color: color-mix(in oklab, var(--ink) 35%, var(--line)); }
+
+  /* Stage: the phone and its notes form one block, the same height, centered */
+  .stage { display: grid; place-items: center; min-height: 0; }
+  .features {
+    display: grid;
+    grid-template-columns: auto minmax(0, var(--detail-w));
+    column-gap: var(--gap);
+    max-width: 100%;
+  }
+  .screen { grid-area: 1 / 1; display: flex; }
+  .feature { grid-area: 1 / 2; min-width: 0; }
+  .feature[hidden] { display: none; }
+  .feature .media { display: none; }
   .phone {
     position: relative;
-    height: min(74vh, 720px, calc(100svh - 240px));
+    height: var(--phone-h);
     aspect-ratio: 9 / 19.5;
-    border: 10px solid var(--bezel);
-    border-radius: var(--r);
-    background: color-mix(in oklab, var(--shade) 8%, var(--base));
-    box-shadow: 0 0 0 6px #fff, 0 12px 28px -8px rgb(0 0 0 / .28);
+    border: 9px solid var(--bezel);
+    border-radius: 46px;
+    background: var(--bezel);
+    box-shadow: 0 1px 2px rgb(0 0 0 / .06), 0 24px 48px -28px rgb(0 0 0 / .3);
     overflow: hidden;
   }
-  .flap-shadow {
-    position: absolute; inset: 0; z-index: 4;
-    pointer-events: none;
-    filter: drop-shadow(0 10px 12px rgb(0 0 0 / .22));
-  }
-  .flap {
-    position: absolute; top: -6px; left: -6px;
-    width: calc(100% + 12px); height: calc(100% + 12px);
-    border-radius: calc(var(--r) + 6px);
-    transform-origin: 0 0;
-    visibility: hidden;
-  }
-  .phone::after {
-    content: "";
-    position: absolute; top: 10px; left: 50%; z-index: 2;
-    width: 30%; height: 3.4%;
-    border-radius: 999px;
-    background: #000;
-    transform: translateX(-50%);
-  }
-  .phone video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-  .empty {
-    position: absolute; inset: 0; margin: 0;
-    display: grid; place-items: center;
-    padding: 28px;
-    color: var(--mauve);
-    font-size: 14px;
-    text-align: center;
-    overflow-wrap: anywhere;
-  }
-
-  /* Pager */
-  .pager {
-    position: fixed; left: 0; right: 0; bottom: 0; z-index: 5;
-    /* Hint on the left, page dots in the centre, pause on the right. */
-    display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 20px;
-    padding: 28px var(--edge);
-  }
-  .swatches { grid-column: 2; grid-row: 1; display: flex; align-items: center; gap: 2px; }
-  .swatch {
-    height: 32px;
-    display: grid; place-items: center;
-    padding: 0 7px; border: 0; border-radius: 999px;
-    background: none;
-    cursor: pointer;
-  }
-  .swatch::before {
-    content: "";
-    width: 10px; height: 10px;
-    border-radius: 999px;
-    background: var(--s);
-    transition: width .35s cubic-bezier(.3, .7, .2, 1);
-  }
-  .swatch[aria-current="true"]::before { width: 32px; }
-  .hint { grid-column: 1; grid-row: 1; margin: 0; color: var(--mauve); font-size: 15px; transition: opacity .4s ease; }
-  .hint.is-gone { opacity: 0; }
-
-  /* Pause / play sits inside the phone screen. */
-  .pause {
-    position: absolute; left: 14px; bottom: 16px; z-index: 3;
-    width: 40px; height: 40px;
+  /* Two layers: the next recording loads behind the one on screen and fades in over it once it has a frame */
+  .layer { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; border-radius: 37px; opacity: 0; cursor: pointer; }
+  .layer.is-front { opacity: 1; z-index: 1; }
+  .layer.is-incoming { z-index: 2; }
+  .no-video { z-index: 3; background: var(--bezel); }
+  .no-video { position: absolute; inset: 0; display: grid; place-items: center; padding: 24px; color: #A7ABB3; font-size: 13px; text-align: center; overflow-wrap: anywhere; }
+  .no-video[hidden] { display: none; }
+  .play {
+    position: absolute; z-index: 4; right: 12px; bottom: 12px;
+    width: 36px; height: 36px;
     display: grid; place-items: center;
     padding: 0; border: 0; border-radius: 50%;
-    background: rgb(0 0 0 / .38);
-    -webkit-backdrop-filter: blur(10px);
-    backdrop-filter: blur(10px);
+    background: rgb(0 0 0 / .4);
     color: #fff;
     cursor: pointer;
+    -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
   }
-  .pause:hover { background: rgb(0 0 0 / .55); }
-  .pause .icon-play, .pause.is-paused .icon-pause { display: none; }
-  .pause.is-paused .icon-play { display: block; }
+  .play:hover { background: rgb(0 0 0 / .6); }
+  .play .i-play, .play.is-paused .i-pause { display: none; }
+  .play.is-paused .i-play { display: block; }
 
-  /* Pointer effects: a ring that follows the mouse, ripples as it moves, a splash on click. */
-  .fx { position: fixed; inset: 0; z-index: 6; overflow: hidden; pointer-events: none; }
-  .ripple { position: absolute; border: 1.5px solid var(--fx); border-radius: 50%; pointer-events: none; }
-  .cursor {
-    position: fixed; top: 0; left: 0; z-index: 7;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity .2s ease;
-  }
-  .cursor.is-on { opacity: 1; }
-  .cursor span {
-    display: block;
-    width: 36px; height: 36px; margin: -18px 0 0 -18px;
-    border: 1.5px solid var(--fx);
-    border-radius: 50%;
-    transition: transform .25s ease, background-color .25s ease;
-  }
-  .cursor.is-over span { transform: scale(1.7); background: color-mix(in oklab, var(--fx) 12%, transparent); }
-  .cursor.is-down span { transform: scale(.7); }
+  /* Notes column: as tall as the phone, title at the top */
+  .detail { display: flex; flex-direction: column; height: var(--phone-h); min-height: 0; padding-top: 8px; }
+  .detail h2 { font-family: var(--font-display); font-size: clamp(26px, 2.2vw, 32px); font-weight: 700; letter-spacing: -0.02em; line-height: 1.2; }
+  .summary { margin-top: 14px; color: var(--muted); font-size: 18px; line-height: 1.55; }
+  .meta { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 0; margin-top: 28px; color: var(--muted); font-size: 14px; }
+  .meta > * + *::before { content: "·"; margin: 0 8px; }
+  .detail-body { flex: 1; min-height: 0; margin-top: 44px; overflow-y: auto; scrollbar-gutter: stable; scrollbar-width: thin; }
+  /* When the notes do not fit, the last line fades out to show there is more below */
+  .detail-body.is-clipped { -webkit-mask-image: linear-gradient(#000 calc(100% - 36px), transparent); mask-image: linear-gradient(#000 calc(100% - 36px), transparent); }
+  .notes { display: grid; grid-template-columns: auto minmax(0, 1fr); border-top: 1px solid var(--line); }
+  .notes > div { display: contents; }
+  .notes dt, .notes dd { padding: 20px 0; border-bottom: 1px solid var(--line); }
+  .notes dt { padding-right: 40px; color: var(--muted); font-size: 15px; font-weight: 500; white-space: nowrap; }
+  .notes dd { font-size: 17px; }
+  .tags { display: flex; flex-wrap: wrap; margin-top: 8px; color: var(--muted); font-size: 14px; }
+  .tags li + li::before { content: "·"; margin: 0 8px; }
+  .view-switch { display: none; }
 
-  @media (max-width: 900px) {
-    :root { --edge: 20px; }
-    .topbar { padding: 18px var(--edge); }
-    .slide { padding: 112px var(--edge) 88px; }
-    .slide-inner {
-      grid-template-columns: minmax(0, 1fr);
-      align-content: start;
-      row-gap: 20px;
+  /* Pager: one segment per feature shows where you are and how many there are */
+  .pager {
+    position: fixed; z-index: 2; left: 0; right: 0; bottom: clamp(10px, 2.4vh, 22px);
+    width: fit-content; margin-inline: auto;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .progress { display: flex; gap: 6px; padding: 0 8px; }
+  .seg { display: grid; align-items: center; width: 32px; height: 32px; padding: 0; border: 0; background: none; cursor: pointer; }
+  .seg .track { position: relative; display: block; height: 4px; border-radius: 4px; background: color-mix(in oklab, var(--ink) 13%, transparent); overflow: hidden; transition: background-color .2s ease; }
+  .seg:hover .track { background: color-mix(in oklab, var(--ink) 28%, transparent); }
+  .seg .fill { position: absolute; inset: 0; background: var(--accent); opacity: 0; transition: opacity .2s ease; }
+  .seg[aria-current="true"] .fill { opacity: 1; }
+  .step {
+    display: grid; place-items: center;
+    width: 44px; height: 44px; padding: 0;
+    border: 1px solid var(--line); border-radius: 50%;
+    background: var(--raise);
+    cursor: pointer;
+    transition: border-color .2s ease;
+  }
+  .step:hover { border-color: color-mix(in oklab, var(--ink) 35%, var(--line)); }
+  /* Wide screens: the arrows sit in the side margins, level with the middle of the phone */
+  @media (min-width: 1024px) {
+    .step {
+      position: fixed; z-index: 2;
+      top: calc(50% + 40px);
+      width: 52px; height: 52px;
+      translate: 0 -50%;
     }
-    .sticker { --r: 44px; order: -1; justify-self: center; }
-    .phone { height: min(calc(100svh - 340px), 560px); border-width: 8px; }
-    .copy h2 { font-size: clamp(38px, 11vw, 52px); }
-    .copy p { margin-top: 10px; font-size: 15px; }
-    .pager { padding: 16px var(--edge) 20px; }
-    .hint { display: none; }
+    .step.prev { left: max(16px, calc((100vw - var(--content-w)) / 4 - 26px)); }
+    .step.next { right: max(16px, calc((100vw - var(--content-w)) / 4 - 26px)); }
+    .progress { padding: 0; }
+  }
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+  /* Short desktop windows: tighten the notes so they still fit. */
+  @media (min-width: 821px) and (max-height: 820px) {
+    .detail-body { margin-top: 32px; }
+    .meta { margin-top: 20px; }
+    .notes dt, .notes dd { padding-top: 12px; padding-bottom: 12px; }
+    .notes dd { font-size: 16px; line-height: 1.5; }
+    .summary { font-size: 17px; }
+  }
+
+  /* Phone: header, the feature title, a switch between recording and notes, the pager at the bottom. */
+  @media (max-width: 820px) {
+    .page { row-gap: 24px; padding: max(20px, env(safe-area-inset-top)) 24px max(16px, env(safe-area-inset-bottom)); }
+    .profile { gap: 12px; width: 100%; }
+    .profile .role { font-size: 14px; }
+    .stage { place-items: stretch; grid-template-rows: minmax(0, 1fr) auto; row-gap: 20px; }
+    .features { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto auto minmax(0, 1fr); row-gap: 20px; min-height: 0; }
+    .feature, .detail { display: contents; }
+    .head { grid-row: 1; }
+    .view-switch { grid-row: 2; display: flex; padding: 3px; border-radius: 10px; background: color-mix(in oklab, var(--ink) 7%, transparent); }
+    .view-switch button { display: grid; place-items: center; flex: 1; height: 34px; border: 0; border-radius: 8px; background: none; color: var(--muted); cursor: pointer; }
+    .view-switch button[aria-pressed="true"] { background: var(--raise); color: var(--ink); box-shadow: 0 1px 2px rgb(0 0 0 / .12), 0 2px 6px -2px rgb(0 0 0 / .12); }
+    .screen, .detail-body { grid-area: 3 / 1; min-height: 0; margin: 0; }
+    .screen { justify-content: center; }
+    .pager { position: static; width: auto; margin: 0; justify-content: space-between; }
+    .stage[data-view="video"] .detail-body, .stage[data-view="notes"] .screen { display: none; }
+    .phone { height: 100%; border-width: 7px; border-radius: 36px; }
+    .layer { border-radius: 29px; }
+    .detail h2 { font-size: 23px; }
+    .summary { margin-top: 8px; font-size: 16px; }
+    .meta { margin-top: 12px; font-size: 14px; }
+    .notes { grid-template-columns: minmax(0, 1fr); }
+    .notes dt { padding: 16px 0 4px; border: 0; font-size: 14px; white-space: normal; }
+    .notes dd { padding: 0 0 16px; }
+    .progress { flex: 1; justify-content: center; padding: 0 4px; }
+    .seg { flex: 0 1 36px; }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .swatch::before, .hint { transition: none; }
+    .step, .links a, .seg .track, .seg .fill { transition: none; }
   }
 </style>
 </head>
 <body>
 
-<header class="topbar">
-  <div>
-    <h1>Yuquan Wang</h1>
-    <p>iOS engineer at Perfect Corp. Features I built in YouCam Makeup.</p>
+<div class="page">
+  <header class="profile">
+    <div>
+      <h1>Yuquan Wang</h1>
+      <p class="role"><span lang="en">iOS Engineer, YouCam Makeup · Perfect Corp.</span><span lang="zh-Hant">YouCam Makeup iOS 工程師 · 玩美移動</span></p>
+    </div>
+    <div class="links">
+      <a href="https://www.linkedin.com/in/%E6%B7%AF%E9%8A%93-%E7%8E%8B-57a98b244" target="_blank" rel="noopener" aria-label="LinkedIn">
+        <svg width="22" height="22" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M13.6 0H2.4A2.4 2.4 0 0 0 0 2.4v11.2A2.4 2.4 0 0 0 2.4 16h11.2a2.4 2.4 0 0 0 2.4-2.4V2.4A2.4 2.4 0 0 0 13.6 0ZM4.9 13.4H2.6V6h2.3v7.4ZM3.7 5a1.3 1.3 0 1 1 0-2.7 1.3 1.3 0 0 1 0 2.7Zm9.7 8.4h-2.3V9.8c0-.9 0-2-1.2-2s-1.4.9-1.4 1.9v3.7H6.2V6h2.2v1h.1c.3-.6 1.1-1.2 2.2-1.2 2.4 0 2.8 1.6 2.8 3.6v4Z"/></svg>
+      </a>
+      <button class="lang" type="button"></button>
+    </div>
+  </header>
+
+  <main class="stage" data-view="video">
+    <div class="features">
+      <div class="screen">
+        <div class="phone">
+          <video class="layer is-front" muted loop playsinline preload="auto"></video>
+          <video class="layer" muted loop playsinline preload="auto"></video>
+          <p class="no-video" hidden></p>
+          <button class="play" type="button">
+            <svg class="i-pause" width="12" height="12" viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><rect x="2" y="1" width="3" height="10" rx=".8"/><rect x="7" y="1" width="3" height="10" rx=".8"/></svg>
+            <svg class="i-play" width="12" height="12" viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M3 1.6v8.8a.7.7 0 0 0 1.05.6l7-4.4a.7.7 0 0 0 0-1.2l-7-4.4A.7.7 0 0 0 3 1.6Z"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!--
+        One <article class="feature"> per feature. The pager and the phone are fed from these.
+        To add a feature: copy one article, then change the id, the video and poster paths, the date and the text.
+        Each text has an English (lang="en") and a Chinese (lang="zh-Hant") version.
+        Remove data-sample after you replace the sample recording with a real one.
+        Keep each note to one or two sentences, so the whole feature fits on one screen.
+      -->
+      <article class="feature" id="feature-1" data-sample>
+        <div class="media">
+          <div class="phone"><video src="assets/videos/feature-1.mp4" poster="assets/videos/feature-1.jpg" muted loop playsinline preload="none"></video></div>
+        </div>
+        <div class="detail">
+          <div class="head">
+            <h2><span lang="en">[Feature name]</span><span lang="zh-Hant">[功能名稱]</span></h2>
+            <p class="summary"><span lang="en">[One line: what the user sees and does]</span><span lang="zh-Hant">[一句話：使用者看到什麼、做什麼]</span></p>
+            <p class="meta"><time>[YYYY.MM]</time></p>
+            <ul class="tags"><li>[Swift]</li><li>[UIKit]</li><li>[AVFoundation]</li></ul>
+          </div>
+          <div class="detail-body">
+            <dl class="notes">
+              <div><dt data-label="part"></dt><dd><span lang="en">[What you owned: the screens, modules or pipeline you built]</span><span lang="zh-Hant">[你負責的部分：你做的畫面、模組或流程]</span></dd></div>
+              <div><dt data-label="problem"></dt><dd><span lang="en">[The hard part: the technical problem, in one or two sentences]</span><span lang="zh-Hant">[難點：技術問題，一到兩句]</span></dd></div>
+              <div><dt data-label="approach"></dt><dd><span lang="en">[How you solved it: the design, the APIs, the trade-off]</span><span lang="zh-Hant">[做法：設計、用到的 API、取捨]</span></dd></div>
+              <div><dt data-label="result"></dt><dd><span lang="en">[What changed: a public number, or what it made possible]</span><span lang="zh-Hant">[成果：可以公開的數字，或它帶來的改變]</span></dd></div>
+            </dl>
+          </div>
+        </div>
+      </article>
+
+      <article class="feature" id="feature-2" data-sample>
+        <div class="media">
+          <div class="phone"><video src="assets/videos/feature-2.mp4" poster="assets/videos/feature-2.jpg" muted loop playsinline preload="none"></video></div>
+        </div>
+        <div class="detail">
+          <div class="head">
+            <h2><span lang="en">[Feature name]</span><span lang="zh-Hant">[功能名稱]</span></h2>
+            <p class="summary"><span lang="en">[One line: what the user sees and does]</span><span lang="zh-Hant">[一句話：使用者看到什麼、做什麼]</span></p>
+            <p class="meta"><time>[YYYY.MM]</time></p>
+            <ul class="tags"><li>[Swift]</li><li>[Metal]</li></ul>
+          </div>
+          <div class="detail-body">
+            <dl class="notes">
+              <div><dt data-label="part"></dt><dd><span lang="en">[What you owned]</span><span lang="zh-Hant">[你負責的部分]</span></dd></div>
+              <div><dt data-label="problem"></dt><dd><span lang="en">[The hard part]</span><span lang="zh-Hant">[難點]</span></dd></div>
+              <div><dt data-label="approach"></dt><dd><span lang="en">[How you solved it]</span><span lang="zh-Hant">[做法]</span></dd></div>
+              <div><dt data-label="result"></dt><dd><span lang="en">[What changed]</span><span lang="zh-Hant">[成果]</span></dd></div>
+            </dl>
+          </div>
+        </div>
+      </article>
+
+      <article class="feature" id="feature-3" data-sample>
+        <div class="media">
+          <div class="phone"><video src="assets/videos/feature-3.mp4" poster="assets/videos/feature-3.jpg" muted loop playsinline preload="none"></video></div>
+        </div>
+        <div class="detail">
+          <div class="head">
+            <h2><span lang="en">[Feature name]</span><span lang="zh-Hant">[功能名稱]</span></h2>
+            <p class="summary"><span lang="en">[One line: what the user sees and does]</span><span lang="zh-Hant">[一句話：使用者看到什麼、做什麼]</span></p>
+            <p class="meta"><time>[YYYY.MM]</time></p>
+            <ul class="tags"><li>[SwiftUI]</li><li>[Core Image]</li></ul>
+          </div>
+          <div class="detail-body">
+            <dl class="notes">
+              <div><dt data-label="part"></dt><dd><span lang="en">[What you owned]</span><span lang="zh-Hant">[你負責的部分]</span></dd></div>
+              <div><dt data-label="problem"></dt><dd><span lang="en">[The hard part]</span><span lang="zh-Hant">[難點]</span></dd></div>
+              <div><dt data-label="approach"></dt><dd><span lang="en">[How you solved it]</span><span lang="zh-Hant">[做法]</span></dd></div>
+              <div><dt data-label="result"></dt><dd><span lang="en">[What changed]</span><span lang="zh-Hant">[成果]</span></dd></div>
+            </dl>
+          </div>
+        </div>
+      </article>
+
+      <article class="feature" id="feature-4" data-sample>
+        <div class="media">
+          <div class="phone"><video src="assets/videos/feature-4.mp4" poster="assets/videos/feature-4.jpg" muted loop playsinline preload="none"></video></div>
+        </div>
+        <div class="detail">
+          <div class="head">
+            <h2><span lang="en">[Feature name]</span><span lang="zh-Hant">[功能名稱]</span></h2>
+            <p class="summary"><span lang="en">[One line: what the user sees and does]</span><span lang="zh-Hant">[一句話：使用者看到什麼、做什麼]</span></p>
+            <p class="meta"><time>[YYYY.MM]</time></p>
+            <ul class="tags"><li>[Swift]</li><li>[Combine]</li></ul>
+          </div>
+          <div class="detail-body">
+            <dl class="notes">
+              <div><dt data-label="part"></dt><dd><span lang="en">[What you owned]</span><span lang="zh-Hant">[你負責的部分]</span></dd></div>
+              <div><dt data-label="problem"></dt><dd><span lang="en">[The hard part]</span><span lang="zh-Hant">[難點]</span></dd></div>
+              <div><dt data-label="approach"></dt><dd><span lang="en">[How you solved it]</span><span lang="zh-Hant">[做法]</span></dd></div>
+              <div><dt data-label="result"></dt><dd><span lang="en">[What changed]</span><span lang="zh-Hant">[成果]</span></dd></div>
+            </dl>
+          </div>
+        </div>
+      </article>
+
+    </div>
+
+    <nav class="pager" aria-label="Pages">
+      <button class="step prev" type="button" aria-keyshortcuts="ArrowLeft">
+        <svg width="18" height="18" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 7H2M6.5 2.5 2 7l4.5 4.5"/></svg>
+      </button>
+      <div class="progress" role="group"></div>
+      <p class="sr-only" aria-live="polite"><span class="now">1</span> / <span class="total">4</span></p>
+      <button class="step next" type="button" aria-keyshortcuts="ArrowRight">
+        <svg width="18" height="18" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M2 7h10M7.5 2.5 12 7l-4.5 4.5"/></svg>
+      </button>
+    </nav>
+  </main>
+</div>
+
+<template id="view-switch">
+  <div class="view-switch" role="group">
+    <button type="button" data-view="video" aria-pressed="true"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="4.5" y="1.5" width="9" height="15" rx="2.2"/><path d="M8 7v4l3.2-2z" fill="currentColor" stroke="none"/></svg></button>
+    <button type="button" data-view="notes" aria-pressed="false"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M3 4.5h12M3 9h12M3 13.5h7.5"/></svg></button>
   </div>
-  <a href="https://www.linkedin.com/in/%E6%B7%AF%E9%8A%93-%E7%8E%8B-57a98b244" target="_blank" rel="noopener">LinkedIn</a>
-</header>
-
-<main class="stage" aria-roledescription="carousel" aria-label="Features I built in YouCam Makeup">
-  <!-- One <section> per feature. Copy a block, then change the shade, the video and the text. -->
-  <section class="slide" style="--shade: #A3164F">
-    <div class="slide-inner">
-      <div class="copy">
-        <h2>[Feature name]</h2>
-        <p>[One line: what the feature does]</p>
-      </div>
-      <div class="phone">
-        <p class="empty"></p>
-        <video src="assets/videos/feature-1.mp4" poster="assets/videos/feature-1.jpg" muted loop playsinline preload="metadata"></video>
-      </div>
-    </div>
-  </section>
-
-  <section class="slide" style="--shade: #B88A74">
-    <div class="slide-inner">
-      <div class="copy">
-        <h2>[Feature name]</h2>
-        <p>[One line: what the feature does]</p>
-      </div>
-      <div class="phone">
-        <p class="empty"></p>
-        <video src="assets/videos/feature-2.mp4" poster="assets/videos/feature-2.jpg" muted loop playsinline preload="metadata"></video>
-      </div>
-    </div>
-  </section>
-
-  <section class="slide" style="--shade: #5E2B55">
-    <div class="slide-inner">
-      <div class="copy">
-        <h2>[Feature name]</h2>
-        <p>[One line: what the feature does]</p>
-      </div>
-      <div class="phone">
-        <p class="empty"></p>
-        <video src="assets/videos/feature-3.mp4" poster="assets/videos/feature-3.jpg" muted loop playsinline preload="metadata"></video>
-      </div>
-    </div>
-  </section>
-
-  <section class="slide" style="--shade: #D9578A">
-    <div class="slide-inner">
-      <div class="copy">
-        <h2>[Feature name]</h2>
-        <p>[One line: what the feature does]</p>
-      </div>
-      <div class="phone">
-        <p class="empty"></p>
-        <video src="assets/videos/feature-4.mp4" poster="assets/videos/feature-4.jpg" muted loop playsinline preload="metadata"></video>
-      </div>
-    </div>
-  </section>
-</main>
-
-<nav class="pager" aria-label="Features">
-  <div class="swatches"></div>
-  <p class="hint">Click or drag the phone to peel it off</p>
-</nav>
-
-<!-- Copied into each phone by the script. -->
-<template id="pause-button">
-  <button class="pause" type="button" aria-label="Pause video">
-    <svg class="icon-pause" width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><rect x="3" y="2" width="3.5" height="12" rx="1"/><rect x="9.5" y="2" width="3.5" height="12" rx="1"/></svg>
-    <svg class="icon-play" width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M4 2.5v11a.8.8 0 0 0 1.2.7l9-5.5a.8.8 0 0 0 0-1.4l-9-5.5A.8.8 0 0 0 4 2.5z"/></svg>
-  </button>
 </template>
-
-
-<p class="sr-only" aria-live="polite"></p>
-<div class="fx" aria-hidden="true"></div>
-<div class="cursor" aria-hidden="true"><span></span></div>
 
 <script>
   const root = document.documentElement;
-  const stage = document.querySelector('.stage');
-  const slides = [...stage.querySelectorAll('.slide')];
-  const hint = document.querySelector('.hint');
-  const live = document.querySelector('[aria-live]');
   const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const n = slides.length;
+  const phoneLayout = matchMedia('(max-width: 820px)');
 
-  const EDGE = 6;          // White die-cut edge around each sticker, px
-  const REST = 74;         // How far the corner is pulled at rest, so the page shows it can be peeled
-  const REST_HOVER = 118;  // The same, while the mouse is over the phone
+  const WORDS = {
+    en: {
+      part: 'My part', problem: 'Problem', approach: 'Approach', result: 'Result',
+      prev: 'Previous', next: 'Next', pause: 'Pause recording', play: 'Play recording',
+      video: 'Recording', notes: 'Notes', sample: 'Sample recording',
+      missing: src => `No recording yet (${src})`,
+      language: 'Language', pages: 'Pages', tech: 'Technologies', view: 'View', features: 'Features', switchLang: '切換成中文',
+    },
+    zh: {
+      part: '我負責的部分', problem: '問題', approach: '做法', result: '成果',
+      prev: '上一個', next: '下一個', pause: '暫停錄影', play: '播放錄影',
+      video: '錄影', notes: '技術說明', sample: '範例錄影',
+      missing: src => `還沒有錄影（${src}）`,
+      language: '語言', pages: '頁面', tech: '使用的技術', view: '顯示', features: '功能', switchLang: 'Switch to English',
+    },
+  };
 
-  const shadeOf = s => s.style.getPropertyValue('--shade').trim();
-  const titleOf = s => s.querySelector('h2').textContent.trim();
-  const videoOf = s => s.querySelector('video');
-  const phoneOf = s => s.querySelector('.phone');
-  const lineOf = s => s.querySelector('.copy h2 .line');
-  const descOf = s => s.querySelector('.copy p');
-  const flapOf = s => s.querySelector('.flap');
-  const flapShadowOf = s => s.querySelector('.flap-shadow');
-  const tintOf = s => (s ? `color-mix(in oklab, ${shadeOf(s)} var(--tint), var(--base))` : 'var(--base)');
-  const clamp01 = v => Math.max(0, Math.min(1, v));
-  const unit = v => { const l = Math.hypot(v[0], v[1]); return [v[0] / l, v[1] / l]; };
-  const rotate = (v, a) => [v[0] * Math.cos(a) - v[1] * Math.sin(a), v[0] * Math.sin(a) + v[1] * Math.cos(a)];
-  const easeInOut = t => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
-  const easeOut = t => 1 - Math.pow(1 - t, 3);
+  const stage = document.querySelector('.stage');
+  const prevBtn = document.querySelector('.step.prev');
+  const nextBtn = document.querySelector('.step.next');
+  const nowEl = document.querySelector('.pager .now');
 
-  if (matchMedia('(pointer: coarse)').matches) hint.textContent = 'Tap or drag the phone to peel it off';
-
+  let lang = 'en';
   let current = -1;
   let playing = !reduceMotion;
-  let busy = false;              // A page change or a drag is running.
-  let intro = !reduceMotion;     // The first-load animation is running.
 
-  // Build each page: title mask, placeholder text, pause button, sticker with its flap, page dot.
-  const swatches = slides.map((s, i) => {
-    const h2 = s.querySelector('.copy h2');
-    h2.innerHTML = `<span class="line">${h2.innerHTML}</span>`;
+  // Build each feature: read its recording, add the sample tag and the phone view switch.
+  const features = [...document.querySelectorAll('.feature')].map(el => {
+    const v = el.querySelector('video');
+    const src = v.getAttribute('src');
+    const poster = v.getAttribute('poster') || '';
+    el.querySelector('.media').remove();
 
-    const phone = phoneOf(s);
-    const v = videoOf(s);
-    s.querySelector('.empty').textContent = 'Add a recording at ' + v.getAttribute('src');
-    const hide = () => { v.hidden = true; };
-    if (v.error || v.networkState === HTMLMediaElement.NETWORK_NO_SOURCE) hide();
-    else v.addEventListener('error', hide);
-
-    phone.append(document.querySelector('#pause-button').content.cloneNode(true));
-    const sticker = document.createElement('div');
-    sticker.className = 'sticker';
-    phone.before(sticker);
-    sticker.append(phone);
-    sticker.insertAdjacentHTML('beforeend', '<div class="flap-shadow"><div class="flap"></div></div>');
-
-    s.setAttribute('role', 'group');
-    s.setAttribute('aria-roledescription', 'slide');
-    s.setAttribute('aria-label', `${i + 1} of ${n}`);
-
+    if (el.hasAttribute('data-sample')) {
+      const tag = document.createElement('span');
+      tag.className = 'sample';
+      el.querySelector('.meta').append(tag);
+    }
+    el.querySelector('.head').after(document.querySelector('#view-switch').content.cloneNode(true));
+    el.querySelector('.view-switch').addEventListener('click', e => {
+      const b = e.target.closest('[data-view]');
+      if (b) setView(b.dataset.view);
+    });
+    el.querySelector('h2').tabIndex = -1;
+    el.hidden = true;
+    el.inert = true;
+    return { el, src, poster };
+  });
+  document.querySelector('.pager .total').textContent = features.length;
+  const progress = document.querySelector('.progress');
+  const segs = features.map((f, i) => {
     const b = document.createElement('button');
     b.type = 'button';
-    b.className = 'swatch';
-    b.style.setProperty('--s', shadeOf(s));
-    b.setAttribute('aria-label', 'Show ' + titleOf(s));
-    b.addEventListener('click', () => go(i));
-    document.querySelector('.swatches').append(b);
+    b.className = 'seg';
+    b.innerHTML = '<span class="track"><span class="fill"></span></span>';
+    b.addEventListener('click', () => { go(i, { focus: true }); });
+    progress.append(b);
     return b;
   });
 
-  function startVideo(s) {
-    const v = videoOf(s);
-    if (v.hidden) return;
-    v.currentTime = 0;
-    if (playing) v.play().catch(() => {});
-  }
+  // Language
 
-  // The page dots move as soon as a page change starts, not when its animation ends.
-  let markedDot = -1;
-  function markDot(i) {
-    if (i === markedDot) return;
-    markedDot = i;
-    swatches.forEach((b, k) => b.setAttribute('aria-current', String(k === i)));
-  }
-
-  // Text. The old title slides up out of its mask, then the new one rises in from below.
-  // The two are never on screen at the same time.
-
-  function clearCopy(s) {
-    for (const el of [lineOf(s), descOf(s)]) {
-      el.getAnimations().forEach(a => a.cancel());
-      el.style.transform = '';
-      el.style.opacity = '';
-    }
-  }
-
-  function hideCopy(s) {
-    clearCopy(s);
-    lineOf(s).style.transform = 'translateY(140%)';
-    descOf(s).style.opacity = '0';
-  }
-
-  function copyOut(s) {
-    if (reduceMotion) { hideCopy(s); return; }
-    lineOf(s).animate(
-      [{ transform: 'translateY(0)' }, { transform: 'translateY(-140%)' }],
-      { duration: 340, easing: 'cubic-bezier(.55, 0, .7, .2)', fill: 'forwards' }
-    );
-    descOf(s).animate(
-      [{ opacity: 1, transform: 'none' }, { opacity: 0, transform: 'translateY(-6px)' }],
-      { duration: 240, easing: 'ease-in', fill: 'forwards' }
-    );
-  }
-
-  function copyIn(s, delay) {
-    const line = lineOf(s);
-    const desc = descOf(s);
-    line.style.transform = '';
-    desc.style.opacity = '';
-    if (reduceMotion) return;
-    // fill: backwards holds the start pose during the delay; after the end the text is in its normal place.
-    line.animate(
-      [{ transform: 'translateY(140%)' }, { transform: 'translateY(0)' }],
-      { duration: 680, delay, easing: 'cubic-bezier(.22, 1, .36, 1)', fill: 'backwards' }
-    );
-    desc.animate(
-      [{ opacity: 0, transform: 'translateY(10px)' }, { opacity: 1, transform: 'none' }],
-      { duration: 520, delay: delay + 160, easing: 'cubic-bezier(.22, 1, .36, 1)', fill: 'backwards' }
-    );
-  }
-
-  // Peel geometry. Coordinates are px in the phone's box, with the origin at its top-left.
-  // A sticker corner is pulled by the vector `pull`. The fold is the line halfway between the
-  // corner and where it is pulled to, at right angles to the pull. The part of the sticker on
-  // the corner's side of the fold flips over that line and shows its paper back.
-
-  const sizeOf = s => [phoneOf(s).offsetWidth, phoneOf(s).offsetHeight];
-  const box = (x0, y0, x1, y1) => [[x0, y0], [x1, y0], [x1, y1], [x0, y1]];
-
-  function restCorner(s) {
-    const [w, h] = sizeOf(s);
-    return [w + EDGE, h + EDGE];
-  }
-
-  // Unit vector from a corner towards the middle of the sticker
-  function inward(s, c) {
-    const [w, h] = sizeOf(s);
-    return unit([w / 2 - c[0], h / 2 - c[1]]);
-  }
-
-  // How far the corner must travel along u until no part of the sticker stays down
-  function fullPull(s, c, u) {
-    const [w, h] = sizeOf(s);
-    let need = 0;
-    for (const x of box(-EDGE, -EDGE, w + EDGE, h + EDGE)) {
-      need = Math.max(need, 2 * ((x[0] - c[0]) * u[0] + (x[1] - c[1]) * u[1]));
-    }
-    return need + 80;
-  }
-
-  // Cut a polygon with the fold line (Sutherland–Hodgman). `peeled` keeps the corner's side.
-  function cutAtFold(pts, m, nrm, peeled) {
-    const side = q => ((q[0] - m[0]) * nrm[0] + (q[1] - m[1]) * nrm[1]) * (peeled ? -1 : 1);
-    const out = [];
-    pts.forEach((a, i) => {
-      const b = pts[(i + 1) % pts.length];
-      const sa = side(a);
-      const sb = side(b);
-      if (sa <= 0) out.push(a);
-      if ((sa < 0 && sb > 0) || (sa > 0 && sb < 0)) {
-        const k = sa / (sa - sb);
-        out.push([a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k]);
-      }
+  function setLang(next) {
+    lang = next;
+    root.dataset.lang = next;
+    root.lang = next === 'zh' ? 'zh-Hant' : 'en';
+    const w = WORDS[next];
+    langBtn.textContent = next === 'zh' ? 'EN' : '中文';
+    langBtn.lang = next === 'zh' ? 'en' : 'zh-Hant';
+    langBtn.setAttribute('aria-label', w.switchLang);
+    document.querySelectorAll('[data-label]').forEach(el => { el.textContent = w[el.dataset.label]; });
+    prevBtn.setAttribute('aria-label', w.prev);
+    nextBtn.setAttribute('aria-label', w.next);
+    document.querySelectorAll('.view-switch').forEach(g => {
+      g.setAttribute('aria-label', w.view);
+      g.querySelectorAll('button').forEach(b => b.setAttribute('aria-label', w[b.dataset.view]));
     });
-    return out;
+    document.querySelectorAll('.meta .sample').forEach(el => { el.textContent = w.sample; });
+    document.querySelectorAll('.tags').forEach(el => el.setAttribute('aria-label', w.tech));
+    document.querySelector('.pager').setAttribute('aria-label', w.pages);
+    features.forEach((f, k) => {
+      const name = f.el.querySelector(`h2 [lang="${next === 'zh' ? 'zh-Hant' : 'en'}"]`);
+      segs[k].setAttribute('aria-label', `${k + 1}. ${name ? name.textContent : ''}`);
+      segs[k].title = name ? name.textContent : '';
+    });
+    progress.setAttribute('aria-label', w.features);
+    if (current >= 0) noVideo.textContent = w.missing(features[current].src);
+    syncPlay();
+    try { localStorage.setItem('lang', next); } catch (e) {}
+  }
+  const langBtn = document.querySelector('.lang');
+  langBtn.addEventListener('click', () => setLang(lang === 'zh' ? 'en' : 'zh'));
+
+  // Playback: one phone, two video layers. On a phone layout the recording plays only while it is shown.
+
+  const layers = [...document.querySelectorAll('.screen .layer')];
+  const noVideo = document.querySelector('.screen .no-video');
+  const playBtn = document.querySelector('.screen .play');
+  let front = 0;
+  let token = 0;
+  const preloads = new Map();
+
+  const videoShown = () => !phoneLayout.matches || stage.dataset.view === 'video';
+
+  function syncPlay() {
+    playBtn.classList.toggle('is-paused', !playing);
+    playBtn.setAttribute('aria-label', WORDS[lang][playing ? 'pause' : 'play']);
   }
 
-  function polygon(pts, dx = 0) {
-    if (!pts.length) return 'polygon(0 0, 0 0, 0 0)';
-    return `polygon(${pts.map(([x, y]) => `${(x + dx).toFixed(1)}px ${(y + dx).toFixed(1)}px`).join(', ')})`;
+  function resume() {
+    const v = layers[front];
+    if (playing && videoShown() && !document.hidden && v.getAttribute('src')) v.play().catch(() => {});
+    else v.pause();
   }
 
-  function clearPeel(s) {
-    phoneOf(s).style.clipPath = '';
-    flapOf(s).style.visibility = 'hidden';
-    flapShadowOf(s).style.opacity = '';
+  function togglePlay() { playing = !playing; syncPlay(); resume(); }
+  playBtn.addEventListener('click', togglePlay);
+  layers.forEach(v => v.addEventListener('click', togglePlay));
+
+  // Fetch a recording ahead of time, so its first frame is ready when its page comes up.
+  function preload(f) {
+    if (preloads.has(f.src)) return;
+    const v = document.createElement('video');
+    v.muted = true; v.preload = 'auto'; v.src = f.src;
+    preloads.set(f.src, v);
   }
 
-  // fade: 0..1, how far the flap has faded out as the sticker leaves.
-  function peel(s, c, pull, fade = 0) {
-    const len = Math.hypot(pull[0], pull[1]);
-    if (len < 0.5) { clearPeel(s); return; }
-    const [w, h] = sizeOf(s);
-    const nrm = [-pull[0] / len, -pull[1] / len];          // Points from the fold back to the corner
-    const m = [c[0] + pull[0] / 2, c[1] + pull[1] / 2];    // A point on the fold
+  // Show a feature's recording. The new one loads in the back layer; when its first frame is
+  // actually on screen, it fades in over the old one. The old frame stays until then, so nothing flashes.
+  function showRecording(f, fade) {
+    const my = ++token;
+    const out = layers[front];
+    const inc = layers[1 - front];
+    noVideo.hidden = true;
 
-    // Front: what stays stuck down. The margin keeps the white edge and the shadow.
-    const margin = EDGE + 34;
-    phoneOf(s).style.clipPath = polygon(cutAtFold(box(-margin, -margin, w + margin, h + margin), m, nrm, false));
+    inc.onerror = null;
+    inc.pause();
+    inc.classList.remove('is-incoming');
+    inc.style.opacity = '';
+    inc.poster = fade ? '' : f.poster;
+    inc.src = f.src;
+    inc.currentTime = 0;
+    if (!out.getAttribute('src')) out.poster = f.poster; // First load: show the poster until the first frame
 
-    // Flap: the lifted part, mirrored across the fold.
-    // Mirror: x' = A x + k nrm, with A = I - 2 nrm nrmᵀ and k = 2 (m · nrm).
-    const flap = flapOf(s);
-    const a = 1 - 2 * nrm[0] * nrm[0];
-    const b = -2 * nrm[0] * nrm[1];
-    const d = 1 - 2 * nrm[1] * nrm[1];
-    const k = 2 * (m[0] * nrm[0] + m[1] * nrm[1]);
-    const o = -EDGE; // The flap box starts EDGE px above and to the left of the phone box.
-    const e = a * o + b * o + k * nrm[0] - o;
-    const f = b * o + d * o + k * nrm[1] - o;
-    flap.style.transform = `matrix(${a}, ${b}, ${b}, ${d}, ${e}, ${f})`;
-    flap.style.clipPath = polygon(cutAtFold(box(-EDGE, -EDGE, w + EDGE, h + EDGE), m, nrm, true), EDGE);
+    let swapped = false;
+    const swap = () => {
+      if (my !== token || swapped) return;
+      swapped = true;
+      inc.classList.add('is-incoming');
+      const done = () => {
+        if (my !== token) return;
+        out.pause();
+        out.classList.remove('is-front');
+        inc.classList.remove('is-incoming');
+        inc.classList.add('is-front');
+        front = 1 - front;
+        resume();
+      };
+      if (fade) inc.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 280, easing: 'ease-out' }).onfinish = done;
+      else { inc.style.opacity = '1'; done(); inc.style.opacity = ''; }
+    };
 
-    // Paper shading: bright along the fold, darker towards the lifted corner.
-    const W = w + 2 * EDGE;
-    const H = h + 2 * EDGE;
-    const angle = Math.atan2(nrm[0], -nrm[1]);
-    const L = Math.abs(W * Math.sin(angle)) + Math.abs(H * Math.cos(angle));
-    const at = ((m[0] - o - W / 2) * nrm[0] + (m[1] - o - H / 2) * nrm[1]) / L + 0.5;
-    const pc = v => (v * 100).toFixed(2) + '%';
-    flap.style.background = `linear-gradient(${angle}rad, #cfc8cc ${pc(at)}, #fdfcfc ${pc(at + 0.035)}, #f1edef ${pc(at + 0.25)}, #ddd6da ${pc(at + 0.6)})`;
-    flap.style.visibility = 'visible';
+    // Wait until a frame is painted, not only decoded.
+    const whenFramed = () => {
+      if (my !== token) return;
+      if (inc.requestVideoFrameCallback && playing && videoShown()) {
+        inc.requestVideoFrameCallback(() => swap());
+        inc.play().catch(() => swap());
+      } else requestAnimationFrame(() => requestAnimationFrame(swap));
+    };
+    if (inc.readyState >= 2) whenFramed();
+    else inc.addEventListener('loadeddata', whenFramed, { once: true });
+    setTimeout(swap, 1500); // A slow connection still gets the page change.
 
-    // A small curl casts a short, tight shadow. A big one casts a longer, softer shadow.
-    const lifted = Math.min(1, len / 320);
-    flapShadowOf(s).style.filter =
-      `drop-shadow(0 ${(2 + 10 * lifted).toFixed(1)}px ${(3 + 12 * lifted).toFixed(1)}px rgb(0 0 0 / ${(0.14 + 0.1 * lifted).toFixed(3)}))`;
-    flapShadowOf(s).style.opacity = 1 - fade;
+    inc.onerror = () => {
+      if (my !== token) return;
+      out.pause();
+      noVideo.textContent = WORDS[lang].missing(f.src);
+      noVideo.hidden = false;
+    };
   }
 
-  // At rest the current sticker's corner floats a little, like paper in a light breeze.
-  // Three slow waves of different lengths move the lift and the angle, so the motion never repeats exactly.
-
-  let restPull = [0, 0];   // The current rest pull, so a peel starts exactly from it
-  let restSince = 0;
-  let hoverLift = 0;       // 0..1, eases towards hoverTarget
-  let hoverTarget = 0;
-  let restFrame = 0;
-  let growSince = -Infinity; // After the landing, the corner curls up from flat.
-
-  function restLoop(now) {
-    restFrame = 0;
-    if (current < 0 || busy) return;
-    hoverLift = reduceMotion ? hoverTarget : hoverLift + (hoverTarget - hoverLift) * 0.12;
-    const s = slides[current];
-    const c = restCorner(s);
-    const t = now / 1000;
-    const breeze = reduceMotion ? 0 : Math.min(1, (now - restSince) / 1200) * (1 - 0.6 * hoverLift);
-    const grow = easeOut(clamp01((now - growSince) / 700));
-    const lift = grow * (REST + (REST_HOVER - REST) * hoverLift +
-      breeze * (9 * Math.sin(t * 2.1) + 5 * Math.sin(t * 3.7 + 1.3) + 3 * Math.sin(t * 6.1 + 0.4)));
-    const turn = breeze * (0.07 * Math.sin(t * 1.3 + 0.7) + 0.04 * Math.sin(t * 2.9));
-    const u = rotate(inward(s, c), turn);
-    restPull = [u[0] * lift, u[1] * lift];
-    peel(s, c, restPull);
-    if (!reduceMotion || Math.abs(hoverTarget - hoverLift) > 0.002) restFrame = requestAnimationFrame(restLoop);
+  function setView(view) {
+    stage.dataset.view = view;
+    requestAnimationFrame(() => checkClip(features[current]));
+    document.querySelectorAll('.view-switch button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.view === view)));
+    resume();
   }
+  phoneLayout.addEventListener('change', resume);
+  document.addEventListener('visibilitychange', resume);
 
-  function wakeRest() {
-    if (!restFrame) restFrame = requestAnimationFrame(restLoop);
+  // Notes that do not fit get a fade at the bottom until they are scrolled to the end.
+  function checkClip(f) {
+    const b = f && f.el.querySelector('.detail-body');
+    if (!b) return;
+    b.classList.toggle('is-clipped', b.scrollHeight - b.scrollTop - b.clientHeight > 2);
   }
+  features.forEach(f => f.el.querySelector('.detail-body').addEventListener('scroll', e => checkClip(f), { passive: true }));
+  addEventListener('resize', () => checkClip(features[current]));
 
-  function setActive(i) {
+  // Paging
+
+  // Paging wraps around: after the last feature comes the first one again.
+  const wrap = i => (i + features.length) % features.length;
+  const step = d => go(wrap(current + d));
+
+  function go(i, { focus = false } = {}) {
+    if (i === current) return;
+    const old = features[current];
+    const f = features[i];
     current = i;
-    slides.forEach((s, k) => {
-      const on = k === i;
-      s.classList.toggle('is-active', on);
-      s.inert = !on;
-      s.setAttribute('aria-hidden', String(!on));
-      clearPeel(s);
-      if (!on) videoOf(s).pause();
+
+    // The text changes at once, so nothing moves. The phone stays put and its screen cross-fades.
+    if (old) {
+      old.el.hidden = true;
+      old.el.inert = true;
+    }
+    f.el.hidden = false;
+    f.el.inert = false;
+    f.el.querySelector('.detail-body').scrollTop = 0;
+    showRecording(f, !!old && !reduceMotion);
+    preload(features[wrap(i + 1)]);
+    preload(features[wrap(i - 1)]);
+
+    features.forEach((x, k) => {
+      segs[k].setAttribute('aria-current', String(k === i));
     });
-    markDot(i);
-    root.style.setProperty('--shade', shadeOf(slides[i]));
-    stage.style.background = tintOf(slides[i]);
-    restSince = performance.now();
-    cancelAnimationFrame(restFrame);
-    restLoop(restSince);
+    nowEl.textContent = i + 1;
+    history.replaceState(null, '', '#' + f.el.id);
+    checkClip(f);
+    if (focus) f.el.querySelector('h2').focus({ preventScroll: true });
   }
 
-  // Page change. "Next" peels the top sticker off and shows the next page below it.
-  // "Previous" lays the previous sticker back down on top. progress: 0 = the top sticker lies
-  // flat (with its rest lift), 1 = it is fully peeled off.
-
-  let move = null; // { top, under, corner, u, from, full }
-  let progress = 0;
-
-  // pull0: where the corner already is (the rest pull), so the peel starts without a jump.
-  function begin(top, under, corner, pull0) {
-    busy = true;
-    cancelAnimationFrame(restFrame);
-    restFrame = 0;
-    const rc = restCorner(top);
-    const atRest = corner[0] === rc[0] && corner[1] === rc[1];
-    const u = pull0 ? unit(pull0) : inward(top, corner);
-    const from = pull0 ? Math.hypot(pull0[0], pull0[1]) : atRest ? REST : 0;
-    move = { top, under, corner, u, from, full: fullPull(top, corner, u) };
-    top.classList.add('is-top');
-    if (under) {
-      // The sticker below already has its corner lifted, so nothing jumps when it comes to rest.
-      under.classList.add('is-under');
-      const c = restCorner(under);
-      const v = inward(under, c);
-      peel(under, c, [v[0] * REST, v[1] * REST]);
-    }
-  }
-
-  // pull: the exact corner pull while dragging. Without it, the corner moves along a gentle arc.
-  function render(p, pull) {
-    progress = p;
-    const { top, under, corner, u, from, full } = move;
-    if (!pull) {
-      const dist = from + (full - from) * p;
-      const v = rotate(u, 0.16 * Math.sin(Math.PI * p));
-      pull = [v[0] * dist, v[1] * dist];
-    }
-    peel(top, corner, pull, clamp01((p - 0.7) / 0.3));
-    stage.style.background = `color-mix(in oklab, ${tintOf(top)} ${((1 - p) * 100).toFixed(2)}%, ${tintOf(under)})`;
-  }
-
-  function end(active) {
-    for (const s of [move.top, move.under]) if (s) s.classList.remove('is-top', 'is-under');
-    move = null;
-    busy = false;
-    hoverLift = 0;
-    setActive(slides.indexOf(active));
-    slides.forEach(s => { if (s !== active) clearCopy(s); });
-    live.textContent = `${titleOf(active)}, ${current + 1} of ${n}`;
-    if (intro) intro = false;
-    else hint.classList.add('is-gone');
-  }
-
-  function animateTo(target, ms, ease, done) {
-    if (reduceMotion) ms = 0;
-    const from = progress;
-    const t0 = performance.now();
-    (function step(now) {
-      const t = ms ? Math.min(1, (now - t0) / ms) : 1;
-      render(from + (target - from) * ease(t));
-      if (t < 1) requestAnimationFrame(step);
-      else done();
-    })(t0);
-  }
-
-  function go(i, d) {
-    if (busy || i === current || current < 0) return;
-    d = d || (i > current ? 1 : -1);
-    const here = slides[current];
-    const target = slides[i];
-    markDot(i);
-    startVideo(target);
-    hideCopy(target);
-    copyOut(here);
-    copyIn(target, 320);
-    if (d > 0) {
-      begin(here, target, restCorner(here), restPull);
-      render(0);
-      animateTo(1, 900, easeInOut, () => end(target));
-    } else {
-      begin(target, here, restCorner(target));
-      render(1);
-      animateTo(0, 900, easeInOut, () => end(target));
-    }
-  }
-  const next = () => go((current + 1) % n, 1);
-  const prev = () => go((current - 1 + n) % n, -1);
-
-  // Click or tap the phone: it peels off. Drag it: the corner nearest to where the drag starts
-  // follows the pointer, and letting go far enough peels it off.
-
-  let drag = null;
-
-  stage.addEventListener('pointerdown', e => {
-    if (busy || e.button !== 0 || n < 2 || current < 0) return;
-    if (!e.target.closest('.slide.is-active .sticker') || e.target.closest('.pause')) return;
-    drag = { x: e.clientX, y: e.clientY, id: e.pointerId, started: false, vx: 0, vy: 0, lx: e.clientX, ly: e.clientY, lt: performance.now() };
-  });
-
-  stage.addEventListener('pointermove', e => {
-    if (!drag || e.pointerId !== drag.id) return;
-    const dx = e.clientX - drag.x;
-    const dy = e.clientY - drag.y;
-    if (!drag.started) {
-      if (Math.hypot(dx, dy) < 8) return;
-      drag.started = true;
-      stage.setPointerCapture(e.pointerId);
-      stage.classList.add('is-dragging');
-      const top = slides[current];
-      const r = phoneOf(top).getBoundingClientRect();
-      const [w, h] = sizeOf(top);
-      const corner = [drag.x - r.left < w / 2 ? -EDGE : w + EDGE, drag.y - r.top < h / 2 ? -EDGE : h + EDGE];
-      const rc = restCorner(top);
-      const atRest = corner[0] === rc[0] && corner[1] === rc[1];
-      drag.base = atRest ? restPull.slice() : [0, 0];
-      begin(top, slides[(current + 1) % n], corner, atRest ? restPull : null);
-      hideCopy(move.under);
-      startVideo(move.under);
-    }
-    const now = performance.now();
-    const dt = Math.max(1, now - drag.lt);
-    drag.vx = (e.clientX - drag.lx) / dt;
-    drag.vy = (e.clientY - drag.ly) / dt;
-    drag.lx = e.clientX;
-    drag.ly = e.clientY;
-    drag.lt = now;
-
-    // Only a pull in over the sticker peels it. A pull away from it leaves it flat.
-    const toward = inward(move.top, move.corner);
-    let pull = [drag.base[0] + dx, drag.base[1] + dy];
-    if (pull[0] * toward[0] + pull[1] * toward[1] < 1) pull = [toward[0], toward[1]];
-    const len = Math.hypot(pull[0], pull[1]);
-    move.u = unit(pull);
-    move.full = fullPull(move.top, move.corner, move.u);
-    render(clamp01((len - move.from) / (move.full - move.from)), pull);
-    markDot(progress > 0.35 ? slides.indexOf(move.under) : current);
-  });
-
-  function endDrag(e) {
-    if (!drag || e.pointerId !== drag.id) return;
-    const d = drag;
-    drag = null;
-    stage.classList.remove('is-dragging');
-    if (!d.started) {
-      if (e.type === 'pointerup') next(); // A click or tap
-      return;
-    }
-    const fling = d.vx * move.u[0] + d.vy * move.u[1] > 0.6; // px per ms along the pull
-    const { top, under } = move;
-    if (progress > 0.35 || fling) {
-      markDot(slides.indexOf(under));
-      copyOut(top);
-      copyIn(under, 220);
-      animateTo(1, 650, easeOut, () => end(under));
-    } else {
-      markDot(current);
-      animateTo(0, 450, easeOut, () => end(top));
-    }
-  }
-  stage.addEventListener('pointerup', endDrag);
-  stage.addEventListener('pointercancel', endDrag);
-
-  // Keys and trackpad
+  prevBtn.addEventListener('click', () => { step(-1); });
+  nextBtn.addEventListener('click', () => { step(1); });
 
   addEventListener('keydown', e => {
-    if (e.key === 'ArrowRight') next();
-    else if (e.key === 'ArrowLeft') prev();
+    if (e.altKey || e.metaKey || e.ctrlKey) return;
+    // Inside the notes, the page keys scroll the notes.
+    if (e.target.closest('.detail, .detail-body') && ['PageUp', 'PageDown', 'Home', 'End'].includes(e.key)) return;
+    if (e.key === 'ArrowRight' || e.key === 'PageDown') { e.preventDefault(); step(1); }
+    else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); step(-1); }
+    else if (e.key === 'Home') { e.preventDefault(); go(0); }
+    else if (e.key === 'End') { e.preventDefault(); go(features.length - 1); }
   });
 
-  // One page per wheel gesture. Wait for the trackpad momentum to stop before the next one.
+  // Notes that can still scroll in this direction take the gesture; otherwise it turns the page.
+  function notesTake(target, dy) {
+    const sc = target.closest && target.closest('.detail-body');
+    if (!sc || sc.scrollHeight <= sc.clientHeight + 1) return false;
+    return dy < 0 ? sc.scrollTop > 0 : sc.scrollTop + sc.clientHeight < sc.scrollHeight - 1;
+  }
+
+  // Wheel or trackpad: one page per gesture. Wait for the momentum to stop before the next one.
   let wheelArmed = true;
   let wheelQuiet = 0;
   addEventListener('wheel', e => {
-    clearTimeout(wheelQuiet);
-    wheelQuiet = setTimeout(() => { wheelArmed = true; }, 220);
     const d = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
-    if (!wheelArmed || Math.abs(d) < 10) return;
+    if (Math.abs(e.deltaY) >= Math.abs(e.deltaX) && notesTake(e.target, e.deltaY)) return;
+    clearTimeout(wheelQuiet);
+    wheelQuiet = setTimeout(() => { wheelArmed = true; }, 250);
+    if (!wheelArmed || Math.abs(d) < 12) return;
     wheelArmed = false;
-    d > 0 ? next() : prev();
+    step(d > 0 ? 1 : -1);
   }, { passive: true });
 
-  addEventListener('resize', wakeRest);
+  // Swipe to page: left/right anywhere, up/down unless the notes are scrolling.
+  let touch = null;
+  stage.addEventListener('touchstart', e => { const t = e.touches[0]; touch = { x: t.clientX, y: t.clientY, t: Date.now(), target: e.target }; }, { passive: true });
+  stage.addEventListener('touchend', e => {
+    if (!touch) return;
+    const t = e.changedTouches[0];
+    const dx = t.clientX - touch.x, dy = t.clientY - touch.y;
+    const quick = Date.now() - touch.t < 700;
+    if (quick && Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) step(dx < 0 ? 1 : -1);
+    else if (quick && Math.abs(dy) > 60 && Math.abs(dy) > Math.abs(dx) * 1.5 && !notesTake(touch.target, -dy)) step(dy < 0 ? 1 : -1);
+    touch = null;
+  }, { passive: true });
 
-  // Video playback
-
-  const pauseButtons = [...document.querySelectorAll('.phone .pause')];
-
-  function setPlaying(on) {
-    playing = on;
-    pauseButtons.forEach(b => {
-      b.classList.toggle('is-paused', !on);
-      b.setAttribute('aria-label', on ? 'Pause video' : 'Play video');
-    });
-    if (current < 0) return;
-    const v = videoOf(slides[current]);
-    if (on && !v.hidden) v.play().catch(() => {});
-    else v.pause();
-  }
-  pauseButtons.forEach(b => b.addEventListener('click', () => setPlaying(!playing)));
-
-  document.addEventListener('visibilitychange', () => {
-    if (current < 0) return;
-    const v = videoOf(slides[current]);
-    if (document.hidden) v.pause();
-    else if (playing && !v.hidden) v.play().catch(() => {});
+  addEventListener('hashchange', () => {
+    const k = features.findIndex(f => '#' + f.el.id === location.hash);
+    if (k >= 0) go(k);
   });
 
-  // Pointer effects
+  // Start
 
-  const fx = document.querySelector('.fx');
-  const cursor = document.querySelector('.cursor');
-
-  function ripple(x, y, size, ms, opacity) {
-    const r = document.createElement('span');
-    r.className = 'ripple';
-    r.style.cssText = `left:${x}px;top:${y}px;width:${size}px;height:${size}px;margin:${-size / 2}px 0 0 ${-size / 2}px`;
-    fx.append(r);
-    r.animate(
-      [{ transform: 'scale(.2)', opacity }, { transform: 'scale(1)', opacity: 0 }],
-      { duration: ms, easing: 'cubic-bezier(.2, .7, .3, 1)' }
-    ).onfinish = () => r.remove();
-  }
-
-  // The sticker corner lifts further while the mouse is over the phone.
-  addEventListener('pointermove', e => {
-    if (e.pointerType !== 'mouse') return;
-    const over = e.target.closest('.slide.is-active .sticker') ? 1 : 0;
-    if (over !== hoverTarget) {
-      hoverTarget = over;
-      if (!busy) wakeRest();
-    }
-  });
-
-  if (!reduceMotion) {
-    // Click or tap: two rings, like a drop on water.
-    addEventListener('pointerdown', e => {
-      ripple(e.clientX, e.clientY, 170, 750, .9);
-      setTimeout(() => ripple(e.clientX, e.clientY, 90, 600, .6), 90);
-      cursor.classList.add('is-down');
-    });
-    addEventListener('pointerup', () => cursor.classList.remove('is-down'));
-
-    if (matchMedia('(pointer: fine)').matches) {
-      // The ring trails the mouse with a little lag and grows over things you can click.
-      let tx = 0, ty = 0, cx = 0, cy = 0, lastX = null, lastY = null, travel = 0, frame = 0;
-      const follow = () => {
-        cx += (tx - cx) * 0.22;
-        cy += (ty - cy) * 0.22;
-        cursor.style.transform = `translate(${cx}px, ${cy}px)`;
-        frame = Math.abs(tx - cx) + Math.abs(ty - cy) > 0.3 ? requestAnimationFrame(follow) : 0;
-      };
-      addEventListener('pointermove', e => {
-        if (e.pointerType !== 'mouse') return;
-        tx = e.clientX;
-        ty = e.clientY;
-        if (lastX === null) { cx = lastX = tx; cy = lastY = ty; }
-        cursor.classList.add('is-on');
-        cursor.classList.toggle('is-over', !!e.target.closest('a, button, .slide.is-active .sticker'));
-        // A small ripple every 90 px of travel.
-        travel += Math.hypot(tx - lastX, ty - lastY);
-        lastX = tx;
-        lastY = ty;
-        if (travel > 90) { travel = 0; ripple(tx, ty, 56, 800, .4); }
-        if (!frame) frame = requestAnimationFrame(follow);
-      });
-      document.documentElement.addEventListener('mouseleave', () => {
-        cursor.classList.remove('is-on');
-        hoverTarget = 0;
-        if (!busy) wakeRest();
-      });
-    }
-  }
-
-  // First load: the stickers are slapped down one at a time into a stack, so the visitor sees
-  // how many features there are. The first feature lands last, on top. The stack lines up,
-  // then the top corner curls up and the title rises in.
-
-  function tween(ms, delay, fn) {
-    const t0 = performance.now() + delay;
-    (function step(now) {
-      const t = clamp01((now - t0) / ms);
-      if (now >= t0) fn(t);
-      if (t < 1) requestAnimationFrame(step);
-    })(performance.now());
-  }
-
-  setPlaying(playing);
-  if (reduceMotion) {
-    intro = false;
-    setActive(0);
-    startVideo(slides[0]);
-  } else {
-    busy = true;
-    const first = slides[0];
-    const order = slides.slice().reverse(); // The last feature lands first, at the bottom.
-    const tilts = [-6, 4, -3, 5, -4, 3];
-    const DROP = 640;
-    const GAP = 170;
-    const START = 250;
-    const impact = k => START + k * GAP + DROP * 0.6;
-
-    markDot(0);
-    root.style.setProperty('--shade', shadeOf(first));
-    stage.style.background = 'var(--base)';
-    startVideo(first);
-
-    order.forEach((s, k) => {
-      const tilt = s === first ? 0 : tilts[k % tilts.length];
-      const sticker = s.querySelector('.sticker');
-      s.classList.add(s === first ? 'is-top' : 'is-under');
-      s.style.zIndex = k + 1;
-      hideCopy(s);
-      sticker.style.transform = `rotate(${tilt}deg)`;
-      sticker.animate([
-        { transform: `translateY(-48px) rotate(${tilt * 2.5}deg) scale(1.28)`, opacity: 0, filter: 'drop-shadow(0 36px 28px rgb(0 0 0 / .28))' },
-        { opacity: 1, offset: 0.18 }, // Opaque early, so a falling sticker never looks see-through
-        { transform: `rotate(${tilt}deg) scale(.97)`, opacity: 1, filter: 'drop-shadow(0 3px 5px rgb(0 0 0 / .12))', offset: 0.6 },
-        { transform: `rotate(${tilt}deg) scale(1.012)`, offset: 0.8 },
-        { transform: `rotate(${tilt}deg) scale(1)`, opacity: 1, filter: 'drop-shadow(0 0 0 rgb(0 0 0 / 0))' }
-      ], { duration: DROP, delay: START + k * GAP, easing: 'cubic-bezier(.3, .6, .3, 1)', fill: 'backwards' });
-    });
-
-    // The page takes the first feature's shade as its sticker lands.
-    const landed = impact(n - 1);
-    tween(500, landed - 80, t => {
-      stage.style.background = `color-mix(in oklab, var(--base) ${((1 - easeOut(t)) * 100).toFixed(2)}%, ${tintOf(first)})`;
-    });
-    copyIn(first, landed + 120);
-
-    // The stickers below straighten up under the top one.
-    const settle = START + (n - 1) * GAP + DROP + 60;
-    order.forEach((s, k) => {
-      if (s === first) return;
-      const tilt = tilts[k % tilts.length];
-      s.querySelector('.sticker').animate(
-        [{ transform: `rotate(${tilt}deg)` }, { transform: 'rotate(0deg)' }],
-        { duration: 420, delay: settle, easing: 'cubic-bezier(.45, 0, .2, 1)', fill: 'forwards' }
-      );
-    });
-
-    setTimeout(() => {
-      for (const s of slides) {
-        const sticker = s.querySelector('.sticker');
-        sticker.getAnimations().forEach(a => a.cancel());
-        sticker.style.transform = '';
-        s.style.zIndex = '';
-        s.classList.remove('is-top', 'is-under');
-        if (s !== first) clearCopy(s);
-      }
-      busy = false;
-      intro = false;
-      growSince = performance.now();
-      setActive(0);
-    }, settle + 440);
-  }
+  let saved = null;
+  try { saved = localStorage.getItem('lang'); } catch (e) {}
+  setLang(saved || (/^zh/i.test(navigator.language) ? 'zh' : 'en'));
+  const start = features.findIndex(f => '#' + f.el.id === location.hash);
+  go(start >= 0 ? start : 0);
 </script>
 </body>
 </html>
