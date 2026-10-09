@@ -4,21 +4,9 @@ iOS 作品頁。網址：https://s56207824inc.github.io
 
 ## 更新內容
 
-1. 編輯 `index.html`，找到 `<article class="feature">`。每個 article 是一頁功能：左邊的作品列表和翻頁按鈕都會從這裡自動產生。
-   - `video` 的 `src` 和 `poster`：錄影和封面圖的路徑。
-   - `<time>`：上線日期，例如 `2025.06`。
-   - 文字都有英文（`lang="en"`）和中文（`lang="zh-Hant"`）兩個版本。搜尋 `[`，把方括號裡的文字換成實際內容。
-   - `tags`：用到的技術，例如 Swift、Metal。
-   - 每項技術說明保持一到兩句，整頁才能放在一個畫面內。
-2. 新增功能：複製一整個 article，再改 `id`（例如 `feature-5`）、影片路徑和文字。
-3. push 到 `main`。GitHub Pages 會在 1–2 分鐘內自動更新。
-
-每個功能有自己的網址（例如 `https://s56207824inc.github.io/#feature-2`），可以直接分享某一頁。
-
-## 範例影片
-
-`assets/videos/feature-1.mp4` 到 `feature-4.mp4` 是自動產生的範例影片，網頁會標示「Sample recording / 範例錄影」。
-換成真正的錄影後，把那個 article 的 `data-sample` 刪掉。
+1. 編輯 `index.html`。搜尋 `[`，把所有方括號裡的文字換成實際內容。
+   新增 feature 時，複製一個 `<section class="slide">` 區塊，再改 `--shade` 顏色、影片路徑和文字。
+2. push 到 `main`。GitHub Pages 會在 1–2 分鐘內自動更新。
 
 ## 錄影
 
