@@ -152,6 +152,8 @@
     border: 10px solid var(--bezel);
     border-radius: var(--r);
     background: color-mix(in oklab, var(--shade) 8%, var(--base));
+    background-size: cover; /* The script sets the poster here, so the phone is never blank while the video loads. */
+    background-position: center;
     box-shadow: 0 0 0 6px #fff, 0 12px 28px -8px rgb(0 0 0 / .28);
     overflow: hidden;
   }
@@ -263,7 +265,7 @@
     .phone { height: min(calc(100svh - 340px), 560px); border-width: 8px; }
     /* The recording leads on a phone. The notes open in its place from the button by the title. */
     /* Wider than the recording (9:16 instead of 9:19.5): the video fills it and loses a little at the top and bottom */
-    .phone { height: max(250px, min(calc(100svh - 300px), 560px)); aspect-ratio: 1170 / 2391; border-width: 0; box-shadow: none; background: #000; }
+    .phone { height: max(250px, min(calc(100svh - 300px), 560px)); aspect-ratio: 1170 / 2391; border-width: 0; box-shadow: none; background-color: #000; background-position: 50% 100%; }
     .phone video { object-position: 50% 100%; } /* Crop only the status bar of the recording. */
     /* Phone on top, notes below; the notes scroll inside their own area */
     .slide-inner { display: flex; flex-direction: column; align-items: stretch; height: 100%; }
@@ -329,7 +331,7 @@
       </div>
       <div class="phone">
         <p class="empty"></p>
-        <video src="assets/videos/feature-1.mp4" poster="assets/videos/feature-1.jpg" muted loop playsinline preload="metadata"></video>
+        <video src="assets/videos/feature-1.mp4" poster="assets/videos/feature-1.jpg" muted loop playsinline preload="none"></video>
       </div>
     </div>
   </section>
@@ -352,7 +354,7 @@
       </div>
       <div class="phone">
         <p class="empty"></p>
-        <video src="assets/videos/feature-2.mp4" poster="assets/videos/feature-2.jpg" muted loop playsinline preload="metadata"></video>
+        <video src="assets/videos/feature-2.mp4" poster="assets/videos/feature-2.jpg" muted loop playsinline preload="none"></video>
       </div>
     </div>
   </section>
@@ -375,7 +377,7 @@
       </div>
       <div class="phone">
         <p class="empty"></p>
-        <video src="assets/videos/feature-3.mp4" poster="assets/videos/feature-3.jpg" muted loop playsinline preload="metadata"></video>
+        <video src="assets/videos/feature-3.mp4" poster="assets/videos/feature-3.jpg" muted loop playsinline preload="none"></video>
       </div>
     </div>
   </section>
@@ -398,7 +400,7 @@
       </div>
       <div class="phone">
         <p class="empty"></p>
-        <video src="assets/videos/feature-4.mp4" poster="assets/videos/feature-4.jpg" muted loop playsinline preload="metadata"></video>
+        <video src="assets/videos/feature-4.mp4" poster="assets/videos/feature-4.jpg" muted loop playsinline preload="none"></video>
       </div>
     </div>
   </section>
@@ -421,7 +423,7 @@
       </div>
       <div class="phone">
         <p class="empty"></p>
-        <video src="assets/videos/feature-5.mp4" poster="assets/videos/feature-5.jpg" muted loop playsinline preload="metadata"></video>
+        <video src="assets/videos/feature-5.mp4" poster="assets/videos/feature-5.jpg" muted loop playsinline preload="none"></video>
       </div>
     </div>
   </section>
@@ -488,6 +490,7 @@
 
     const phone = phoneOf(s);
     const v = videoOf(s);
+    phone.style.backgroundImage = `url("${v.getAttribute('poster')}")`;
     // The video is see-through until its poster loads, so the text is added only when the file fails.
     const hide = () => {
       v.hidden = true;
