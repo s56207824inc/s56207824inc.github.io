@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Yuquan Wang, iOS engineer</title>
+<title>WANG YU CYUAN, iOS engineer</title>
 <meta name="description" content="Features I built in YouCam Makeup.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://s56207824inc.github.io/">
-<meta property="og:title" content="Yuquan Wang, iOS engineer">
+<meta property="og:title" content="WANG YU CYUAN, iOS engineer">
 <meta property="og:description" content="Features I built in YouCam Makeup.">
 <!-- 1200x630 preview image for LinkedIn / email link cards. Add the file, then uncomment.
 <meta property="og:image" content="https://s56207824inc.github.io/assets/og.png">
@@ -57,11 +57,12 @@
   /* Top bar and pager stay put. Only the slides change. */
   .topbar {
     position: fixed; top: 0; left: 0; right: 0; z-index: 5;
-    display: flex; align-items: flex-start; justify-content: space-between; gap: 16px;
+    display: flex; align-items: center; justify-content: flex-start; gap: 6px;
     padding: 28px var(--edge);
     pointer-events: none;
   }
   .topbar h1 { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", sans-serif; font-size: 22px; font-weight: 700; letter-spacing: -0.01em; line-height: 1.25; }
+  .topbar .name { display: flex; align-items: center; gap: 6px; }
   .topbar p { margin: 4px 0 0; color: var(--mauve); font-size: 15px; }
   .topbar .li { pointer-events: auto; display: inline-flex; padding: 4px; color: var(--mauve); transition: color .2s ease; }
   .topbar .li:hover { color: var(--ink); }
@@ -85,17 +86,18 @@
   .slide.is-under { z-index: 1; }
   .slide-inner {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-columns: minmax(0, 620px) auto;
+    justify-content: center; /* Keep the copy and the phone together as one group. */
     align-items: center;
-    column-gap: clamp(48px, 8vw, 140px);
+    column-gap: clamp(48px, 6vw, 96px);
     min-height: 0;
   }
-  .copy { max-width: 540px; min-width: 0; }
+  .copy { max-width: 620px; min-width: 0; }
   .copy h2 {
     margin: 0;
     color: var(--ink);
     font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", sans-serif;
-    font-size: clamp(26px, 2.2vw, 32px);
+    font-size: clamp(32px, 3vw, 44px);
     font-weight: 700;
     line-height: 1.2;
     letter-spacing: -0.02em;
@@ -106,8 +108,8 @@
     margin: -.08em 0 -.14em;
   }
   .copy h2 .line { display: block; }
-  .copy .summary { margin: 14px 0 0; color: var(--mauve); font-size: 18px; line-height: 1.55; }
-  .copy .meta, .copy .tags { display: flex; flex-wrap: wrap; margin: 0; padding: 0; list-style: none; color: var(--mauve); font-size: 14px; }
+  .copy .summary { margin: 16px 0 0; color: var(--mauve); font-size: 21px; line-height: 1.55; }
+  .copy .meta, .copy .tags { display: flex; flex-wrap: wrap; margin: 0; padding: 0; list-style: none; color: var(--mauve); font-size: 16px; }
   .copy .meta { margin-top: 28px; }
   .copy .tags { margin-top: 8px; }
   .copy .tags li + li::before { content: "·"; margin: 0 8px; }
@@ -123,13 +125,13 @@
   .notes-btn .i-phone, .notes-btn[aria-pressed="true"] .i-notes { display: none; }
   .notes-btn[aria-pressed="true"] .i-phone { display: block; }
   .copy .notes dt, .copy .notes dd { margin: 0; padding: 18px 0; border-bottom: 1px solid var(--line); }
-  .copy .notes dt { padding-right: 40px; color: var(--mauve); font-size: 15px; font-weight: 500; white-space: nowrap; }
-  .copy .notes dd { font-size: 17px; line-height: 1.55; }
+  .copy .notes dt { padding-right: 40px; color: var(--mauve); font-size: 16px; font-weight: 500; white-space: nowrap; }
+  .copy .notes dd { font-size: 19px; line-height: 1.55; }
   @media (max-height: 820px) and (min-width: 901px) {
     .copy .meta { margin-top: 20px; }
     .copy .notes { margin-top: 28px; }
     .copy .notes dt, .copy .notes dd { padding-top: 11px; padding-bottom: 11px; }
-    .copy .notes dd { font-size: 16px; }
+    .copy .notes dd { font-size: 17px; }
   }
 
   /* Each phone is a sticker: a white die-cut edge, a soft shadow, and a flap that shows
@@ -259,7 +261,8 @@
     .phone { height: min(calc(100svh - 340px), 560px); border-width: 8px; }
     /* The recording leads on a phone. The notes open in its place from the button by the title. */
     /* Wider than the recording (9:16 instead of 9:19.5): the video fills it and loses a little at the top and bottom */
-    .phone { height: max(250px, min(calc(100svh - 300px), 560px)); aspect-ratio: 9 / 16; border-width: 0; box-shadow: none; background: #000; }
+    .phone { height: max(250px, min(calc(100svh - 300px), 560px)); aspect-ratio: 1170 / 2391; border-width: 0; box-shadow: none; background: #000; }
+    .phone video { object-position: 50% 100%; } /* Crop only the status bar of the recording. */
     /* Phone on top, notes below; the notes scroll inside their own area */
     .slide-inner { display: flex; flex-direction: column; align-items: stretch; height: 100%; }
     .sticker { flex: none; align-self: center; }
@@ -294,11 +297,14 @@
 
 <header class="topbar">
   <div>
-    <h1>Yuquan Wang</h1>
-  </div>
+    <div class="name">
+    <h1>WANG YU CYUAN</h1>
   <a class="li" href="https://www.linkedin.com/in/%E6%B7%AF%E9%8A%93-%E7%8E%8B-57a98b244" target="_blank" rel="noopener" aria-label="LinkedIn">
     <svg width="22" height="22" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M13.6 0H2.4A2.4 2.4 0 0 0 0 2.4v11.2A2.4 2.4 0 0 0 2.4 16h11.2a2.4 2.4 0 0 0 2.4-2.4V2.4A2.4 2.4 0 0 0 13.6 0ZM4.9 13.4H2.6V6h2.3v7.4ZM3.7 5a1.3 1.3 0 1 1 0-2.7 1.3 1.3 0 0 1 0 2.7Zm9.7 8.4h-2.3V9.8c0-.9 0-2-1.2-2s-1.4.9-1.4 1.9v3.7H6.2V6h2.2v1h.1c.3-.6 1.1-1.2 2.2-1.2 2.4 0 2.8 1.6 2.8 3.6v4Z"/></svg>
   </a>
+    </div>
+    <p>Portfolio · iOS features I built for YouCam Makeup</p>
+  </div>
 </header>
 
 <main class="stage" aria-roledescription="carousel" aria-label="Features I built in YouCam Makeup">
@@ -306,16 +312,16 @@
   <section class="slide" style="--shade: #A3164F">
     <div class="slide-inner">
       <div class="copy">
-        <h2>[Feature name]</h2>
+        <h2>AI Hairstyle</h2>
         <div class="copy-body">
-          <p class="summary">[One line: what the user sees and does]</p>
-          <p class="meta"><time>[YYYY.MM]</time></p>
-          <ul class="tags"><li>[Swift]</li><li>[UIKit]</li><li>[AVFoundation]</li></ul>
+          <p class="summary">Pick a hairstyle. It renders in the background, so you can leave and find the result in History.</p>
+          <p class="meta"><time>2026.09</time></p>
+          <ul class="tags"><li>Swift</li><li>UIKit</li><li>Swift Concurrency</li></ul>
           <dl class="notes">
-            <div><dt>My part</dt><dd>[What you owned: the screens, modules or pipeline you built]</dd></div>
-            <div><dt>Problem</dt><dd>[The hard part, in one or two sentences]</dd></div>
-            <div><dt>Approach</dt><dd>[How you solved it: the design, the APIs, the trade-off]</dd></div>
-            <div><dt>Result</dt><dd>[What changed: a public number, or what it made possible]</dd></div>
+            <div><dt>My part</dt><dd>The hairstyle picker, the result carousel and the background render queue.</dd></div>
+            <div><dt>Problem</dt><dd>A render takes several seconds, and people left the screen before it finished and lost the result.</dd></div>
+            <div><dt>Approach</dt><dd>Each render runs as a background task that does not depend on the screen. The finished result goes to History, and the picker shows it when it is ready.</dd></div>
+            <div><dt>Result</dt><dd>People can try many styles in a row and leave the screen at any time without losing a result.</dd></div>
           </dl>
         </div>
       </div>
@@ -329,16 +335,16 @@
   <section class="slide" style="--shade: #B88A74">
     <div class="slide-inner">
       <div class="copy">
-        <h2>[Feature name]</h2>
+        <h2>History</h2>
         <div class="copy-body">
-          <p class="summary">[One line: what the user sees and does]</p>
-          <p class="meta"><time>[YYYY.MM]</time></p>
-          <ul class="tags"><li>[Swift]</li><li>[Metal]</li></ul>
+          <p class="summary">Every AI result in one place, filtered by feature, with the ones that expire soon marked.</p>
+          <p class="meta"><time>2026.09</time></p>
+          <ul class="tags"><li>Swift</li><li>UIKit</li><li>Core Data</li></ul>
           <dl class="notes">
-            <div><dt>My part</dt><dd>[What you owned: the screens, modules or pipeline you built]</dd></div>
-            <div><dt>Problem</dt><dd>[The hard part, in one or two sentences]</dd></div>
-            <div><dt>Approach</dt><dd>[How you solved it: the design, the APIs, the trade-off]</dd></div>
-            <div><dt>Result</dt><dd>[What changed: a public number, or what it made possible]</dd></div>
+            <div><dt>My part</dt><dd>The History page: the filter by feature, the expiry groups and the result detail page.</dd></div>
+            <div><dt>Problem</dt><dd>Results from more than ten AI features came back in different formats, and each one expires on a different date.</dd></div>
+            <div><dt>Approach</dt><dd>One result model for all features, grouped by expiry date and filtered locally, so the list updates without a reload.</dd></div>
+            <div><dt>Result</dt><dd>One place to find every AI result, and the ones that expire soon are clearly marked.</dd></div>
           </dl>
         </div>
       </div>
@@ -352,16 +358,16 @@
   <section class="slide" style="--shade: #5E2B55">
     <div class="slide-inner">
       <div class="copy">
-        <h2>[Feature name]</h2>
+        <h2>AI Wardrobe</h2>
         <div class="copy-body">
-          <p class="summary">[One line: what the user sees and does]</p>
-          <p class="meta"><time>[YYYY.MM]</time></p>
-          <ul class="tags"><li>[SwiftUI]</li><li>[Core Image]</li></ul>
+          <p class="summary">Pick an outfit from a themed collection and see it on the photo, then switch to the next one in a tap.</p>
+          <p class="meta"><time>2026.08</time></p>
+          <ul class="tags"><li>Swift</li><li>UIKit</li><li>Collection View</li></ul>
           <dl class="notes">
-            <div><dt>My part</dt><dd>[What you owned: the screens, modules or pipeline you built]</dd></div>
-            <div><dt>Problem</dt><dd>[The hard part, in one or two sentences]</dd></div>
-            <div><dt>Approach</dt><dd>[How you solved it: the design, the APIs, the trade-off]</dd></div>
-            <div><dt>Result</dt><dd>[What changed: a public number, or what it made possible]</dd></div>
+            <div><dt>My part</dt><dd>The outfit picker with its themed tabs, and the preview that swaps outfits on the photo.</dd></div>
+            <div><dt>Problem</dt><dd>Each tab has many outfits, and fast scrolling through large thumbnails made the list stutter.</dd></div>
+            <div><dt>Approach</dt><dd>Thumbnails load and decode off the main thread and are cached per tab. A finished outfit is kept, so switching back to it is instant.</dd></div>
+            <div><dt>Result</dt><dd>Smooth scrolling through all collections, and switching between outfits feels immediate.</dd></div>
           </dl>
         </div>
       </div>
@@ -375,22 +381,45 @@
   <section class="slide" style="--shade: #D9578A">
     <div class="slide-inner">
       <div class="copy">
-        <h2>[Feature name]</h2>
+        <h2>Object Removal</h2>
         <div class="copy-body">
-          <p class="summary">[One line: what the user sees and does]</p>
-          <p class="meta"><time>[YYYY.MM]</time></p>
-          <ul class="tags"><li>[Swift]</li><li>[Combine]</li></ul>
+          <p class="summary">Mark what to remove with a tap, a lasso or a brush, and the background fills in where it was.</p>
+          <p class="meta"><time>2026.07</time></p>
+          <ul class="tags"><li>Swift</li><li>Metal</li><li>Core Image</li></ul>
           <dl class="notes">
-            <div><dt>My part</dt><dd>[What you owned: the screens, modules or pipeline you built]</dd></div>
-            <div><dt>Problem</dt><dd>[The hard part, in one or two sentences]</dd></div>
-            <div><dt>Approach</dt><dd>[How you solved it: the design, the APIs, the trade-off]</dd></div>
-            <div><dt>Result</dt><dd>[What changed: a public number, or what it made possible]</dd></div>
+            <div><dt>My part</dt><dd>The selection tools (tap, lasso, brush) and the mask that the removal request uses.</dd></div>
+            <div><dt>Problem</dt><dd>Three tools draw on one mask, and undo, redo and the eraser must work the same for all of them.</dd></div>
+            <div><dt>Approach</dt><dd>Each stroke is a step in one history. The mask is rendered with Metal at the photo resolution, so the preview and the request use the same mask.</dd></div>
+            <div><dt>Result</dt><dd>People can combine all three tools on one photo and undo any step.</dd></div>
           </dl>
         </div>
       </div>
       <div class="phone">
         <p class="empty"></p>
         <video src="assets/videos/feature-4.mp4" poster="assets/videos/feature-4.jpg" muted loop playsinline preload="metadata"></video>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" style="--shade: #8E5B6E">
+    <div class="slide-inner">
+      <div class="copy">
+        <h2>Body Reshape</h2>
+        <div class="copy-body">
+          <p class="summary">The waist, arms and hips are found on the photo, so one slider reshapes each part.</p>
+          <p class="meta"><time>2026.06</time></p>
+          <ul class="tags"><li>Swift</li><li>UIKit</li><li>Vision</li></ul>
+          <dl class="notes">
+            <div><dt>My part</dt><dd>The body tools: waist, waistline, arms, hips and belly, with automatic detection and a manual mode.</dd></div>
+            <div><dt>Problem</dt><dd>Each body part needs its own detected area, and a strong change must not bend the background.</dd></div>
+            <div><dt>Approach</dt><dd>Detection finds each part and shows its area on the photo. The warp stays inside that area, and the BG Protect switch keeps the background straight.</dd></div>
+            <div><dt>Result</dt><dd>One slider per body part, and the change looks natural even at strong values.</dd></div>
+          </dl>
+        </div>
+      </div>
+      <div class="phone">
+        <p class="empty"></p>
+        <video src="assets/videos/feature-5.mp4" poster="assets/videos/feature-5.jpg" muted loop playsinline preload="metadata"></video>
       </div>
     </div>
   </section>
@@ -459,7 +488,7 @@
     const v = videoOf(s);
     s.querySelector('.empty').textContent = 'Add a recording at ' + v.getAttribute('src');
     const hide = () => { v.hidden = true; };
-    if (v.error || v.networkState === HTMLMediaElement.NETWORK_NO_SOURCE) hide();
+    if (v.error) hide();
     else v.addEventListener('error', hide);
 
     phone.append(document.querySelector('#pause-button').content.cloneNode(true));
