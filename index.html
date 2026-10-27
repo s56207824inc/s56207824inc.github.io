@@ -538,14 +538,26 @@
     b.setAttribute('aria-label', on ? 'Show recording' : 'Show notes');
     const v = videoOf(s);
     if (on) v.pause();
-    else if (playing && !v.hidden && s.classList.contains('is-active')) v.play().catch(() => {});
+    else if (playing && !v.hidden && s.classList.contains('is-active')) play(v);
   }
 
+  // A browser can refuse to start a video, for example in Low Power Mode. Then the next tap or key starts it.
+  function play(v) {
+    v.play().catch(() => {
+      const retry = () => {
+        if (playing && v.paused && v === videoOf(slides[current])) v.play().catch(() => {});
+      };
+      addEventListener('pointerdown', retry, { once: true, capture: true });
+      addEventListener('keydown', retry, { once: true, capture: true });
+    });
+  }
+
+  // Call this only when the slide is visible: Safari pauses a muted video that starts while hidden.
   function startVideo(s) {
     const v = videoOf(s);
     if (v.hidden) return;
     v.currentTime = 0;
-    if (playing) v.play().catch(() => {});
+    if (playing) play(v);
   }
 
   // The page dots move as soon as a page change starts, not when its animation ends.
@@ -745,6 +757,9 @@
       if (s.classList.contains('show-notes')) showNotes(s, false);
       if (!on) videoOf(s).pause();
     });
+    // If anything stopped the recording during the page change, it plays again here.
+    const v = videoOf(slides[i]);
+    if (playing && v.paused && !v.hidden) play(v);
     markDot(i);
     // Load the next recording now, so it plays at once when the page turns.
     videoOf(slides[(i + 1) % n]).preload = 'auto';
@@ -878,7 +893,6 @@
     const here = slides[current];
     const target = slides[i];
     markDot(i);
-    startVideo(target);
     hideCopy(target);
     copyOut(here);
     copyIn(target, 320);
@@ -891,6 +905,7 @@
       render(1);
       animateTo(0, 900, easeInOut, () => end(target));
     }
+    startVideo(target); // After begin(), which makes the target visible
   }
   const next = () => go((current + 1) % n, 1);
   const prev = () => go((current - 1 + n) % n, -1);
@@ -1045,7 +1060,7 @@
     });
     if (current < 0) return;
     const v = videoOf(slides[current]);
-    if (on && !v.hidden) v.play().catch(() => {});
+    if (on && !v.hidden) play(v);
     else v.pause();
   }
   pauseButtons.forEach(b => b.addEventListener('click', () => setPlaying(!playing)));
@@ -1054,7 +1069,7 @@
     if (current < 0) return;
     const v = videoOf(slides[current]);
     if (document.hidden) v.pause();
-    else if (playing && !v.hidden) v.play().catch(() => {});
+    else if (playing && !v.hidden) play(v);
   });
 
   // Pointer effects
@@ -1154,7 +1169,6 @@
     markDot(0);
     root.style.setProperty('--shade', shadeOf(first));
     stage.style.background = 'var(--base)';
-    startVideo(first);
 
     order.forEach((s, k) => {
       const tilt = s === first ? 0 : tilts[k % tilts.length];
@@ -1171,6 +1185,7 @@
         { transform: `rotate(${tilt}deg) scale(1)`, opacity: 1, filter: 'drop-shadow(0 0 0 rgb(0 0 0 / 0))' }
       ], { duration: DROP, delay: START + k * GAP, easing: 'cubic-bezier(.3, .6, .3, 1)', fill: 'backwards' });
     });
+    startVideo(first); // After the loop, which makes the first slide visible
 
     // The page takes the first feature's shade as its sticker lands.
     const landed = impact(n - 1);
