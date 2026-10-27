@@ -738,6 +738,8 @@
       if (!on) videoOf(s).pause();
     });
     markDot(i);
+    // Load the next recording now, so it plays at once when the page turns.
+    videoOf(slides[(i + 1) % n]).preload = 'auto';
     root.style.setProperty('--shade', shadeOf(slides[i]));
     stage.style.background = tintOf(slides[i]);
     restSince = performance.now();
