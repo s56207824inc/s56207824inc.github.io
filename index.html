@@ -13,6 +13,8 @@
 <meta property="og:image" content="https://s56207824inc.github.io/assets/og.png">
 -->
 <meta name="twitter:card" content="summary_large_image">
+<!-- The first phone shows this poster while its video loads. -->
+<link rel="preload" as="image" href="assets/videos/feature-1.jpg">
 <style>
   :root {
     --base: #F7F4F5;
@@ -486,8 +488,11 @@
 
     const phone = phoneOf(s);
     const v = videoOf(s);
-    s.querySelector('.empty').textContent = 'Add a recording at ' + v.getAttribute('src');
-    const hide = () => { v.hidden = true; };
+    // The video is see-through until its poster loads, so the text is added only when the file fails.
+    const hide = () => {
+      v.hidden = true;
+      s.querySelector('.empty').textContent = 'Add a recording at ' + v.getAttribute('src');
+    };
     if (v.error) hide();
     else v.addEventListener('error', hide);
 
