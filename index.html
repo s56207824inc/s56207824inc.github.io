@@ -129,11 +129,17 @@
   .copy .notes dt, .copy .notes dd { margin: 0; padding: 18px 0; border-bottom: 1px solid var(--line); }
   .copy .notes dt { padding-right: 40px; color: var(--mauve); font-size: 16px; font-weight: 500; white-space: nowrap; }
   .copy .notes dd { font-size: 19px; line-height: 1.55; }
+  /* Headline per point: the bold line says what it does, the line below says how */
+  .copy .notes.points { grid-template-columns: minmax(0, 1fr); }
+  .copy .notes.points dt { padding: 20px 0 4px; border: 0; color: var(--ink); font-size: 19px; font-weight: 600; white-space: normal; }
+  .copy .notes.points dd { padding: 0 0 20px; color: var(--mauve); font-size: 17px; }
   @media (max-height: 820px) and (min-width: 901px) {
     .copy .meta { margin-top: 20px; }
     .copy .notes { margin-top: 28px; }
     .copy .notes dt, .copy .notes dd { padding-top: 11px; padding-bottom: 11px; }
     .copy .notes dd { font-size: 17px; }
+    .copy .notes.points dt { padding: 12px 0 2px; font-size: 17px; }
+    .copy .notes.points dd { padding: 0 0 12px; font-size: 15px; }
   }
 
   /* Each phone is a sticker: a white die-cut edge, a soft shadow, and a flap that shows
@@ -285,6 +291,8 @@
     .copy .notes { grid-template-columns: minmax(0, 1fr); margin-top: 16px; }
     .copy .notes dt { padding: 14px 0 2px; border: 0; white-space: normal; font-size: 14px; }
     .copy .notes dd { padding: 0 0 14px; font-size: 16px; }
+    .copy .notes.points dt { padding: 14px 0 2px; font-size: 16px; }
+    .copy .notes.points dd { padding: 0 0 14px; font-size: 15px; }
     .pager { padding: 16px var(--edge) 20px; }
     .swatch { height: 24px; padding: 0 4px; }
     .swatch::before { width: 6px; height: 6px; }
@@ -318,13 +326,13 @@
       <div class="copy">
         <h2>AI Hairstyle</h2>
         <div class="copy-body">
-          <p class="summary">Pick a hairstyle. It renders in the background, so you can leave and find the result in History.</p>
+          <p class="summary">See a new hairstyle on your own photo.</p>
           <p class="meta"><time>2026.09</time></p>
           <ul class="tags"><li>Swift</li><li>UIKit</li><li>Swift Concurrency</li></ul>
-          <dl class="notes">
-            <div><dt>Problem</dt><dd>A render takes several seconds, and people left the screen before it finished and lost the result.</dd></div>
-            <div><dt>Approach</dt><dd>Each render runs as a background task that does not depend on the screen. The finished result goes to History, and the picker shows it when it is ready.</dd></div>
-            <div><dt>Result</dt><dd>People can try many styles in a row and leave the screen at any time without losing a result.</dd></div>
+          <dl class="notes points">
+            <div><dt>Renders keep going after you leave</dt><dd>Each render is a background task owned by a queue, not by the screen, so closing the page does not cancel it.</dd></div>
+            <div><dt>Try many styles in a row</dt><dd>New requests wait in the queue while earlier ones render, so picking the next style never waits.</dd></div>
+            <div><dt>Results wait in History</dt><dd>A finished render is saved to History, and the picker shows it when you come back.</dd></div>
           </dl>
         </div>
       </div>
