@@ -322,7 +322,6 @@
           <p class="meta"><time>2026.09</time></p>
           <ul class="tags"><li>Swift</li><li>UIKit</li><li>Swift Concurrency</li></ul>
           <dl class="notes">
-            <div><dt>My part</dt><dd>The hairstyle picker, the result carousel and the background render queue.</dd></div>
             <div><dt>Problem</dt><dd>A render takes several seconds, and people left the screen before it finished and lost the result.</dd></div>
             <div><dt>Approach</dt><dd>Each render runs as a background task that does not depend on the screen. The finished result goes to History, and the picker shows it when it is ready.</dd></div>
             <div><dt>Result</dt><dd>People can try many styles in a row and leave the screen at any time without losing a result.</dd></div>
@@ -345,7 +344,6 @@
           <p class="meta"><time>2026.09</time></p>
           <ul class="tags"><li>Swift</li><li>UIKit</li><li>Core Data</li></ul>
           <dl class="notes">
-            <div><dt>My part</dt><dd>The History page: the filter by feature, the expiry groups and the result detail page.</dd></div>
             <div><dt>Problem</dt><dd>Results from more than ten AI features came back in different formats, and each one expires on a different date.</dd></div>
             <div><dt>Approach</dt><dd>One result model for all features, grouped by expiry date and filtered locally, so the list updates without a reload.</dd></div>
             <div><dt>Result</dt><dd>One place to find every AI result, and the ones that expire soon are clearly marked.</dd></div>
@@ -368,7 +366,6 @@
           <p class="meta"><time>2026.08</time></p>
           <ul class="tags"><li>Swift</li><li>UIKit</li><li>Collection View</li></ul>
           <dl class="notes">
-            <div><dt>My part</dt><dd>The outfit picker with its themed tabs, and the preview that swaps outfits on the photo.</dd></div>
             <div><dt>Problem</dt><dd>Each tab has many outfits, and fast scrolling through large thumbnails made the list stutter.</dd></div>
             <div><dt>Approach</dt><dd>Thumbnails load and decode off the main thread and are cached per tab. A finished outfit is kept, so switching back to it is instant.</dd></div>
             <div><dt>Result</dt><dd>Smooth scrolling through all collections, and switching between outfits feels immediate.</dd></div>
@@ -391,7 +388,6 @@
           <p class="meta"><time>2026.07</time></p>
           <ul class="tags"><li>Swift</li><li>Metal</li><li>Core Image</li></ul>
           <dl class="notes">
-            <div><dt>My part</dt><dd>The selection tools (tap, lasso, brush) and the mask that the removal request uses.</dd></div>
             <div><dt>Problem</dt><dd>Three tools draw on one mask, and undo, redo and the eraser must work the same for all of them.</dd></div>
             <div><dt>Approach</dt><dd>Each stroke is a step in one history. The mask is rendered with Metal at the photo resolution, so the preview and the request use the same mask.</dd></div>
             <div><dt>Result</dt><dd>People can combine all three tools on one photo and undo any step.</dd></div>
@@ -414,7 +410,6 @@
           <p class="meta"><time>2026.06</time></p>
           <ul class="tags"><li>Swift</li><li>UIKit</li><li>Vision</li></ul>
           <dl class="notes">
-            <div><dt>My part</dt><dd>The body tools: waist, waistline, arms, hips and belly, with automatic detection and a manual mode.</dd></div>
             <div><dt>Problem</dt><dd>Each body part needs its own detected area, and a strong change must not bend the background.</dd></div>
             <div><dt>Approach</dt><dd>Detection finds each part and shows its area on the photo. The warp stays inside that area, and the BG Protect switch keeps the background straight.</dd></div>
             <div><dt>Result</dt><dd>One slider per body part, and the change looks natural even at strong values.</dd></div>
