@@ -111,8 +111,6 @@
   }
   .copy h2 .line { display: block; }
   .copy .summary { margin: 16px 0 0; color: var(--mauve); font-size: 21px; line-height: 1.55; }
-  .copy .tags { display: flex; flex-wrap: wrap; margin: 28px 0 0; padding: 0; list-style: none; color: var(--mauve); font-size: 16px; }
-  .copy .tags li + li::before { content: "·"; margin: 0 8px; }
   .copy .notes { display: grid; grid-template-columns: auto minmax(0, 1fr); margin: 40px 0 0; border-top: 1px solid var(--line); }
   .copy .notes > div { display: contents; }
   .notes-btn {
@@ -129,14 +127,17 @@
   .copy .notes dd { font-size: 19px; line-height: 1.55; }
   /* Headline per point: the bold line says what it does, the line below says how */
   .copy .notes.points { grid-template-columns: minmax(0, 1fr); }
-  .copy .notes.points dt { padding: 20px 0 4px; border: 0; color: var(--ink); font-size: 19px; font-weight: 600; white-space: normal; }
+  .copy .notes.points dt { padding: 20px 0 8px; border: 0; color: var(--ink); font-size: 23px; font-weight: 600; white-space: normal; }
   .copy .notes.points dd { padding: 0 0 20px; color: var(--mauve); font-size: 17px; }
+  /* What it gives the user in plain words, then the technique under it */
+  .copy .tech { margin: 4px 0 0; padding: 0; list-style: none; }
+  .copy .tech li + li { margin-top: 12px; }
+  .copy .tech b { display: block; color: var(--ink); font-weight: 500; }
   @media (max-height: 820px) and (min-width: 901px) {
-    .copy .tags { margin-top: 20px; }
     .copy .notes { margin-top: 28px; }
     .copy .notes dt, .copy .notes dd { padding-top: 11px; padding-bottom: 11px; }
     .copy .notes dd { font-size: 17px; }
-    .copy .notes.points dt { padding: 12px 0 2px; font-size: 17px; }
+    .copy .notes.points dt { padding: 12px 0 6px; font-size: 20px; }
     .copy .notes.points dd { padding: 0 0 12px; font-size: 15px; }
   }
 
@@ -276,7 +277,6 @@
     .sticker { flex: none; align-self: center; }
     .copy { position: relative; flex: 1; max-width: none; min-height: 0; overflow-y: auto; touch-action: pan-y; }
     .copy h2 { padding-right: 52px; }
-    .copy .tags { margin-top: 10px; }
     .copy .notes { display: none; }
     .notes-btn { display: grid; }
     .slide.show-notes .sticker { display: none; }
@@ -288,7 +288,7 @@
     .copy .notes { grid-template-columns: minmax(0, 1fr); margin-top: 16px; }
     .copy .notes dt { padding: 14px 0 2px; border: 0; white-space: normal; font-size: 14px; }
     .copy .notes dd { padding: 0 0 14px; font-size: 16px; }
-    .copy .notes.points dt { padding: 14px 0 2px; font-size: 16px; }
+    .copy .notes.points dt { padding: 14px 0 6px; font-size: 19px; }
     .copy .notes.points dd { padding: 0 0 14px; font-size: 15px; }
     .pager { padding: 16px var(--edge) 20px; }
     .swatch { height: 24px; padding: 0 4px; }
@@ -323,11 +323,15 @@
       <div class="copy">
         <h2>AI Hairstyle</h2>
         <div class="copy-body">
-          <p class="summary">Pick a hairstyle for women or men, and AI puts it on your photo.</p>
+          <p class="summary">Try a new cut before you go to the salon. Pick hairstyles for women or men, and AI puts them on your photo. Compare the results later in History.</p>
           <dl class="notes points">
-            <div><dt>Use case</dt><dd>Try a new cut before you go to the salon. Queue several styles, leave the screen, and compare the results later in History.</dd></div>
-            <div><dt>Tech</dt><dd>UIKit for the style grid and its themed tabs. Swift Concurrency for a background render queue, so a render does not stop when you leave the screen.</dd></div>
-            <div><dt>Language</dt><dd>Swift</dd></div>
+            <div><dt>How it's built</dt><dd><ul class="tech">
+              <li><b>Smooth at every step</b>Images cached on the device and decoded before they appear, progress that starts at once, and taps guarded against double actions</li>
+              <li><b>Keep browsing while AI works</b>Task queue that sends renders to the server and polls for the results</li>
+              <li><b>Nothing is lost when you leave</b>Results kept on the server and cached on the device for History</li>
+              <li><b>One codebase for iOS and Android</b>Flutter module inside the native app, with a Pigeon bridge to Swift</li>
+            </ul></dd></div>
+            <div><dt>Stack</dt><dd>Swift / Flutter / Dart / Pigeon / SQLite / Firebase / Push Notification</dd></div>
           </dl>
         </div>
       </div>
@@ -338,38 +342,20 @@
     </div>
   </section>
 
-  <section class="slide" style="--shade: #B88A74">
-    <div class="slide-inner">
-      <div class="copy">
-        <h2>History</h2>
-        <div class="copy-body">
-          <p class="summary">Every AI result in one place, filtered by feature, with the ones that expire soon marked.</p>
-          <ul class="tags"><li>Swift</li><li>UIKit</li><li>Core Data</li></ul>
-          <dl class="notes">
-            <div><dt>Problem</dt><dd>Results from more than ten AI features came back in different formats, and each one expires on a different date.</dd></div>
-            <div><dt>Approach</dt><dd>One result model for all features, grouped by expiry date and filtered locally, so the list updates without a reload.</dd></div>
-            <div><dt>Result</dt><dd>One place to find every AI result, and the ones that expire soon are clearly marked.</dd></div>
-          </dl>
-        </div>
-      </div>
-      <div class="phone">
-        <p class="empty"></p>
-        <video src="assets/videos/feature-2.mp4" poster="assets/videos/feature-2.jpg" muted loop playsinline preload="none"></video>
-      </div>
-    </div>
-  </section>
-
   <section class="slide" style="--shade: #5E2B55">
     <div class="slide-inner">
       <div class="copy">
         <h2>AI Wardrobe</h2>
         <div class="copy-body">
-          <p class="summary">Pick an outfit from a themed collection and see it on the photo, then switch to the next one in a tap.</p>
-          <ul class="tags"><li>Swift</li><li>UIKit</li><li>Collection View</li></ul>
-          <dl class="notes">
-            <div><dt>Problem</dt><dd>Each tab has many outfits, and fast scrolling through large thumbnails made the list stutter.</dd></div>
-            <div><dt>Approach</dt><dd>Thumbnails load and decode off the main thread and are cached per tab. A finished outfit is kept, so switching back to it is instant.</dd></div>
-            <div><dt>Result</dt><dd>Smooth scrolling through all collections, and switching between outfits feels immediate.</dd></div>
+          <p class="summary">Try outfits on your own photo, from themed collections or a look found on the web. Render many at once.</p>
+          <dl class="notes points">
+            <div><dt>How it's built</dt><dd><ul class="tech">
+              <li><b>Many outfits in one tap</b>Batch mode sends all chosen outfits at once; each result shows when ready</li>
+              <li><b>Switch back without waiting</b>Results cached by outfit and body area, so a finished look shows at once</li>
+              <li><b>Bring your own outfit</b>Upload a photo or search the web, and it uses the same render queue</li>
+              <li><b>Smooth through long collections</b>Cached thumbnails, and tabs that jump straight to their part of the list</li>
+            </ul></dd></div>
+            <div><dt>Stack</dt><dd>Swift / Flutter / Dart / Pigeon / SQLite / Firebase / Push Notification</dd></div>
           </dl>
         </div>
       </div>
@@ -385,12 +371,15 @@
       <div class="copy">
         <h2>Object Removal</h2>
         <div class="copy-body">
-          <p class="summary">Mark what to remove with a tap, a lasso or a brush, and the background fills in where it was.</p>
-          <ul class="tags"><li>Swift</li><li>Metal</li><li>Core Image</li></ul>
-          <dl class="notes">
-            <div><dt>Problem</dt><dd>Three tools draw on one mask, and undo, redo and the eraser must work the same for all of them.</dd></div>
-            <div><dt>Approach</dt><dd>Each stroke is a step in one history. The mask is rendered with Metal at the photo resolution, so the preview and the request use the same mask.</dd></div>
-            <div><dt>Result</dt><dd>People can combine all three tools on one photo and undo any step.</dd></div>
+          <p class="summary">Remove people or things from a photo. Let AI find them, or mark them with a tap, brush or lasso.</p>
+          <dl class="notes points">
+            <div><dt>How it's built</dt><dd><ul class="tech">
+              <li><b>Four ways to choose</b>Auto, tap, brush and lasso draw on one mask, with an eraser and soft edges</li>
+              <li><b>Undo any step</b>Each edit keeps its own mask and result, so undo works across every tool</li>
+              <li><b>No leftovers when you deselect</b>A GPU fragment shader erases an AI-found object's mask, soft edges included</li>
+              <li><b>On the device or in the cloud</b>Essential runs a Core ML model on the device; Advanced uses the AI server</li>
+            </ul></dd></div>
+            <div><dt>Stack</dt><dd>Swift / Flutter / Dart / HookWidget / Pigeon / Core ML / GLSL / Firebase</dd></div>
           </dl>
         </div>
       </div>
@@ -404,20 +393,47 @@
   <section class="slide" style="--shade: #8E5B6E">
     <div class="slide-inner">
       <div class="copy">
-        <h2>Body Reshape</h2>
+        <h2>Body Tuner</h2>
         <div class="copy-body">
-          <p class="summary">The waist, arms and hips are found on the photo, so one slider reshapes each part.</p>
-          <ul class="tags"><li>Swift</li><li>UIKit</li><li>Vision</li></ul>
-          <dl class="notes">
-            <div><dt>Problem</dt><dd>Each body part needs its own detected area, and a strong change must not bend the background.</dd></div>
-            <div><dt>Approach</dt><dd>Detection finds each part and shows its area on the photo. The warp stays inside that area, and the BG Protect switch keeps the background straight.</dd></div>
-            <div><dt>Result</dt><dd>One slider per body part, and the change looks natural even at strong values.</dd></div>
+          <p class="summary">Reshape the shoulders, neck, chest, arms, upper arms, forearms, waist, waistline, belly, abs, hips and legs, each with its own slider. AI finds every part on the photo.</p>
+          <dl class="notes points">
+            <div><dt>How it's built</dt><dd><ul class="tech">
+              <li><b>Finds the body for you</b>In-house on-device AI engine, wired in with models that download on first use</li>
+              <li><b>Smooth slider, no lag</b>A render queue that drops old frames, so only the latest slider value is drawn</li>
+              <li><b>Background stays straight</b>BG Protect keeps the warp off walls and lines behind the body</li>
+              <li><b>Undo any step</b>Every change, AI server results included, is one step in one history</li>
+            </ul></dd></div>
+            <div><dt>Stack</dt><dd>Swift / Objective-C / GPUImage / Firebase</dd></div>
           </dl>
         </div>
       </div>
       <div class="phone">
         <p class="empty"></p>
         <video src="assets/videos/feature-5.mp4" poster="assets/videos/feature-5.jpg" muted loop playsinline preload="none"></video>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" style="--shade: #B88A74">
+    <div class="slide-inner">
+      <div class="copy">
+        <h2>History</h2>
+        <div class="copy-body">
+          <p class="summary">Every AI result in one place. Filter by feature, switch between photos and videos, and see what expires soon.</p>
+          <dl class="notes points">
+            <div><dt>How it's built</dt><dd><ul class="tech">
+              <li><b>One list for every AI feature</b>Each feature plugs in its own source, and the page merges them by date</li>
+              <li><b>Results update by themselves</b>One shared poller with quotas and backoff checks your newest task first</li>
+              <li><b>Expired results leave on time</b>One timer aimed at the next result due to expire, with no extra polling</li>
+              <li><b>Shared by 4 apps</b>One Flutter module with immutable state and nearly 800 unit tests</li>
+            </ul></dd></div>
+            <div><dt>Stack</dt><dd>Flutter / Dart / Riverpod + HookWidget / SQLite / Firebase</dd></div>
+          </dl>
+        </div>
+      </div>
+      <div class="phone">
+        <p class="empty"></p>
+        <video src="assets/videos/feature-2.mp4" poster="assets/videos/feature-2.jpg" muted loop playsinline preload="none"></video>
       </div>
     </div>
   </section>
