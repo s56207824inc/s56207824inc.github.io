@@ -111,9 +111,7 @@
   }
   .copy h2 .line { display: block; }
   .copy .summary { margin: 16px 0 0; color: var(--mauve); font-size: 21px; line-height: 1.55; }
-  .copy .meta, .copy .tags { display: flex; flex-wrap: wrap; margin: 0; padding: 0; list-style: none; color: var(--mauve); font-size: 16px; }
-  .copy .meta { margin-top: 28px; }
-  .copy .tags { margin-top: 8px; }
+  .copy .tags { display: flex; flex-wrap: wrap; margin: 28px 0 0; padding: 0; list-style: none; color: var(--mauve); font-size: 16px; }
   .copy .tags li + li::before { content: "·"; margin: 0 8px; }
   .copy .notes { display: grid; grid-template-columns: auto minmax(0, 1fr); margin: 40px 0 0; border-top: 1px solid var(--line); }
   .copy .notes > div { display: contents; }
@@ -134,7 +132,7 @@
   .copy .notes.points dt { padding: 20px 0 4px; border: 0; color: var(--ink); font-size: 19px; font-weight: 600; white-space: normal; }
   .copy .notes.points dd { padding: 0 0 20px; color: var(--mauve); font-size: 17px; }
   @media (max-height: 820px) and (min-width: 901px) {
-    .copy .meta { margin-top: 20px; }
+    .copy .tags { margin-top: 20px; }
     .copy .notes { margin-top: 28px; }
     .copy .notes dt, .copy .notes dd { padding-top: 11px; padding-bottom: 11px; }
     .copy .notes dd { font-size: 17px; }
@@ -278,8 +276,7 @@
     .sticker { flex: none; align-self: center; }
     .copy { position: relative; flex: 1; max-width: none; min-height: 0; overflow-y: auto; touch-action: pan-y; }
     .copy h2 { padding-right: 52px; }
-    .copy .meta { margin-top: 10px; }
-    .copy .tags { margin-top: 4px; }
+    .copy .tags { margin-top: 10px; }
     .copy .notes { display: none; }
     .notes-btn { display: grid; }
     .slide.show-notes .sticker { display: none; }
@@ -326,13 +323,11 @@
       <div class="copy">
         <h2>AI Hairstyle</h2>
         <div class="copy-body">
-          <p class="summary">See a new hairstyle on your own photo.</p>
-          <p class="meta"><time>2026.09</time></p>
-          <ul class="tags"><li>Swift</li><li>UIKit</li><li>Swift Concurrency</li></ul>
+          <p class="summary">Pick a hairstyle for women or men, and AI puts it on your photo.</p>
           <dl class="notes points">
-            <div><dt>Renders keep going after you leave</dt><dd>Each render is a background task owned by a queue, not by the screen, so closing the page does not cancel it.</dd></div>
-            <div><dt>Try many styles in a row</dt><dd>New requests wait in the queue while earlier ones render, so picking the next style never waits.</dd></div>
-            <div><dt>Results wait in History</dt><dd>A finished render is saved to History, and the picker shows it when you come back.</dd></div>
+            <div><dt>Use case</dt><dd>Try a new cut before you go to the salon. Queue several styles, leave the screen, and compare the results later in History.</dd></div>
+            <div><dt>Tech</dt><dd>UIKit for the style grid and its themed tabs. Swift Concurrency for a background render queue, so a render does not stop when you leave the screen.</dd></div>
+            <div><dt>Language</dt><dd>Swift</dd></div>
           </dl>
         </div>
       </div>
@@ -349,7 +344,6 @@
         <h2>History</h2>
         <div class="copy-body">
           <p class="summary">Every AI result in one place, filtered by feature, with the ones that expire soon marked.</p>
-          <p class="meta"><time>2026.09</time></p>
           <ul class="tags"><li>Swift</li><li>UIKit</li><li>Core Data</li></ul>
           <dl class="notes">
             <div><dt>Problem</dt><dd>Results from more than ten AI features came back in different formats, and each one expires on a different date.</dd></div>
@@ -371,7 +365,6 @@
         <h2>AI Wardrobe</h2>
         <div class="copy-body">
           <p class="summary">Pick an outfit from a themed collection and see it on the photo, then switch to the next one in a tap.</p>
-          <p class="meta"><time>2026.08</time></p>
           <ul class="tags"><li>Swift</li><li>UIKit</li><li>Collection View</li></ul>
           <dl class="notes">
             <div><dt>Problem</dt><dd>Each tab has many outfits, and fast scrolling through large thumbnails made the list stutter.</dd></div>
@@ -393,7 +386,6 @@
         <h2>Object Removal</h2>
         <div class="copy-body">
           <p class="summary">Mark what to remove with a tap, a lasso or a brush, and the background fills in where it was.</p>
-          <p class="meta"><time>2026.07</time></p>
           <ul class="tags"><li>Swift</li><li>Metal</li><li>Core Image</li></ul>
           <dl class="notes">
             <div><dt>Problem</dt><dd>Three tools draw on one mask, and undo, redo and the eraser must work the same for all of them.</dd></div>
@@ -415,7 +407,6 @@
         <h2>Body Reshape</h2>
         <div class="copy-body">
           <p class="summary">The waist, arms and hips are found on the photo, so one slider reshapes each part.</p>
-          <p class="meta"><time>2026.06</time></p>
           <ul class="tags"><li>Swift</li><li>UIKit</li><li>Vision</li></ul>
           <dl class="notes">
             <div><dt>Problem</dt><dd>Each body part needs its own detected area, and a strong change must not bend the background.</dd></div>
