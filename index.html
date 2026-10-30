@@ -323,10 +323,10 @@
       <div class="copy">
         <h2>AI Hairstyle</h2>
         <div class="copy-body">
-          <p class="summary">Try a new cut before you go to the salon. Pick hairstyles for women or men, and AI puts them on your photo. Compare the results later in History.</p>
+          <p class="summary">Try a new cut before you go to the salon. Pick hairstyles for women or men, and AI puts them on your photo.</p>
           <dl class="notes points">
             <div><dt>How it's built</dt><dd><ul class="tech">
-              <li><b>Smooth at every step</b>Images cached on the device and decoded before they appear, progress that starts at once, and taps guarded against double actions</li>
+              <li><b>Smooth at every step</b>Images pre-decoded, progress shown at once, and taps guarded against double actions</li>
               <li><b>Keep browsing while AI works</b>Task queue that sends renders to the server and polls for the results</li>
               <li><b>Nothing is lost when you leave</b>Results kept on the server and cached on the device for History</li>
               <li><b>One codebase for iOS and Android</b>Flutter module inside the native app, with a Pigeon bridge to Swift</li>
@@ -352,7 +352,7 @@
             <div><dt>How it's built</dt><dd><ul class="tech">
               <li><b>Many outfits in one tap</b>Batch mode sends all chosen outfits at once; each result shows when ready</li>
               <li><b>Switch back without waiting</b>Results cached by outfit and body area, so a finished look shows at once</li>
-              <li><b>Bring your own outfit</b>Upload a photo or search the web, and it uses the same render queue</li>
+              <li><b>Bring your own outfit</b>Upload a photo or search the web; both use the same render queue</li>
               <li><b>Smooth through long collections</b>Cached thumbnails, and tabs that jump straight to their part of the list</li>
             </ul></dd></div>
             <div><dt>Stack</dt><dd>Swift / Flutter / Dart / Pigeon / SQLite / Firebase / Push Notification</dd></div>
@@ -375,7 +375,7 @@
           <dl class="notes points">
             <div><dt>How it's built</dt><dd><ul class="tech">
               <li><b>Four ways to choose</b>Auto, tap, brush and lasso draw on one mask, with an eraser and soft edges</li>
-              <li><b>Undo any step</b>Each edit keeps its own mask and result, so undo works across every tool</li>
+              <li><b>Undo across every tool</b>Each edit keeps its own mask and result as one step</li>
               <li><b>No leftovers when you deselect</b>A GPU fragment shader erases an AI-found object's mask, soft edges included</li>
               <li><b>On the device or in the cloud</b>Essential runs a Core ML model on the device; Advanced uses the AI server</li>
             </ul></dd></div>
