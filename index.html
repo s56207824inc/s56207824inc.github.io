@@ -14,7 +14,7 @@
 -->
 <meta name="twitter:card" content="summary_large_image">
 <!-- The first phone shows this poster while its video loads. -->
-<link rel="preload" as="image" href="assets/videos/feature-1.jpg">
+<link rel="preload" as="image" href="assets/videos/feature-1.webp">
 <style>
   :root {
     --base: #F7F4F5;
@@ -337,7 +337,7 @@
       </div>
       <div class="phone">
         <p class="empty"></p>
-        <video src="assets/videos/feature-1.mp4" poster="assets/videos/feature-1.jpg" muted loop playsinline preload="none"></video>
+        <video src="assets/videos/feature-1.mp4" data-poster="assets/videos/feature-1.webp" muted loop playsinline preload="none"></video>
       </div>
     </div>
   </section>
@@ -361,7 +361,7 @@
       </div>
       <div class="phone">
         <p class="empty"></p>
-        <video src="assets/videos/feature-3.mp4" poster="assets/videos/feature-3.jpg" muted loop playsinline preload="none"></video>
+        <video src="assets/videos/feature-3.mp4" data-poster="assets/videos/feature-3.webp" muted loop playsinline preload="none"></video>
       </div>
     </div>
   </section>
@@ -385,7 +385,7 @@
       </div>
       <div class="phone">
         <p class="empty"></p>
-        <video src="assets/videos/feature-4.mp4" poster="assets/videos/feature-4.jpg" muted loop playsinline preload="none"></video>
+        <video src="assets/videos/feature-4.mp4" data-poster="assets/videos/feature-4.webp" muted loop playsinline preload="none"></video>
       </div>
     </div>
   </section>
@@ -409,7 +409,7 @@
       </div>
       <div class="phone">
         <p class="empty"></p>
-        <video src="assets/videos/feature-5.mp4" poster="assets/videos/feature-5.jpg" muted loop playsinline preload="none"></video>
+        <video src="assets/videos/feature-5.mp4" data-poster="assets/videos/feature-5.webp" muted loop playsinline preload="none"></video>
       </div>
     </div>
   </section>
@@ -433,7 +433,7 @@
       </div>
       <div class="phone">
         <p class="empty"></p>
-        <video src="assets/videos/feature-2.mp4" poster="assets/videos/feature-2.jpg" muted loop playsinline preload="none"></video>
+        <video src="assets/videos/feature-2.mp4" data-poster="assets/videos/feature-2.webp" muted loop playsinline preload="none"></video>
       </div>
     </div>
   </section>
@@ -500,8 +500,7 @@
 
     const phone = phoneOf(s);
     const v = videoOf(s);
-    phone.style.backgroundImage = `url("${v.getAttribute('poster')}")`;
-    // The video is see-through until its poster loads, so the text is added only when the file fails.
+    // The video is see-through until its first frame loads, so the text is added only when the file fails.
     const hide = () => {
       v.hidden = true;
       s.querySelector('.empty').textContent = 'Add a recording at ' + v.getAttribute('src');
@@ -539,6 +538,14 @@
     document.querySelector('.swatches').append(b);
     return b;
   });
+
+  // Posters: the first page's loads with the HTML. The others wait until the first recording can
+  // play to the end, so on a slow link it does not share the bandwidth. A page change shows its own at once.
+  const showPoster = s => { phoneOf(s).style.backgroundImage = `url("${videoOf(s).dataset.poster}")`; };
+  const showAllPosters = () => slides.forEach(showPoster);
+  showPoster(slides[0]);
+  videoOf(slides[0]).addEventListener('canplaythrough', showAllPosters, { once: true });
+  setTimeout(showAllPosters, 5000); // The browser may not load the recording at all, for example in Low Power Mode
 
   // Phone layout: the notes take the recording's place, and the recording waits.
   function showNotes(s, on) {
@@ -771,8 +778,11 @@
     const v = videoOf(slides[i]);
     if (playing && v.paused && !v.hidden) play(v);
     markDot(i);
-    // Load the next recording now, so it plays at once when the page turns.
-    videoOf(slides[(i + 1) % n]).preload = 'auto';
+    // Load the next recording once this one can play to the end, so it plays at once when the page
+    // turns, and on a slow link the two do not share the bandwidth.
+    const next = videoOf(slides[(i + 1) % n]);
+    if (v.hidden || v.readyState === 4) next.preload = 'auto';
+    else v.addEventListener('canplaythrough', () => { next.preload = 'auto'; }, { once: true });
     root.style.setProperty('--shade', shadeOf(slides[i]));
     stage.style.background = tintOf(slides[i]);
     restSince = performance.now();
@@ -790,6 +800,8 @@
   // pull0: where the corner already is (the rest pull), so the peel starts without a jump.
   function begin(top, under, corner, pull0) {
     busy = true;
+    showPoster(top);
+    if (under) showPoster(under);
     cancelAnimationFrame(restFrame);
     restFrame = 0;
     const rc = restCorner(top);
