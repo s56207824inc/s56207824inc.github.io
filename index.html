@@ -547,6 +547,18 @@
   videoOf(slides[0]).addEventListener('canplaythrough', showAllPosters, { once: true });
   setTimeout(showAllPosters, 5000); // The browser may not load the recording at all, for example in Low Power Mode
 
+  // Run fn when v has played a few seconds without help. Before that, a second recording that loads
+  // and decodes makes the first one stutter.
+  function afterSteadyPlay(v, fn) {
+    if (v.hidden) { fn(); return; }
+    const check = () => {
+      if (v.currentTime < 3) return;
+      v.removeEventListener('timeupdate', check);
+      fn();
+    };
+    v.addEventListener('timeupdate', check);
+  }
+
   // Phone layout: the notes take the recording's place, and the recording waits.
   function showNotes(s, on) {
     s.classList.toggle('show-notes', on);
@@ -778,11 +790,10 @@
     const v = videoOf(slides[i]);
     if (playing && v.paused && !v.hidden) play(v);
     markDot(i);
-    // Load the next recording once this one can play to the end, so it plays at once when the page
-    // turns, and on a slow link the two do not share the bandwidth.
+    // Load the next recording once this one plays steadily, so it plays at once when the page turns,
+    // and the two do not share the bandwidth or the decoder.
     const next = videoOf(slides[(i + 1) % n]);
-    if (v.hidden || v.readyState === 4) next.preload = 'auto';
-    else v.addEventListener('canplaythrough', () => { next.preload = 'auto'; }, { once: true });
+    afterSteadyPlay(v, () => { next.preload = 'auto'; });
     root.style.setProperty('--shade', shadeOf(slides[i]));
     stage.style.background = tintOf(slides[i]);
     restSince = performance.now();
@@ -1199,12 +1210,15 @@
       s.style.zIndex = k + 1;
       hideCopy(s);
       sticker.style.transform = `rotate(${tilt}deg)`;
+      // No moving shadow on the first sticker: its recording plays as it drops, and a filter
+      // around a playing video makes the browser redraw both on every frame.
+      const shadow = s === first ? () => ({}) : f => ({ filter: `drop-shadow(${f})` });
       sticker.animate([
-        { transform: `translateY(-48px) rotate(${tilt * 2.5}deg) scale(1.28)`, opacity: 0, filter: 'drop-shadow(0 36px 28px rgb(0 0 0 / .28))' },
+        { transform: `translateY(-48px) rotate(${tilt * 2.5}deg) scale(1.28)`, opacity: 0, ...shadow('0 36px 28px rgb(0 0 0 / .28)') },
         { opacity: 1, offset: 0.18 }, // Opaque early, so a falling sticker never looks see-through
-        { transform: `rotate(${tilt}deg) scale(.97)`, opacity: 1, filter: 'drop-shadow(0 3px 5px rgb(0 0 0 / .12))', offset: 0.6 },
+        { transform: `rotate(${tilt}deg) scale(.97)`, opacity: 1, ...shadow('0 3px 5px rgb(0 0 0 / .12)'), offset: 0.6 },
         { transform: `rotate(${tilt}deg) scale(1.012)`, offset: 0.8 },
-        { transform: `rotate(${tilt}deg) scale(1)`, opacity: 1, filter: 'drop-shadow(0 0 0 rgb(0 0 0 / 0))' }
+        { transform: `rotate(${tilt}deg) scale(1)`, opacity: 1, ...shadow('0 0 0 rgb(0 0 0 / 0)') }
       ], { duration: DROP, delay: START + k * GAP, easing: 'cubic-bezier(.3, .6, .3, 1)', fill: 'backwards' });
     });
     startVideo(first); // After the loop, which makes the first slide visible
